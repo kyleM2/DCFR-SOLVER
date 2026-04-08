@@ -84,6 +84,45 @@ impl PreflopBetConfig {
             min_allin_depth: 1,    // No open-shove; all-in allowed after first raise
         }
     }
+
+    /// Stack-depth preset: returns appropriate bet config for given stack size in bb.
+    /// 100bb: full tree (open → 3bet → 4bet → allin)
+    ///  50bb: shorter tree (open → 3bet → allin), 4bet collapses to allin
+    ///  25bb: push/fold (open → allin), 3bet collapses to allin
+    ///  15bb: short-stack push/fold with min-raise open (Spin&Go / MTT short-stack)
+    pub fn for_stack(stack_bb: i32) -> Self {
+        match stack_bb {
+            s if s <= 15 => PreflopBetConfig {
+                raise_sizes: vec![
+                    vec![4],   // depth 0 (open): 2bb min-raise = 4 chips
+                    // depth 1+: all-in only (3bet = shove)
+                ],
+                sb_limp: true,
+                sb_open_size: Some(5),  // SB open: 2.5bb = 5 chips
+                min_allin_depth: 0,     // open-shove allowed at 15bb
+            },
+            s if s <= 25 => PreflopBetConfig {
+                raise_sizes: vec![
+                    vec![5],   // depth 0 (open): 2.5bb
+                    // depth 1+: all-in only (3bet = shove)
+                ],
+                sb_limp: true,
+                sb_open_size: Some(7),
+                min_allin_depth: 0,  // open-shove allowed at 25bb
+            },
+            s if s <= 50 => PreflopBetConfig {
+                raise_sizes: vec![
+                    vec![5],   // depth 0 (open): 2.5bb
+                    vec![16],  // depth 1 (3-bet): 8bb = 16 chips
+                    // depth 2+: all-in only (4bet = shove)
+                ],
+                sb_limp: true,
+                sb_open_size: Some(7),
+                min_allin_depth: 1,  // no open-shove; all-in after first raise
+            },
+            _ => Self::nl500(), // 100bb+
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -128,6 +167,53 @@ impl PreflopState {
             all_in: [false; NUM_PLAYERS],
             to_act: 0, // UTG acts first
             n_raises: 0, // Blinds are not a "raise"; open = depth 0
+            holes: [Hand::new(); NUM_PLAYERS],
+            config,
+            last_raise_size: 2, // BB = 2 chips as min raise reference
+        }
+    }
+
+    /// Generic N-player constructor. `num_active` = 2..6.
+    /// Front positions (0..6-num_active) are pre-folded with zero stacks.
+    /// `stack_chips` is the starting stack in chips (1 chip = 0.5bb).
+    pub fn new_generic(num_active: usize, stack_chips: i32, config: PreflopBetConfig) -> Self {
+        assert!((2..=6).contains(&num_active), "num_active must be 2..6");
+        let first_active = NUM_PLAYERS - num_active;
+
+        let mut stacks = [0i32; NUM_PLAYERS];
+        let mut bets = [0i32; NUM_PLAYERS];
+        let mut folded = [false; NUM_PLAYERS];
+        let mut has_acted = [false; NUM_PLAYERS];
+
+        // Pre-fold front positions
+        for i in 0..first_active {
+            folded[i] = true;
+            has_acted[i] = true;
+            // stacks[i] already 0
+        }
+
+        // Active positions get full stacks
+        for i in first_active..NUM_PLAYERS {
+            stacks[i] = stack_chips;
+        }
+
+        // Post blinds (SB=4, BB=5 are always active when num_active >= 2)
+        stacks[4] -= 1; // SB posts 1 chip
+        stacks[5] -= 2; // BB posts 2 chips
+        bets[4] = 1;
+        bets[5] = 2;
+
+        // First to act: HU → SB(4), otherwise → first_active position
+        let to_act = if num_active == 2 { 4 } else { first_active as u8 };
+
+        PreflopState {
+            stacks,
+            bets,
+            folded,
+            has_acted,
+            all_in: [false; NUM_PLAYERS],
+            to_act,
+            n_raises: 0,
             holes: [Hand::new(); NUM_PLAYERS],
             config,
             last_raise_size: 2, // BB = 2 chips as min raise reference
@@ -651,6 +737,37 @@ impl PreflopTrainer {
         }
     }
 
+    /// Generic N-player training. `num_players` = 2..6, `stack_chips` in chips.
+    /// Traverser cycles through active positions only.
+    pub fn train_generic(&mut self, iterations: u64, num_players: usize, stack_chips: i32) {
+        let first_active = NUM_PLAYERS - num_players;
+        let active_positions: Vec<usize> = (first_active..NUM_PLAYERS).collect();
+
+        for i in 0..iterations {
+            if i > 0 && i % 100_000 == 0 {
+                eprintln!(
+                    "  iteration {}/{} ({} info sets)",
+                    i, iterations, self.blueprint.entries.len()
+                );
+            }
+
+            // Deal random hole cards to active positions only
+            let holes = self.deal_holes_for(&active_positions);
+
+            // Traverser cycles through active positions
+            let traverser = active_positions[i as usize % num_players] as u8;
+
+            let mut state = PreflopState::new_generic(num_players, stack_chips, self.blueprint.config.clone());
+            for &p in &active_positions {
+                state.holes[p] = holes[p];
+            }
+
+            let mut history = Vec::new();
+            self.cfr_external(&state, traverser, &mut history);
+            self.blueprint.iterations += 1;
+        }
+    }
+
     /// Heads-up training (SB vs BB only). Much faster convergence.
     pub fn train_hu(&mut self, iterations: u64) {
         for i in 0..iterations {
@@ -685,6 +802,20 @@ impl PreflopTrainer {
         let mut holes = [Hand::new(); NUM_PLAYERS];
         let mut dead = Hand::new();
         for p in 0..NUM_PLAYERS {
+            let c1 = self.draw_excluding(dead);
+            dead = dead.add(c1);
+            let c2 = self.draw_excluding(dead);
+            dead = dead.add(c2);
+            holes[p] = Hand::new().add(c1).add(c2);
+        }
+        holes
+    }
+
+    /// Deal hole cards only to specified positions (fewer draws = faster).
+    fn deal_holes_for(&mut self, positions: &[usize]) -> [Hand; NUM_PLAYERS] {
+        let mut holes = [Hand::new(); NUM_PLAYERS];
+        let mut dead = Hand::new();
+        for &p in positions {
             let c1 = self.draw_excluding(dead);
             dead = dead.add(c1);
             let c2 = self.draw_excluding(dead);
@@ -951,12 +1082,663 @@ impl PreflopBlueprint {
 
         spots
     }
+
+    /// Helper: extract a full PreflopSpot at a given decision point.
+    fn extract_spot_at(&self, spot_name: String, history: &[u8], state: &PreflopState) -> PreflopSpot {
+        let actions = state.actions();
+        let mut hands = Vec::new();
+        for idx in 0..169u8 {
+            let ch = crate::iso::CanonicalHand::from_index(idx);
+            let key = PreflopInfoKey {
+                bucket: idx,
+                history: history.to_vec(),
+            };
+            if let Some(entry) = self.entries.get(&key) {
+                let avg = entry.average_strategy();
+                let action_probs: Vec<ActionProb> = actions.iter()
+                    .zip(avg.iter())
+                    .map(|(a, &p)| ActionProb {
+                        action: format!("{}", a),
+                        prob: p,
+                    })
+                    .collect();
+                hands.push(HandStrategy {
+                    hand: ch.to_string(),
+                    actions: action_probs,
+                });
+            } else {
+                hands.push(HandStrategy {
+                    hand: ch.to_string(),
+                    actions: vec![],
+                });
+            }
+        }
+        PreflopSpot { spot_name, hands }
+    }
+
+    /// Extract facing-open charts: defender's full action distribution when facing an open raise.
+    /// ~15 spots: each (opener, defender) pair where defender acts after opener.
+    pub fn extract_facing_open_charts(&self) -> Vec<PreflopSpot> {
+        let config = &self.config;
+        let mut spots = Vec::new();
+
+        for opener_pos in 0..5usize {
+            for defender_pos in (opener_pos + 1)..6usize {
+                let mut state = PreflopState::new_6max(config.clone());
+                let mut history: Vec<u8> = Vec::new();
+
+                // Fold everyone before opener
+                for _ in 0..opener_pos {
+                    history.push(0);
+                    state = state.apply(PreflopAction::Fold);
+                }
+
+                // Opener raises
+                let opener_actions = state.actions();
+                let raise_idx = match opener_actions.iter()
+                    .position(|a| matches!(a, PreflopAction::Raise(_))) {
+                    Some(idx) => idx,
+                    None => continue,
+                };
+                history.push(raise_idx as u8);
+                state = state.apply(opener_actions[raise_idx]);
+
+                // Fold everyone between opener and defender
+                for _ in (opener_pos + 1)..defender_pos {
+                    history.push(0);
+                    state = state.apply(PreflopAction::Fold);
+                }
+
+                let spot_name = format!("{} facing {} open",
+                    POSITION_NAMES[defender_pos], POSITION_NAMES[opener_pos]);
+                spots.push(self.extract_spot_at(spot_name, &history, &state));
+            }
+        }
+
+        spots
+    }
+
+    /// Extract facing-3bet charts: opener's full action distribution when facing a 3bet.
+    /// ~10 spots for the most common 3bet scenarios.
+    pub fn extract_facing_3bet_charts(&self) -> Vec<PreflopSpot> {
+        let config = &self.config;
+        let mut spots = Vec::new();
+
+        let matchup_list: [(usize, usize); 10] = [
+            (0, 3), // UTG facing BTN 3bet
+            (0, 5), // UTG facing BB 3bet
+            (1, 2), // HJ facing CO 3bet
+            (1, 3), // HJ facing BTN 3bet
+            (1, 5), // HJ facing BB 3bet
+            (2, 3), // CO facing BTN 3bet
+            (2, 5), // CO facing BB 3bet
+            (3, 4), // BTN facing SB 3bet
+            (3, 5), // BTN facing BB 3bet
+            (4, 5), // SB facing BB 3bet
+        ];
+
+        for &(opener_pos, bettor3_pos) in &matchup_list {
+            let mut state = PreflopState::new_6max(config.clone());
+            let mut history: Vec<u8> = Vec::new();
+
+            // Fold before opener
+            for _ in 0..opener_pos {
+                history.push(0);
+                state = state.apply(PreflopAction::Fold);
+            }
+
+            // Opener raises
+            let opener_actions = state.actions();
+            let raise_idx = match opener_actions.iter()
+                .position(|a| matches!(a, PreflopAction::Raise(_))) {
+                Some(idx) => idx,
+                None => continue,
+            };
+            history.push(raise_idx as u8);
+            state = state.apply(opener_actions[raise_idx]);
+
+            // Fold between opener and 3bettor
+            for _ in (opener_pos + 1)..bettor3_pos {
+                history.push(0);
+                state = state.apply(PreflopAction::Fold);
+            }
+
+            // 3bettor raises (3bet)
+            let bettor3_actions = state.actions();
+            let bet3_raise_idx = match bettor3_actions.iter()
+                .position(|a| matches!(a, PreflopAction::Raise(_))) {
+                Some(idx) => idx,
+                None => continue,
+            };
+            history.push(bet3_raise_idx as u8);
+            state = state.apply(bettor3_actions[bet3_raise_idx]);
+
+            // Fold remaining until opener gets to act again
+            while state.to_act as usize != opener_pos {
+                history.push(0);
+                state = state.apply(PreflopAction::Fold);
+            }
+
+            let spot_name = format!("{} facing {} 3bet",
+                POSITION_NAMES[opener_pos], POSITION_NAMES[bettor3_pos]);
+            spots.push(self.extract_spot_at(spot_name, &history, &state));
+        }
+
+        spots
+    }
+
+    /// Extract facing-4bet charts: 3bettor's full action distribution when facing a 4bet.
+    /// ~5 spots for the most common 4bet scenarios.
+    pub fn extract_facing_4bet_charts(&self) -> Vec<PreflopSpot> {
+        let config = &self.config;
+        let mut spots = Vec::new();
+
+        let matchup_list: [(usize, usize); 5] = [
+            (2, 3), // BTN facing CO 4bet
+            (3, 5), // BB facing BTN 4bet
+            (1, 3), // BTN facing HJ 4bet
+            (0, 5), // BB facing UTG 4bet
+            (4, 5), // BB facing SB 4bet
+        ];
+
+        for &(opener_pos, bettor3_pos) in &matchup_list {
+            let mut state = PreflopState::new_6max(config.clone());
+            let mut history: Vec<u8> = Vec::new();
+
+            // Fold before opener
+            for _ in 0..opener_pos {
+                history.push(0);
+                state = state.apply(PreflopAction::Fold);
+            }
+
+            // Opener raises (open)
+            let opener_actions = state.actions();
+            let open_raise_idx = match opener_actions.iter()
+                .position(|a| matches!(a, PreflopAction::Raise(_))) {
+                Some(idx) => idx,
+                None => continue,
+            };
+            history.push(open_raise_idx as u8);
+            state = state.apply(opener_actions[open_raise_idx]);
+
+            // Fold between opener and 3bettor
+            for _ in (opener_pos + 1)..bettor3_pos {
+                history.push(0);
+                state = state.apply(PreflopAction::Fold);
+            }
+
+            // 3bettor raises (3bet)
+            let bettor3_actions = state.actions();
+            let bet3_raise_idx = match bettor3_actions.iter()
+                .position(|a| matches!(a, PreflopAction::Raise(_))) {
+                Some(idx) => idx,
+                None => continue,
+            };
+            history.push(bet3_raise_idx as u8);
+            state = state.apply(bettor3_actions[bet3_raise_idx]);
+
+            // Fold remaining until opener gets to act again
+            while state.to_act as usize != opener_pos {
+                history.push(0);
+                state = state.apply(PreflopAction::Fold);
+            }
+
+            // Opener raises (4bet)
+            let opener_4bet_actions = state.actions();
+            let bet4_raise_idx = match opener_4bet_actions.iter()
+                .position(|a| matches!(a, PreflopAction::Raise(_))) {
+                Some(idx) => idx,
+                None => continue,
+            };
+            history.push(bet4_raise_idx as u8);
+            state = state.apply(opener_4bet_actions[bet4_raise_idx]);
+
+            // Fold remaining until 3bettor gets to act again
+            while state.to_act as usize != bettor3_pos {
+                history.push(0);
+                state = state.apply(PreflopAction::Fold);
+            }
+
+            let spot_name = format!("{} facing {} 4bet+",
+                POSITION_NAMES[bettor3_pos], POSITION_NAMES[opener_pos]);
+            spots.push(self.extract_spot_at(spot_name, &history, &state));
+        }
+
+        spots
+    }
+
+    /// Extract all preflop charts: RFI(5) + facing open(~15) + facing 3bet(~10) + facing 4bet(~5).
+    pub fn extract_all_charts(&self) -> Vec<PreflopSpot> {
+        let mut spots = self.extract_charts();
+        spots.extend(self.extract_facing_open_charts());
+        spots.extend(self.extract_facing_3bet_charts());
+        spots.extend(self.extract_facing_4bet_charts());
+        spots
+    }
+
+    // -----------------------------------------------------------------------
+    // Generic N-player chart extraction
+    // -----------------------------------------------------------------------
+
+    /// Extract all charts for an N-player game (num_players=2..6).
+    /// Dynamically generates RFI, facing-open, facing-3bet, and facing-4bet spots
+    /// based on which positions are active.
+    pub fn extract_all_charts_generic(&self, num_players: usize, stack_chips: i32) -> Vec<PreflopSpot> {
+        let first_active = NUM_PLAYERS - num_players;
+        let active: Vec<usize> = (first_active..NUM_PLAYERS).collect();
+        let config = &self.config;
+
+        let mut spots = Vec::new();
+
+        // --- RFI spots: each active position except BB(5) ---
+        for &pos in &active {
+            if pos == 5 { continue; } // BB can't RFI
+            let n_folds = pos - first_active;
+            let history_prefix: Vec<u8> = vec![0u8; n_folds];
+            let state = build_state_from_folds_generic(pos, first_active, stack_chips, config);
+
+            let spot_name = format!("{} RFI", POSITION_NAMES[pos]);
+            spots.push(self.extract_spot_at(spot_name, &history_prefix, &state));
+        }
+
+        // --- Facing open: (opener, defender) pairs from active positions ---
+        for &opener_pos in &active {
+            if opener_pos == 5 { continue; } // BB can't open
+            for &defender_pos in &active {
+                if defender_pos <= opener_pos { continue; }
+                let mut state = PreflopState::new_generic(num_players, stack_chips, config.clone());
+                let mut history: Vec<u8> = Vec::new();
+
+                // Fold active players before opener
+                for &p in &active {
+                    if p >= opener_pos { break; }
+                    history.push(0);
+                    state = state.apply(PreflopAction::Fold);
+                }
+
+                // Opener raises
+                let opener_actions = state.actions();
+                let raise_idx = match opener_actions.iter()
+                    .position(|a| matches!(a, PreflopAction::Raise(_))) {
+                    Some(idx) => idx,
+                    None => continue,
+                };
+                history.push(raise_idx as u8);
+                state = state.apply(opener_actions[raise_idx]);
+
+                // Fold active players between opener and defender
+                for &p in &active {
+                    if p <= opener_pos || p >= defender_pos { continue; }
+                    history.push(0);
+                    state = state.apply(PreflopAction::Fold);
+                }
+
+                let spot_name = format!("{} facing {} open",
+                    POSITION_NAMES[defender_pos], POSITION_NAMES[opener_pos]);
+                spots.push(self.extract_spot_at(spot_name, &history, &state));
+            }
+        }
+
+        // --- Facing 3bet: all (opener, 3bettor) pairs where config has 3bet depth ---
+        if config.raise_sizes.len() >= 2 {
+            for &opener_pos in &active {
+                if opener_pos == 5 { continue; }
+                for &bettor3_pos in &active {
+                    if bettor3_pos <= opener_pos { continue; }
+                    let mut state = PreflopState::new_generic(num_players, stack_chips, config.clone());
+                    let mut history: Vec<u8> = Vec::new();
+
+                    // Fold before opener
+                    for &p in &active {
+                        if p >= opener_pos { break; }
+                        history.push(0);
+                        state = state.apply(PreflopAction::Fold);
+                    }
+
+                    // Opener raises
+                    let opener_actions = state.actions();
+                    let raise_idx = match opener_actions.iter()
+                        .position(|a| matches!(a, PreflopAction::Raise(_))) {
+                        Some(idx) => idx,
+                        None => continue,
+                    };
+                    history.push(raise_idx as u8);
+                    state = state.apply(opener_actions[raise_idx]);
+
+                    // Fold between opener and 3bettor
+                    for &p in &active {
+                        if p <= opener_pos || p >= bettor3_pos { continue; }
+                        history.push(0);
+                        state = state.apply(PreflopAction::Fold);
+                    }
+
+                    // 3bettor raises
+                    let bettor3_actions = state.actions();
+                    let bet3_idx = match bettor3_actions.iter()
+                        .position(|a| matches!(a, PreflopAction::Raise(_))) {
+                        Some(idx) => idx,
+                        None => continue,
+                    };
+                    history.push(bet3_idx as u8);
+                    state = state.apply(bettor3_actions[bet3_idx]);
+
+                    // Fold until opener acts again
+                    while state.to_act as usize != opener_pos {
+                        if state.active_count() <= 1 { break; }
+                        history.push(0);
+                        state = state.apply(PreflopAction::Fold);
+                    }
+                    if state.to_act as usize != opener_pos { continue; }
+
+                    let spot_name = format!("{} facing {} 3bet",
+                        POSITION_NAMES[opener_pos], POSITION_NAMES[bettor3_pos]);
+                    spots.push(self.extract_spot_at(spot_name, &history, &state));
+                }
+            }
+        }
+
+        // --- Facing 4bet: all (opener, 3bettor) pairs where config has 4bet depth ---
+        if config.raise_sizes.len() >= 3 {
+            for &opener_pos in &active {
+                if opener_pos == 5 { continue; }
+                for &bettor3_pos in &active {
+                    if bettor3_pos <= opener_pos { continue; }
+                    let mut state = PreflopState::new_generic(num_players, stack_chips, config.clone());
+                    let mut history: Vec<u8> = Vec::new();
+
+                    // Fold before opener
+                    for &p in &active {
+                        if p >= opener_pos { break; }
+                        history.push(0);
+                        state = state.apply(PreflopAction::Fold);
+                    }
+
+                    // Opener raises (open)
+                    let opener_actions = state.actions();
+                    let open_idx = match opener_actions.iter()
+                        .position(|a| matches!(a, PreflopAction::Raise(_))) {
+                        Some(idx) => idx,
+                        None => continue,
+                    };
+                    history.push(open_idx as u8);
+                    state = state.apply(opener_actions[open_idx]);
+
+                    // Fold between opener and 3bettor
+                    for &p in &active {
+                        if p <= opener_pos || p >= bettor3_pos { continue; }
+                        history.push(0);
+                        state = state.apply(PreflopAction::Fold);
+                    }
+
+                    // 3bettor 3bets
+                    let bettor3_actions = state.actions();
+                    let bet3_idx = match bettor3_actions.iter()
+                        .position(|a| matches!(a, PreflopAction::Raise(_))) {
+                        Some(idx) => idx,
+                        None => continue,
+                    };
+                    history.push(bet3_idx as u8);
+                    state = state.apply(bettor3_actions[bet3_idx]);
+
+                    // Fold until opener acts again
+                    while state.to_act as usize != opener_pos {
+                        if state.active_count() <= 1 { break; }
+                        history.push(0);
+                        state = state.apply(PreflopAction::Fold);
+                    }
+                    if state.to_act as usize != opener_pos { continue; }
+
+                    // Opener 4bets
+                    let opener_4bet_actions = state.actions();
+                    let bet4_idx = match opener_4bet_actions.iter()
+                        .position(|a| matches!(a, PreflopAction::Raise(_))) {
+                        Some(idx) => idx,
+                        None => continue,
+                    };
+                    history.push(bet4_idx as u8);
+                    state = state.apply(opener_4bet_actions[bet4_idx]);
+
+                    // Fold until 3bettor acts again
+                    while state.to_act as usize != bettor3_pos {
+                        if state.active_count() <= 1 { break; }
+                        history.push(0);
+                        state = state.apply(PreflopAction::Fold);
+                    }
+                    if state.to_act as usize != bettor3_pos { continue; }
+
+                    let spot_name = format!("{} facing {} 4bet+",
+                        POSITION_NAMES[bettor3_pos], POSITION_NAMES[opener_pos]);
+                    spots.push(self.extract_spot_at(spot_name, &history, &state));
+                }
+            }
+        }
+
+        spots
+    }
+
+    /// Generic N-player matchup extraction.
+    pub fn extract_all_matchups_generic(&self, num_players: usize, stack_chips: i32) -> Vec<SrpMatchup> {
+        let first_active = NUM_PLAYERS - num_players;
+        let active: Vec<usize> = (first_active..NUM_PLAYERS).collect();
+        let config = &self.config;
+        let mut matchups = Vec::new();
+
+        // SRP matchups: all (opener, caller) pairs
+        for &opener_pos in &active {
+            if opener_pos == 5 { continue; }
+            for &caller_pos in &active {
+                if caller_pos <= opener_pos { continue; }
+                if let Some(m) = self.extract_one_matchup_generic(opener_pos, caller_pos, num_players, stack_chips) {
+                    matchups.push(m);
+                }
+            }
+        }
+
+        // 3bet matchups (if config supports 3bet)
+        if config.raise_sizes.len() >= 2 {
+            for &opener_pos in &active {
+                if opener_pos == 5 { continue; }
+                for &bettor3_pos in &active {
+                    if bettor3_pos <= opener_pos { continue; }
+                    if let Some(m) = self.extract_3bet_matchup_generic(opener_pos, bettor3_pos, num_players, stack_chips) {
+                        matchups.push(m);
+                    }
+                }
+            }
+        }
+
+        // 4bet matchups (if config supports 4bet)
+        if config.raise_sizes.len() >= 3 {
+            for &opener_pos in &active {
+                if opener_pos == 5 { continue; }
+                for &bettor3_pos in &active {
+                    if bettor3_pos <= opener_pos { continue; }
+                    if let Some(m) = self.extract_4bet_matchup_generic(opener_pos, bettor3_pos, num_players, stack_chips) {
+                        matchups.push(m);
+                    }
+                }
+            }
+        }
+
+        matchups
+    }
+
+    fn extract_one_matchup_generic(&self, opener_pos: usize, caller_pos: usize, num_players: usize, stack_chips: i32) -> Option<SrpMatchup> {
+        let first_active = NUM_PLAYERS - num_players;
+        let active: Vec<usize> = (first_active..NUM_PLAYERS).collect();
+        let config = &self.config;
+        let mut state = PreflopState::new_generic(num_players, stack_chips, config.clone());
+        let mut history: Vec<u8> = Vec::new();
+
+        // Fold before opener
+        for &p in &active {
+            if p >= opener_pos { break; }
+            history.push(0);
+            state = state.apply(PreflopAction::Fold);
+        }
+
+        let opener_history = history.clone();
+        let opener_actions = state.actions();
+        let raise_idx = opener_actions.iter()
+            .position(|a| matches!(a, PreflopAction::Raise(_)))?;
+
+        history.push(raise_idx as u8);
+        state = state.apply(opener_actions[raise_idx]);
+
+        // Fold between opener and caller
+        for &p in &active {
+            if p <= opener_pos || p >= caller_pos { continue; }
+            history.push(0);
+            state = state.apply(PreflopAction::Fold);
+        }
+
+        let caller_history = history.clone();
+        let caller_actions = state.actions();
+        let call_idx = caller_actions.iter()
+            .position(|a| matches!(a, PreflopAction::Call))?;
+
+        let opener_range = self.extract_range_single(&opener_history, raise_idx);
+        let caller_range = self.extract_range_single(&caller_history, call_idx);
+
+        state = state.apply(PreflopAction::Call);
+        let pot_chips: i32 = state.bets.iter().sum();
+        let eff_stack_chips = state.stacks[opener_pos].min(state.stacks[caller_pos]);
+
+        Some(SrpMatchup {
+            matchup: format!("{} vs {}", POSITION_NAMES[opener_pos], POSITION_NAMES[caller_pos]),
+            pot_chips,
+            eff_stack_chips,
+            opener: MatchupSide { position: POSITION_NAMES[opener_pos].to_string(), range: opener_range },
+            caller: MatchupSide { position: POSITION_NAMES[caller_pos].to_string(), range: caller_range },
+        })
+    }
+
+    fn extract_3bet_matchup_generic(&self, opener_pos: usize, bettor3_pos: usize, num_players: usize, stack_chips: i32) -> Option<SrpMatchup> {
+        let first_active = NUM_PLAYERS - num_players;
+        let active: Vec<usize> = (first_active..NUM_PLAYERS).collect();
+        let config = &self.config;
+        let mut state = PreflopState::new_generic(num_players, stack_chips, config.clone());
+        let mut history: Vec<u8> = Vec::new();
+
+        for &p in &active { if p >= opener_pos { break; } history.push(0); state = state.apply(PreflopAction::Fold); }
+
+        let opener_open_history = history.clone();
+        let opener_actions = state.actions();
+        let open_raise_idx = opener_actions.iter().position(|a| matches!(a, PreflopAction::Raise(_)))?;
+        history.push(open_raise_idx as u8);
+        state = state.apply(opener_actions[open_raise_idx]);
+
+        for &p in &active { if p <= opener_pos || p >= bettor3_pos { continue; } history.push(0); state = state.apply(PreflopAction::Fold); }
+
+        let bettor3_history = history.clone();
+        let bettor3_actions = state.actions();
+        let bet3_raise_idx = bettor3_actions.iter().position(|a| matches!(a, PreflopAction::Raise(_)))?;
+        history.push(bet3_raise_idx as u8);
+        state = state.apply(bettor3_actions[bet3_raise_idx]);
+
+        while state.to_act as usize != opener_pos {
+            if state.active_count() <= 1 { return None; }
+            history.push(0);
+            state = state.apply(PreflopAction::Fold);
+        }
+
+        let opener_call_history = history.clone();
+        let opener_facing_actions = state.actions();
+        let call_idx = opener_facing_actions.iter().position(|a| matches!(a, PreflopAction::Call))?;
+
+        state = state.apply(PreflopAction::Call);
+        let pot_chips: i32 = state.bets.iter().sum();
+        let eff_stack_chips = state.stacks[opener_pos].min(state.stacks[bettor3_pos]);
+
+        let opener_range = self.extract_range_compound(&opener_open_history, open_raise_idx, &opener_call_history, call_idx);
+        let bettor3_range = self.extract_range_single(&bettor3_history, bet3_raise_idx);
+
+        Some(SrpMatchup {
+            matchup: format!("{} open vs {} 3bet", POSITION_NAMES[opener_pos], POSITION_NAMES[bettor3_pos]),
+            pot_chips,
+            eff_stack_chips,
+            opener: MatchupSide { position: POSITION_NAMES[opener_pos].to_string(), range: opener_range },
+            caller: MatchupSide { position: POSITION_NAMES[bettor3_pos].to_string(), range: bettor3_range },
+        })
+    }
+
+    fn extract_4bet_matchup_generic(&self, opener_pos: usize, bettor3_pos: usize, num_players: usize, stack_chips: i32) -> Option<SrpMatchup> {
+        let first_active = NUM_PLAYERS - num_players;
+        let active: Vec<usize> = (first_active..NUM_PLAYERS).collect();
+        let config = &self.config;
+        let mut state = PreflopState::new_generic(num_players, stack_chips, config.clone());
+        let mut history: Vec<u8> = Vec::new();
+
+        for &p in &active { if p >= opener_pos { break; } history.push(0); state = state.apply(PreflopAction::Fold); }
+
+        let opener_open_history = history.clone();
+        let opener_actions = state.actions();
+        let open_raise_idx = opener_actions.iter().position(|a| matches!(a, PreflopAction::Raise(_)))?;
+        history.push(open_raise_idx as u8);
+        state = state.apply(opener_actions[open_raise_idx]);
+
+        for &p in &active { if p <= opener_pos || p >= bettor3_pos { continue; } history.push(0); state = state.apply(PreflopAction::Fold); }
+
+        let bettor3_3bet_history = history.clone();
+        let bettor3_actions = state.actions();
+        let bet3_raise_idx = bettor3_actions.iter().position(|a| matches!(a, PreflopAction::Raise(_)))?;
+        history.push(bet3_raise_idx as u8);
+        state = state.apply(bettor3_actions[bet3_raise_idx]);
+
+        while state.to_act as usize != opener_pos {
+            if state.active_count() <= 1 { return None; }
+            history.push(0);
+            state = state.apply(PreflopAction::Fold);
+        }
+
+        let opener_4bet_history = history.clone();
+        let opener_facing_actions = state.actions();
+        let bet4_raise_idx = opener_facing_actions.iter().position(|a| matches!(a, PreflopAction::Raise(_)))?;
+        history.push(bet4_raise_idx as u8);
+        state = state.apply(opener_facing_actions[bet4_raise_idx]);
+
+        while state.to_act as usize != bettor3_pos {
+            if state.active_count() <= 1 { return None; }
+            history.push(0);
+            state = state.apply(PreflopAction::Fold);
+        }
+
+        let bettor3_call_history = history.clone();
+        let bettor3_facing_actions = state.actions();
+        let call_idx = bettor3_facing_actions.iter().position(|a| matches!(a, PreflopAction::Call))?;
+
+        state = state.apply(PreflopAction::Call);
+        let pot_chips: i32 = state.bets.iter().sum();
+        let eff_stack_chips = state.stacks[opener_pos].min(state.stacks[bettor3_pos]);
+
+        let opener_range = self.extract_range_compound(&opener_open_history, open_raise_idx, &opener_4bet_history, bet4_raise_idx);
+        let caller_range = self.extract_range_compound(&bettor3_3bet_history, bet3_raise_idx, &bettor3_call_history, call_idx);
+
+        Some(SrpMatchup {
+            matchup: format!("{} 4bet vs {} call", POSITION_NAMES[opener_pos], POSITION_NAMES[bettor3_pos]),
+            pot_chips,
+            eff_stack_chips,
+            opener: MatchupSide { position: POSITION_NAMES[opener_pos].to_string(), range: opener_range },
+            caller: MatchupSide { position: POSITION_NAMES[bettor3_pos].to_string(), range: caller_range },
+        })
+    }
 }
 
 /// Build a PreflopState after `pos` players have folded.
 fn build_state_from_folds(pos: usize, config: &PreflopBetConfig) -> PreflopState {
     let mut state = PreflopState::new_6max(config.clone());
     for _ in 0..pos {
+        state = state.apply(PreflopAction::Fold);
+    }
+    state
+}
+
+/// Build a generic PreflopState where active positions fold up to `pos`.
+/// `first_active` = 6 - num_players. Folds from first_active..pos.
+fn build_state_from_folds_generic(pos: usize, first_active: usize, stack_chips: i32, config: &PreflopBetConfig) -> PreflopState {
+    let num_active = NUM_PLAYERS - first_active;
+    let mut state = PreflopState::new_generic(num_active, stack_chips, config.clone());
+    for _ in first_active..pos {
         state = state.apply(PreflopAction::Fold);
     }
     state

@@ -16,6 +16,7 @@ pub mod valuenet;
 #[cfg(feature = "nn")]
 pub mod datagen;
 pub mod preflop;
+pub mod preflop_tree;
 pub mod egt;
 pub mod qre;
 pub mod batch;

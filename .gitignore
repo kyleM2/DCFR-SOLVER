@@ -20,3 +20,5 @@ training_data/
 
 # Claude/OMC state
 .omc/
+
+/output

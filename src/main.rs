@@ -316,7 +316,7 @@ enum Commands {
         output: String,
     },
 
-    /// Train 6-max preflop GTO strategy via MCCFR
+    /// Train preflop GTO strategy via MCCFR (2-6 players, configurable stack)
     Preflop {
         #[arg(long, default_value_t = 10_000_000)]
         iterations: u64,
@@ -334,6 +334,15 @@ enum Commands {
 
         #[arg(long, default_value_t = 42)]
         seed: u64,
+
+        /// Number of players (2-6). Default: 6 (6-max).
+        #[arg(long, default_value_t = 6)]
+        num_players: usize,
+
+        /// Stack depth in big blinds. Default: 100.
+        /// Bet sizes auto-configured: 100bb=full tree, 50bb=no 4bet, 25bb=push/fold.
+        #[arg(long, default_value_t = 100)]
+        stack_bb: i32,
 
         /// Open raise size in chips (1 chip = 0.5bb). Default: 5 = 2.5bb (NL500)
         #[arg(long, default_value_t = 5)]
@@ -356,10 +365,76 @@ enum Commands {
         sb_limp: bool,
 
         /// OOP position tax as fraction of pot (0.0-0.5). Default: 0.20
-        /// Transfers this fraction of pot × (rank gap/5) from OOP to IP at showdown.
-        /// Accounts for positional disadvantage. Set to 0.0 for raw equity.
         #[arg(long, default_value_t = 0.20)]
         oop_pot_tax: f32,
+
+        /// Use auto stack preset (ignore manual open/3bet/4bet sizes).
+        /// When true, --stack-bb determines bet config automatically.
+        #[arg(long)]
+        auto_config: bool,
+    },
+
+    /// Train preflop for all player/stack combinations (batch mode)
+    PreflopBatch {
+        #[arg(long, default_value_t = 10_000_000)]
+        iterations: u64,
+
+        /// Output directory for blueprint and chart files
+        #[arg(long, default_value = "output")]
+        output_dir: String,
+
+        #[arg(long, default_value_t = 42)]
+        seed: u64,
+
+        /// OOP position tax as fraction of pot (0.0-0.5). Default: 0.20
+        #[arg(long, default_value_t = 0.20)]
+        oop_pot_tax: f32,
+
+        /// Player counts to solve (comma-separated). Default: 2,3,4,5,6
+        #[arg(long, default_value = "2,3,4,5,6")]
+        players: String,
+
+        /// Stack depths in bb (comma-separated). Default: 25,50,100
+        #[arg(long, default_value = "25,50,100")]
+        stacks: String,
+    },
+
+    /// Extract complete preflop charts via tree walk (from existing blueprint)
+    ExtractTree {
+        /// Path to preflop blueprint .bin file
+        #[arg(long)]
+        blueprint: String,
+
+        /// Number of active players (must match training, 2..6)
+        #[arg(long)]
+        num_players: usize,
+
+        /// Stack depth in bb (must match training)
+        #[arg(long)]
+        stack_bb: i32,
+
+        /// Output JSON path
+        #[arg(long, default_value = "tree_charts.json")]
+        output: String,
+
+        /// Max raise depth (2 = up to facing 3bet, 3 = up to facing 4bet)
+        #[arg(long, default_value_t = 2)]
+        max_raises: u8,
+    },
+
+    /// Batch extract complete charts from all blueprints in a directory
+    ExtractTreeBatch {
+        /// Directory containing preflop_Np_Mbb.bin files
+        #[arg(long, default_value = "output")]
+        input_dir: String,
+
+        /// Output directory for tree chart JSONs
+        #[arg(long, default_value = "output")]
+        output_dir: String,
+
+        /// Max raise depth (2 = up to facing 3bet, 3 = up to facing 4bet)
+        #[arg(long, default_value_t = 2)]
+        max_raises: u8,
     },
 
     /// Extract RFI charts from a preflop blueprint
@@ -506,8 +581,17 @@ fn main() {
         Commands::Chart { blueprint, output } => {
             cmd_chart(&blueprint, &output);
         }
-        Commands::Preflop { iterations, output, chart_output, matchup_output, seed, open_size, sb_open_size, bet3_size, bet4_size, sb_limp, oop_pot_tax } => {
-            cmd_preflop(iterations, &output, chart_output.as_deref(), matchup_output.as_deref(), seed, open_size, sb_open_size, bet3_size, bet4_size, sb_limp, oop_pot_tax);
+        Commands::Preflop { iterations, output, chart_output, matchup_output, seed, num_players, stack_bb, open_size, sb_open_size, bet3_size, bet4_size, sb_limp, oop_pot_tax, auto_config } => {
+            cmd_preflop(iterations, &output, chart_output.as_deref(), matchup_output.as_deref(), seed, num_players, stack_bb, open_size, sb_open_size, bet3_size, bet4_size, sb_limp, oop_pot_tax, auto_config);
+        }
+        Commands::PreflopBatch { iterations, output_dir, seed, oop_pot_tax, players, stacks } => {
+            cmd_preflop_batch(iterations, &output_dir, seed, oop_pot_tax, &players, &stacks);
+        }
+        Commands::ExtractTree { blueprint, num_players, stack_bb, output, max_raises } => {
+            cmd_extract_tree(&blueprint, num_players, stack_bb, &output, max_raises);
+        }
+        Commands::ExtractTreeBatch { input_dir, output_dir, max_raises } => {
+            cmd_extract_tree_batch(&input_dir, &output_dir, max_raises);
         }
         Commands::ChartPreflop { blueprint, output, matchup_output } => {
             cmd_chart_preflop(&blueprint, &output, matchup_output.as_deref());
@@ -1022,38 +1106,53 @@ fn cmd_preflop(
     chart_output: Option<&str>,
     matchup_output: Option<&str>,
     seed: u64,
+    num_players: usize,
+    stack_bb: i32,
     open_size: i32,
     sb_open_size: i32,
     bet3_size: i32,
     bet4_size: i32,
     sb_limp: bool,
     oop_pot_tax: f32,
+    auto_config: bool,
 ) {
-    let config = PreflopBetConfig {
-        raise_sizes: vec![
-            vec![open_size],   // depth 0 (open)
-            vec![bet3_size],   // depth 1 (3-bet)
-            vec![bet4_size],   // depth 2 (4-bet)
-        ],
-        sb_limp,
-        sb_open_size: Some(sb_open_size),
-        min_allin_depth: 1,  // No open-shove; all-in allowed after first raise
+    assert!((2..=6).contains(&num_players), "num-players must be 2..6");
+    assert!(stack_bb > 0, "stack-bb must be positive");
+
+    let stack_chips = stack_bb * 2; // 1 chip = 0.5bb
+
+    let config = if auto_config {
+        PreflopBetConfig::for_stack(stack_bb)
+    } else {
+        PreflopBetConfig {
+            raise_sizes: vec![
+                vec![open_size],   // depth 0 (open)
+                vec![bet3_size],   // depth 1 (3-bet)
+                vec![bet4_size],   // depth 2 (4-bet)
+            ],
+            sb_limp,
+            sb_open_size: Some(sb_open_size),
+            min_allin_depth: 1,
+        }
     };
 
-    println!("Training 6-max preflop MCCFR:");
+    println!("Training {}-player preflop MCCFR ({}bb):", num_players, stack_bb);
     println!("  iterations: {}", iterations);
-    println!("  open size: {} chips ({}bb)", open_size, open_size as f32 / 2.0);
-    println!("  SB open: {} chips ({}bb)", sb_open_size, sb_open_size as f32 / 2.0);
-    println!("  3-bet: {} chips ({}bb)", bet3_size, bet3_size as f32 / 2.0);
-    println!("  4-bet: {} chips ({}bb)", bet4_size, bet4_size as f32 / 2.0);
-    println!("  SB limp: {}", sb_limp);
+    println!("  stack: {}bb = {} chips", stack_bb, stack_chips);
+    println!("  bet depths: {}", config.raise_sizes.len());
+    for (d, sizes) in config.raise_sizes.iter().enumerate() {
+        let label = match d { 0 => "open", 1 => "3bet", 2 => "4bet", _ => "5bet+" };
+        println!("    depth {} ({}): {:?} chips", d, label, sizes);
+    }
+    println!("  min_allin_depth: {}", config.min_allin_depth);
+    println!("  SB limp: {}", config.sb_limp);
     println!("  OOP pot tax: {:.0}%", oop_pot_tax * 100.0);
     println!("  seed: {}", seed);
 
     let mut trainer = PreflopTrainer::new(config, seed);
     trainer.oop_pot_tax = oop_pot_tax;
     let start = std::time::Instant::now();
-    trainer.train(iterations);
+    trainer.train_generic(iterations, num_players, stack_chips);
     let elapsed = start.elapsed();
 
     println!("Done in {:.1}s. {} info sets.",
@@ -1068,20 +1167,89 @@ fn cmd_preflop(
 
     if let Some(chart_path) = chart_output {
         println!("Extracting charts to {}...", chart_path);
-        let charts = trainer.blueprint.extract_charts();
+        let charts = trainer.blueprint.extract_all_charts_generic(num_players, stack_chips);
         let json = serde_json::to_string_pretty(&charts).expect("failed to serialize charts");
         fs::write(chart_path, &json).expect("cannot write chart output");
+        println!("Saved {} spots to {}", charts.len(), chart_path);
     }
 
     if let Some(matchup_path) = matchup_output {
-        println!("Extracting matchups (SRP + 3bet + 4bet) to {}...", matchup_path);
-        let matchups = trainer.blueprint.extract_all_matchups();
+        println!("Extracting matchups to {}...", matchup_path);
+        let matchups = trainer.blueprint.extract_all_matchups_generic(num_players, stack_chips);
         let json = serde_json::to_string_pretty(&matchups).expect("failed to serialize matchups");
         fs::write(matchup_path, &json).expect("cannot write matchup output");
-        println!("Saved {} matchups.", matchups.len());
+        println!("Saved {} matchups to {}", matchups.len(), matchup_path);
     }
 
     println!("Done.");
+}
+
+fn cmd_preflop_batch(
+    iterations: u64,
+    output_dir: &str,
+    seed: u64,
+    oop_pot_tax: f32,
+    players_str: &str,
+    stacks_str: &str,
+) {
+    let player_counts: Vec<usize> = players_str.split(',')
+        .map(|s| s.trim().parse().expect("invalid player count"))
+        .collect();
+    let stack_bbs: Vec<i32> = stacks_str.split(',')
+        .map(|s| s.trim().parse().expect("invalid stack bb"))
+        .collect();
+
+    // Create output directory
+    fs::create_dir_all(output_dir).expect("cannot create output directory");
+
+    let total = player_counts.len() * stack_bbs.len();
+    let mut done = 0;
+    let global_start = Instant::now();
+
+    for &np in &player_counts {
+        for &sbb in &stack_bbs {
+            done += 1;
+            let stack_chips = sbb * 2;
+            let config = PreflopBetConfig::for_stack(sbb);
+
+            println!("\n[{}/{}] Training {}p {}bb (depths={})...",
+                done, total, np, sbb, config.raise_sizes.len());
+
+            let mut trainer = PreflopTrainer::new(config, seed);
+            trainer.oop_pot_tax = oop_pot_tax;
+            let start = Instant::now();
+            trainer.train_generic(iterations, np, stack_chips);
+            let elapsed = start.elapsed();
+
+            println!("  {:.1}s, {} info sets, {:.0} iter/s",
+                elapsed.as_secs_f64(),
+                trainer.blueprint.entries.len(),
+                iterations as f64 / elapsed.as_secs_f64());
+
+            // Save blueprint
+            let bp_path = format!("{}/preflop_{}p_{}bb.bin", output_dir, np, sbb);
+            let file = fs::File::create(&bp_path).expect("cannot create blueprint file");
+            let mut writer = BufWriter::new(file);
+            trainer.blueprint.save(&mut writer).expect("failed to save blueprint");
+
+            // Save charts
+            let charts = trainer.blueprint.extract_all_charts_generic(np, stack_chips);
+            let chart_path = format!("{}/preflop_charts_{}p_{}bb.json", output_dir, np, sbb);
+            let json = serde_json::to_string_pretty(&charts).expect("failed to serialize charts");
+            fs::write(&chart_path, &json).expect("cannot write chart output");
+            println!("  Saved {} spots to {}", charts.len(), chart_path);
+
+            // Save matchups
+            let matchups = trainer.blueprint.extract_all_matchups_generic(np, stack_chips);
+            let matchup_path = format!("{}/preflop_matchups_{}p_{}bb.json", output_dir, np, sbb);
+            let json = serde_json::to_string_pretty(&matchups).expect("failed to serialize matchups");
+            fs::write(&matchup_path, &json).expect("cannot write matchup output");
+            println!("  Saved {} matchups to {}", matchups.len(), matchup_path);
+        }
+    }
+
+    let total_elapsed = global_start.elapsed();
+    println!("\nAll {} combinations done in {:.1}s.", total, total_elapsed.as_secs_f64());
 }
 
 fn cmd_chart(blueprint_path: &str, output: &str) {
@@ -1111,8 +1279,8 @@ fn cmd_chart_preflop(blueprint_path: &str, output: &str, matchup_output: Option<
     println!("  {} iterations, {} info sets", blueprint.iterations, blueprint.entries.len());
     println!("  config: {:?}", blueprint.config);
 
-    println!("Extracting RFI charts...");
-    let charts = blueprint.extract_charts();
+    println!("Extracting all preflop charts (RFI + facing open/3bet/4bet)...");
+    let charts = blueprint.extract_all_charts();
 
     let json = serde_json::to_string_pretty(&charts).expect("failed to serialize charts");
     fs::write(output, &json).expect("cannot write output");
@@ -1412,4 +1580,79 @@ fn cmd_datagen(
     };
 
     run_datagen(config);
+}
+
+fn cmd_extract_tree(blueprint_path: &str, num_players: usize, stack_bb: i32, output: &str, max_raises: u8) {
+    use dcfr_solver::preflop::PreflopBlueprint;
+
+    assert!((2..=6).contains(&num_players), "num-players must be 2..6");
+    assert!(stack_bb > 0, "stack-bb must be positive");
+    let stack_chips = stack_bb * 2;
+
+    println!("Loading blueprint from {}...", blueprint_path);
+    let file = fs::File::open(blueprint_path).expect("cannot open blueprint");
+    let mut reader = BufReader::new(file);
+    let blueprint = PreflopBlueprint::load(&mut reader).expect("failed to load blueprint");
+    println!("  {} info sets loaded.", blueprint.entries.len());
+
+    println!("Extracting tree ({}p, {}bb, max_raises={})...", num_players, stack_bb, max_raises);
+    let spots = dcfr_solver::preflop_tree::extract_tree(&blueprint, num_players, stack_chips, max_raises);
+    println!("  {} decision nodes extracted.", spots.len());
+
+    let json = serde_json::to_string_pretty(&spots).expect("serialize failed");
+    fs::write(output, &json).expect("cannot write output");
+    println!("Saved to {}", output);
+}
+
+fn cmd_extract_tree_batch(input_dir: &str, output_dir: &str, max_raises: u8) {
+    use dcfr_solver::preflop::PreflopBlueprint;
+
+    fs::create_dir_all(output_dir).expect("cannot create output directory");
+
+    // Collect matching blueprint files
+    let mut blueprints: Vec<(usize, i32, String)> = Vec::new();
+    for entry in fs::read_dir(input_dir).expect("cannot read input directory") {
+        let entry = entry.expect("dir entry error");
+        let fname = entry.file_name().to_string_lossy().to_string();
+        if let Some((np, sbb)) = parse_blueprint_filename(&fname) {
+            blueprints.push((np, sbb, entry.path().to_string_lossy().to_string()));
+        }
+    }
+    blueprints.sort_by_key(|&(np, sbb, _)| (np, sbb));
+
+    if blueprints.is_empty() {
+        println!("No preflop_Np_Mbb.bin files found in {}", input_dir);
+        return;
+    }
+
+    println!("Found {} blueprints. Extracting with max_raises={}...\n", blueprints.len(), max_raises);
+
+    for (i, (np, sbb, path)) in blueprints.iter().enumerate() {
+        let stack_chips = sbb * 2;
+        print!("[{}/{}] {}p {}bb: ", i + 1, blueprints.len(), np, sbb);
+
+        let file = fs::File::open(path).expect("cannot open blueprint");
+        let mut reader = BufReader::new(file);
+        let blueprint = PreflopBlueprint::load(&mut reader).expect("failed to load");
+
+        let spots = dcfr_solver::preflop_tree::extract_tree(&blueprint, *np, stack_chips, max_raises);
+
+        let out_path = format!("{}/preflop_tree_{}p_{}bb.json", output_dir, np, sbb);
+        let json = serde_json::to_string_pretty(&spots).expect("serialize failed");
+        fs::write(&out_path, &json).expect("cannot write output");
+
+        println!("{} spots -> {}", spots.len(), out_path);
+    }
+
+    println!("\nDone. {} files extracted.", blueprints.len());
+}
+
+/// Parse blueprint filename pattern: preflop_Np_Mbb.bin -> (N, M)
+fn parse_blueprint_filename(name: &str) -> Option<(usize, i32)> {
+    let name = name.strip_prefix("preflop_")?.strip_suffix(".bin")?;
+    let parts: Vec<&str> = name.split('_').collect();
+    if parts.len() != 2 { return None; }
+    let np = parts[0].strip_suffix('p')?.parse::<usize>().ok()?;
+    let sbb = parts[1].strip_suffix("bb")?.parse::<i32>().ok()?;
+    if (2..=6).contains(&np) && sbb > 0 { Some((np, sbb)) } else { None }
 }
