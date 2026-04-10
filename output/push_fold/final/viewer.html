@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Basepoker All-in or Fold GTO Viewer</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg-0: #0a1628;
+    --bg-1: #0f1d30;
+    --bg-2: #142538;
+    --bg-3: #1a2d4200;
+    --border: #1e3a5c;
+    --border-active: #2a5f8f;
+    --text-primary: #e8ecf0;
+    --text-secondary: #7a9bb8;
+    --text-muted: #3d6080;
+    --accent: #018F69;
+    --accent-glow: rgba(1,143,105,0.15);
+
+    --c-pure-push: #017a5a;
+    --c-high-push: #018F69;
+    --c-med-high: #2ab88e;
+    --c-mixed: #f0b429;
+    --c-med-low: #e87040;
+    --c-low: #d45050;
+    --c-pure-fold: #1a2d42;
+    --c-fold-red: #c43030;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg-0);
+    color: var(--text-primary);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Subtle grid texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.2;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 48px;
+  }
+
+  /* Header */
+  .header {
+    padding: 28px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+  .header .subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Control bar */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 28px;
+    align-items: flex-start;
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .control-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding-left: 2px;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 4px;
+  }
+
+  .btn {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .btn:hover {
+    background: var(--bg-3);
+    border-color: var(--border-active);
+    color: var(--text-primary);
+  }
+  .btn.active {
+    background: var(--accent-glow);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Main layout */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  /* Grid area */
+  .grid-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .grid-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .grid-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+  }
+
+  .push-pct-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .push-pct-badge span {
+    color: var(--c-high-push);
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  /* The 13x13 grid */
+  .hand-grid-wrapper {
+    overflow: auto;
+  }
+
+  .hand-grid {
+    display: grid;
+    grid-template-columns: 20px repeat(13, 1fr);
+    grid-template-rows: 20px repeat(13, 1fr);
+    gap: 2px;
+    min-width: 460px;
+  }
+
+  .grid-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  .hand-cell {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    border: 1px solid rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+
+  .hand-cell:hover {
+    transform: scale(1.08);
+    z-index: 10;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  }
+
+  .hand-cell.selected {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    z-index: 5;
+  }
+
+  .cell-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 16px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.95);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .cell-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 2px;
+    line-height: 1;
+  }
+
+  /* Tooltip */
+  .tooltip {
+    position: fixed;
+    background: var(--bg-1);
+    border: 1px solid var(--border-active);
+    border-radius: 8px;
+    padding: 10px 14px;
+    pointer-events: none;
+    z-index: 1000;
+    display: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    min-width: 130px;
+  }
+  .tooltip.visible { display: block; }
+  .tooltip-hand {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+  }
+  .tooltip-pct {
+    font-size: 13px;
+    color: var(--c-high-push);
+  }
+  .tooltip-action {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* Side panel */
+  .side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .panel-card {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .panel-card h3 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .stat-row:last-child { margin-bottom: 0; }
+  .stat-label { color: var(--text-secondary); }
+  .stat-value {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+  .stat-value.green { color: var(--c-high-push); }
+  .stat-value.red { color: var(--c-fold-red); }
+  .stat-value.yellow { color: var(--c-mixed); }
+
+  /* Selected hand detail */
+  .selected-hand-card {
+    background: var(--bg-1);
+    border: 1px solid var(--border-active);
+    border-radius: 10px;
+    padding: 18px;
+    min-height: 100px;
+  }
+  .selected-hand-card h3 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+  .selected-hand-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 8px;
+    word-break: keep-all;
+    white-space: nowrap;
+  }
+  .selected-hand-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .selected-hand-type {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Bar chart for push pct */
+  .pct-bar-container {
+    margin-top: 10px;
+    height: 6px;
+    background: var(--bg-2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .pct-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+  }
+
+  /* Top hands lists */
+  .hand-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .hand-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 8px;
+    border-radius: 5px;
+    background: var(--bg-2);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .hand-list-item:hover { background: var(--bg-3); }
+  .hand-list-item .hl-name { color: var(--text-primary); font-weight: 500; }
+  .hand-list-item .hl-pct { color: var(--text-secondary); }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+  .legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* No data state */
+  .no-data {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+  }
+
+  @media (max-width: 900px) {
+    .main {
+      grid-template-columns: 1fr;
+    }
+    .side-panel {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .side-panel {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="header">
+    <h1>Basepoker All-in or Fold GTO Viewer</h1>
+    <span class="subtitle">8bb &#x2022; 1bb ante &#x2022; Nash equilibrium</span>
+  </header>
+
+  <div class="controls">
+    <div class="control-group">
+      <span class="control-label">Players</span>
+      <div class="btn-group" id="players-group">
+        <button class="btn" data-players="2">2-max</button>
+        <button class="btn" data-players="3">3-max</button>
+        <button class="btn" data-players="4">4-max</button>
+      </div>
+    </div>
+    <div class="control-group">
+      <span class="control-label">Position</span>
+      <div class="btn-group" id="position-group"></div>
+    </div>
+    <div class="control-group">
+      <span class="control-label">Situation</span>
+      <div class="btn-group" id="situation-group"></div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="grid-section">
+      <div class="grid-header">
+        <span class="grid-title" id="grid-title">Push or Fold</span>
+        <span class="push-pct-badge">Push range: <span id="push-pct-display">—</span>%</span>
+      </div>
+      <div class="hand-grid-wrapper">
+        <div class="hand-grid" id="hand-grid"></div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-swatch" style="background:#017a5a"></div>90–100%</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#018F69"></div>70–90%</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#2ab88e"></div>50–70%</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#f0b429"></div>30–50%</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#e87040"></div>10–30%</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#d45050"></div>3–10%</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:#1a2d42"></div>0–3%</div>
+      </div>
+    </div>
+
+    <div class="side-panel">
+      <div class="selected-hand-card" id="selected-card">
+        <h3>Selected Hand</h3>
+        <div style="color:var(--text-muted);font-family:'DM Mono',monospace;font-size:12px;">Click any cell</div>
+      </div>
+
+      <div class="panel-card">
+        <h3>Range Stats</h3>
+        <div class="stat-row">
+          <span class="stat-label">Overall push</span>
+          <span class="stat-value green" id="stat-push-pct">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Pure push (&gt;97%)</span>
+          <span class="stat-value green" id="stat-pure-push">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Pure fold (&lt;3%)</span>
+          <span class="stat-value red" id="stat-pure-fold">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Mixed (3–97%)</span>
+          <span class="stat-value yellow" id="stat-mixed">—</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip">
+  <div class="tooltip-hand" id="tt-hand"></div>
+  <div class="tooltip-pct" id="tt-pct"></div>
+  <div class="tooltip-action" id="tt-action"></div>
+</div>
+
+<script>
+// ─── Embedded data ─────────────────────────────────────────────────────────
+const DATA = {
+  2: {"players": 2, "stack_bb": 8, "ante_bb": 0, "iterations": 1000000000, "seed": 42, "positions": [{"name": "SB", "index": 0, "situations": [{"facing": "no action", "push_pct": 62.0, "hands": [{"hand": "22", "push": 1.0}, {"hand": "33", "push": 1.0}, {"hand": "44", "push": 1.0}, {"hand": "55", "push": 1.0}, {"hand": "66", "push": 1.0}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0001}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.5522}, {"hand": "52s", "push": 0.0001}, {"hand": "53s", "push": 0.9928}, {"hand": "54s", "push": 0.9999}, {"hand": "62s", "push": 0.0}, {"hand": "63s", "push": 0.0815}, {"hand": "64s", "push": 0.9998}, {"hand": "65s", "push": 0.9999}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0004}, {"hand": "74s", "push": 0.9999}, {"hand": "75s", "push": 0.9999}, {"hand": "76s", "push": 0.9995}, {"hand": "82s", "push": 0.0}, {"hand": "83s", "push": 0.0}, {"hand": "84s", "push": 0.0906}, {"hand": "85s", "push": 0.9984}, {"hand": "86s", "push": 0.9999}, {"hand": "87s", "push": 0.9997}, {"hand": "92s", "push": 0.0003}, {"hand": "93s", "push": 0.0014}, {"hand": "94s", "push": 0.0029}, {"hand": "95s", "push": 0.9994}, {"hand": "96s", "push": 0.9998}, {"hand": "97s", "push": 1.0}, {"hand": "98s", "push": 1.0}, {"hand": "T2s", "push": 0.0071}, {"hand": "T3s", "push": 0.0999}, {"hand": "T4s", "push": 0.9911}, {"hand": "T5s", "push": 0.9978}, {"hand": "T6s", "push": 1.0}, {"hand": "T7s", "push": 0.9999}, {"hand": "T8s", "push": 0.9996}, {"hand": "T9s", "push": 0.9997}, {"hand": "J2s", "push": 0.9997}, {"hand": "J3s", "push": 1.0}, {"hand": "J4s", "push": 0.9969}, {"hand": "J5s", "push": 1.0}, {"hand": "J6s", "push": 1.0}, {"hand": "J7s", "push": 0.9999}, {"hand": "J8s", "push": 1.0}, {"hand": "J9s", "push": 1.0}, {"hand": "JTs", "push": 1.0}, {"hand": "Q2s", "push": 1.0}, {"hand": "Q3s", "push": 1.0}, {"hand": "Q4s", "push": 1.0}, {"hand": "Q5s", "push": 1.0}, {"hand": "Q6s", "push": 0.9999}, {"hand": "Q7s", "push": 1.0}, {"hand": "Q8s", "push": 1.0}, {"hand": "Q9s", "push": 1.0}, {"hand": "QTs", "push": 1.0}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 1.0}, {"hand": "K3s", "push": 1.0}, {"hand": "K4s", "push": 0.9998}, {"hand": "K5s", "push": 1.0}, {"hand": "K6s", "push": 1.0}, {"hand": "K7s", "push": 1.0}, {"hand": "K8s", "push": 1.0}, {"hand": "K9s", "push": 1.0}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 1.0}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 1.0}, {"hand": "A3s", "push": 1.0}, {"hand": "A4s", "push": 1.0}, {"hand": "A5s", "push": 1.0}, {"hand": "A6s", "push": 1.0}, {"hand": "A7s", "push": 1.0}, {"hand": "A8s", "push": 1.0}, {"hand": "A9s", "push": 1.0}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0001}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0011}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0032}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0002}, {"hand": "76o", "push": 0.9959}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0004}, {"hand": "86o", "push": 0.0045}, {"hand": "87o", "push": 0.9989}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0001}, {"hand": "96o", "push": 0.0015}, {"hand": "97o", "push": 0.9996}, {"hand": "98o", "push": 0.9999}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0}, {"hand": "T6o", "push": 0.0002}, {"hand": "T7o", "push": 0.5618}, {"hand": "T8o", "push": 1.0}, {"hand": "T9o", "push": 1.0}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0}, {"hand": "J4o", "push": 0.0003}, {"hand": "J5o", "push": 0.0001}, {"hand": "J6o", "push": 0.0001}, {"hand": "J7o", "push": 0.9792}, {"hand": "J8o", "push": 1.0}, {"hand": "J9o", "push": 1.0}, {"hand": "JTo", "push": 1.0}, {"hand": "Q2o", "push": 0.0006}, {"hand": "Q3o", "push": 0.0004}, {"hand": "Q4o", "push": 0.4985}, {"hand": "Q5o", "push": 1.0}, {"hand": "Q6o", "push": 0.9999}, {"hand": "Q7o", "push": 1.0}, {"hand": "Q8o", "push": 0.9999}, {"hand": "Q9o", "push": 1.0}, {"hand": "QTo", "push": 1.0}, {"hand": "QJo", "push": 1.0}, {"hand": "K2o", "push": 0.9999}, {"hand": "K3o", "push": 1.0}, {"hand": "K4o", "push": 1.0}, {"hand": "K5o", "push": 1.0}, {"hand": "K6o", "push": 1.0}, {"hand": "K7o", "push": 1.0}, {"hand": "K8o", "push": 1.0}, {"hand": "K9o", "push": 1.0}, {"hand": "KTo", "push": 1.0}, {"hand": "KJo", "push": 1.0}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 1.0}, {"hand": "A3o", "push": 1.0}, {"hand": "A4o", "push": 1.0}, {"hand": "A5o", "push": 1.0}, {"hand": "A6o", "push": 1.0}, {"hand": "A7o", "push": 1.0}, {"hand": "A8o", "push": 1.0}, {"hand": "A9o", "push": 1.0}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}]}, {"name": "BB", "index": 1, "situations": [{"facing": "SB push", "push_pct": 45.1, "hands": [{"hand": "22", "push": 1.0}, {"hand": "33", "push": 1.0}, {"hand": "44", "push": 1.0}, {"hand": "55", "push": 1.0}, {"hand": "66", "push": 1.0}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.0}, {"hand": "52s", "push": 0.0}, {"hand": "53s", "push": 0.0}, {"hand": "54s", "push": 0.0}, {"hand": "62s", "push": 0.0}, {"hand": "63s", "push": 0.0}, {"hand": "64s", "push": 0.0}, {"hand": "65s", "push": 0.0}, {"hand": "72s", "push": 0.0001}, {"hand": "73s", "push": 0.0}, {"hand": "74s", "push": 0.0}, {"hand": "75s", "push": 0.0}, {"hand": "76s", "push": 0.0001}, {"hand": "82s", "push": 0.0}, {"hand": "83s", "push": 0.0}, {"hand": "84s", "push": 0.0}, {"hand": "85s", "push": 0.0}, {"hand": "86s", "push": 0.0}, {"hand": "87s", "push": 0.0003}, {"hand": "92s", "push": 0.0}, {"hand": "93s", "push": 0.0}, {"hand": "94s", "push": 0.0003}, {"hand": "95s", "push": 0.0}, {"hand": "96s", "push": 0.0}, {"hand": "97s", "push": 0.0018}, {"hand": "98s", "push": 0.9979}, {"hand": "T2s", "push": 0.0}, {"hand": "T3s", "push": 0.0}, {"hand": "T4s", "push": 0.0}, {"hand": "T5s", "push": 0.0}, {"hand": "T6s", "push": 0.0001}, {"hand": "T7s", "push": 0.0222}, {"hand": "T8s", "push": 0.9997}, {"hand": "T9s", "push": 0.9995}, {"hand": "J2s", "push": 0.0001}, {"hand": "J3s", "push": 0.0001}, {"hand": "J4s", "push": 0.0}, {"hand": "J5s", "push": 0.0}, {"hand": "J6s", "push": 0.0089}, {"hand": "J7s", "push": 1.0}, {"hand": "J8s", "push": 0.9996}, {"hand": "J9s", "push": 1.0}, {"hand": "JTs", "push": 1.0}, {"hand": "Q2s", "push": 0.0001}, {"hand": "Q3s", "push": 0.0285}, {"hand": "Q4s", "push": 0.9999}, {"hand": "Q5s", "push": 0.9997}, {"hand": "Q6s", "push": 0.999}, {"hand": "Q7s", "push": 0.9999}, {"hand": "Q8s", "push": 1.0}, {"hand": "Q9s", "push": 1.0}, {"hand": "QTs", "push": 1.0}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 1.0}, {"hand": "K3s", "push": 1.0}, {"hand": "K4s", "push": 1.0}, {"hand": "K5s", "push": 1.0}, {"hand": "K6s", "push": 1.0}, {"hand": "K7s", "push": 1.0}, {"hand": "K8s", "push": 1.0}, {"hand": "K9s", "push": 1.0}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 1.0}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 1.0}, {"hand": "A3s", "push": 1.0}, {"hand": "A4s", "push": 1.0}, {"hand": "A5s", "push": 1.0}, {"hand": "A6s", "push": 1.0}, {"hand": "A7s", "push": 1.0}, {"hand": "A8s", "push": 1.0}, {"hand": "A9s", "push": 1.0}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0}, {"hand": "87o", "push": 0.0001}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0}, {"hand": "96o", "push": 0.0}, {"hand": "97o", "push": 0.0}, {"hand": "98o", "push": 0.0002}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0}, {"hand": "T6o", "push": 0.0}, {"hand": "T7o", "push": 0.0}, {"hand": "T8o", "push": 0.0001}, {"hand": "T9o", "push": 0.9974}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0}, {"hand": "J4o", "push": 0.0}, {"hand": "J5o", "push": 0.0001}, {"hand": "J6o", "push": 0.0002}, {"hand": "J7o", "push": 0.0}, {"hand": "J8o", "push": 0.0004}, {"hand": "J9o", "push": 1.0}, {"hand": "JTo", "push": 1.0}, {"hand": "Q2o", "push": 0.0001}, {"hand": "Q3o", "push": 0.0}, {"hand": "Q4o", "push": 0.0}, {"hand": "Q5o", "push": 0.0004}, {"hand": "Q6o", "push": 0.0001}, {"hand": "Q7o", "push": 0.674}, {"hand": "Q8o", "push": 0.9999}, {"hand": "Q9o", "push": 1.0}, {"hand": "QTo", "push": 1.0}, {"hand": "QJo", "push": 1.0}, {"hand": "K2o", "push": 0.9709}, {"hand": "K3o", "push": 0.9999}, {"hand": "K4o", "push": 0.9997}, {"hand": "K5o", "push": 1.0}, {"hand": "K6o", "push": 1.0}, {"hand": "K7o", "push": 1.0}, {"hand": "K8o", "push": 1.0}, {"hand": "K9o", "push": 1.0}, {"hand": "KTo", "push": 1.0}, {"hand": "KJo", "push": 1.0}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 1.0}, {"hand": "A3o", "push": 1.0}, {"hand": "A4o", "push": 1.0}, {"hand": "A5o", "push": 1.0}, {"hand": "A6o", "push": 1.0}, {"hand": "A7o", "push": 1.0}, {"hand": "A8o", "push": 1.0}, {"hand": "A9o", "push": 1.0}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}]}]},
+  3: {"players": 3, "stack_bb": 8, "ante_bb": 0, "iterations": 1000000000, "seed": 42, "positions": [{"name": "BTN", "index": 0, "situations": [{"facing": "no action", "push_pct": 34.4, "hands": [{"hand": "22", "push": 0.9995}, {"hand": "33", "push": 1.0}, {"hand": "44", "push": 1.0}, {"hand": "55", "push": 0.9999}, {"hand": "66", "push": 1.0}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.0}, {"hand": "52s", "push": 0.0}, {"hand": "53s", "push": 0.0}, {"hand": "54s", "push": 0.0069}, {"hand": "62s", "push": 0.0001}, {"hand": "63s", "push": 0.0}, {"hand": "64s", "push": 0.0001}, {"hand": "65s", "push": 0.4795}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0}, {"hand": "74s", "push": 0.0}, {"hand": "75s", "push": 0.0068}, {"hand": "76s", "push": 0.9956}, {"hand": "82s", "push": 0.0}, {"hand": "83s", "push": 0.0}, {"hand": "84s", "push": 0.0}, {"hand": "85s", "push": 0.0002}, {"hand": "86s", "push": 0.9232}, {"hand": "87s", "push": 0.9975}, {"hand": "92s", "push": 0.0}, {"hand": "93s", "push": 0.0}, {"hand": "94s", "push": 0.0}, {"hand": "95s", "push": 0.0002}, {"hand": "96s", "push": 0.0}, {"hand": "97s", "push": 0.9995}, {"hand": "98s", "push": 0.9996}, {"hand": "T2s", "push": 0.0}, {"hand": "T3s", "push": 0.0}, {"hand": "T4s", "push": 0.0}, {"hand": "T5s", "push": 0.0001}, {"hand": "T6s", "push": 0.0004}, {"hand": "T7s", "push": 0.9475}, {"hand": "T8s", "push": 0.998}, {"hand": "T9s", "push": 1.0}, {"hand": "J2s", "push": 0.0}, {"hand": "J3s", "push": 0.0005}, {"hand": "J4s", "push": 0.0}, {"hand": "J5s", "push": 0.0001}, {"hand": "J6s", "push": 0.0001}, {"hand": "J7s", "push": 0.7377}, {"hand": "J8s", "push": 1.0}, {"hand": "J9s", "push": 0.9999}, {"hand": "JTs", "push": 1.0}, {"hand": "Q2s", "push": 0.0}, {"hand": "Q3s", "push": 0.0004}, {"hand": "Q4s", "push": 0.0}, {"hand": "Q5s", "push": 0.006}, {"hand": "Q6s", "push": 0.1102}, {"hand": "Q7s", "push": 0.0521}, {"hand": "Q8s", "push": 0.9993}, {"hand": "Q9s", "push": 1.0}, {"hand": "QTs", "push": 1.0}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 0.0013}, {"hand": "K3s", "push": 0.0239}, {"hand": "K4s", "push": 0.8404}, {"hand": "K5s", "push": 0.9981}, {"hand": "K6s", "push": 0.999}, {"hand": "K7s", "push": 0.9999}, {"hand": "K8s", "push": 0.9997}, {"hand": "K9s", "push": 1.0}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 1.0}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 1.0}, {"hand": "A3s", "push": 1.0}, {"hand": "A4s", "push": 1.0}, {"hand": "A5s", "push": 1.0}, {"hand": "A6s", "push": 1.0}, {"hand": "A7s", "push": 1.0}, {"hand": "A8s", "push": 1.0}, {"hand": "A9s", "push": 1.0}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0}, {"hand": "87o", "push": 0.0001}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0}, {"hand": "96o", "push": 0.0}, {"hand": "97o", "push": 0.0}, {"hand": "98o", "push": 0.0}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0001}, {"hand": "T5o", "push": 0.0}, {"hand": "T6o", "push": 0.0}, {"hand": "T7o", "push": 0.0001}, {"hand": "T8o", "push": 0.0}, {"hand": "T9o", "push": 0.0866}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0}, {"hand": "J4o", "push": 0.0}, {"hand": "J5o", "push": 0.0}, {"hand": "J6o", "push": 0.0}, {"hand": "J7o", "push": 0.0}, {"hand": "J8o", "push": 0.0006}, {"hand": "J9o", "push": 0.0075}, {"hand": "JTo", "push": 1.0}, {"hand": "Q2o", "push": 0.0}, {"hand": "Q3o", "push": 0.0}, {"hand": "Q4o", "push": 0.0}, {"hand": "Q5o", "push": 0.0}, {"hand": "Q6o", "push": 0.0}, {"hand": "Q7o", "push": 0.0}, {"hand": "Q8o", "push": 0.0}, {"hand": "Q9o", "push": 0.0004}, {"hand": "QTo", "push": 1.0}, {"hand": "QJo", "push": 1.0}, {"hand": "K2o", "push": 0.0}, {"hand": "K3o", "push": 0.0}, {"hand": "K4o", "push": 0.0}, {"hand": "K5o", "push": 0.0001}, {"hand": "K6o", "push": 0.0001}, {"hand": "K7o", "push": 0.0007}, {"hand": "K8o", "push": 0.0011}, {"hand": "K9o", "push": 1.0}, {"hand": "KTo", "push": 1.0}, {"hand": "KJo", "push": 1.0}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 0.9997}, {"hand": "A3o", "push": 1.0}, {"hand": "A4o", "push": 1.0}, {"hand": "A5o", "push": 1.0}, {"hand": "A6o", "push": 1.0}, {"hand": "A7o", "push": 1.0}, {"hand": "A8o", "push": 1.0}, {"hand": "A9o", "push": 1.0}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}]}, {"name": "SB", "index": 1, "situations": [{"facing": "no action", "push_pct": 61.7, "hands": [{"hand": "22", "push": 1.0}, {"hand": "33", "push": 1.0}, {"hand": "44", "push": 1.0}, {"hand": "55", "push": 1.0}, {"hand": "66", "push": 1.0}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0007}, {"hand": "42s", "push": 0.0002}, {"hand": "43s", "push": 0.0086}, {"hand": "52s", "push": 0.0002}, {"hand": "53s", "push": 0.9836}, {"hand": "54s", "push": 0.9989}, {"hand": "62s", "push": 0.0}, {"hand": "63s", "push": 0.0936}, {"hand": "64s", "push": 1.0}, {"hand": "65s", "push": 0.9985}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0}, {"hand": "74s", "push": 0.9367}, {"hand": "75s", "push": 0.997}, {"hand": "76s", "push": 0.9995}, {"hand": "82s", "push": 0.0008}, {"hand": "83s", "push": 0.0002}, {"hand": "84s", "push": 0.0483}, {"hand": "85s", "push": 0.9906}, {"hand": "86s", "push": 0.9996}, {"hand": "87s", "push": 1.0}, {"hand": "92s", "push": 0.002}, {"hand": "93s", "push": 0.0001}, {"hand": "94s", "push": 0.0}, {"hand": "95s", "push": 0.9912}, {"hand": "96s", "push": 0.9987}, {"hand": "97s", "push": 0.9997}, {"hand": "98s", "push": 0.9999}, {"hand": "T2s", "push": 0.0039}, {"hand": "T3s", "push": 0.0002}, {"hand": "T4s", "push": 0.9644}, {"hand": "T5s", "push": 0.9887}, {"hand": "T6s", "push": 0.9997}, {"hand": "T7s", "push": 0.9999}, {"hand": "T8s", "push": 0.9995}, {"hand": "T9s", "push": 0.9999}, {"hand": "J2s", "push": 0.9997}, {"hand": "J3s", "push": 0.9968}, {"hand": "J4s", "push": 0.9998}, {"hand": "J5s", "push": 0.9997}, {"hand": "J6s", "push": 0.9999}, {"hand": "J7s", "push": 1.0}, {"hand": "J8s", "push": 1.0}, {"hand": "J9s", "push": 1.0}, {"hand": "JTs", "push": 0.9999}, {"hand": "Q2s", "push": 0.9982}, {"hand": "Q3s", "push": 1.0}, {"hand": "Q4s", "push": 1.0}, {"hand": "Q5s", "push": 0.9997}, {"hand": "Q6s", "push": 1.0}, {"hand": "Q7s", "push": 0.9992}, {"hand": "Q8s", "push": 1.0}, {"hand": "Q9s", "push": 1.0}, {"hand": "QTs", "push": 0.9999}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 1.0}, {"hand": "K3s", "push": 1.0}, {"hand": "K4s", "push": 1.0}, {"hand": "K5s", "push": 1.0}, {"hand": "K6s", "push": 1.0}, {"hand": "K7s", "push": 1.0}, {"hand": "K8s", "push": 0.9999}, {"hand": "K9s", "push": 1.0}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 1.0}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 1.0}, {"hand": "A3s", "push": 1.0}, {"hand": "A4s", "push": 1.0}, {"hand": "A5s", "push": 1.0}, {"hand": "A6s", "push": 1.0}, {"hand": "A7s", "push": 1.0}, {"hand": "A8s", "push": 1.0}, {"hand": "A9s", "push": 1.0}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0001}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0093}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0001}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0014}, {"hand": "76o", "push": 0.9613}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0001}, {"hand": "86o", "push": 0.0293}, {"hand": "87o", "push": 0.9982}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0001}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0001}, {"hand": "96o", "push": 0.0005}, {"hand": "97o", "push": 0.9968}, {"hand": "98o", "push": 0.9965}, {"hand": "T2o", "push": 0.0001}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0001}, {"hand": "T5o", "push": 0.0004}, {"hand": "T6o", "push": 0.0004}, {"hand": "T7o", "push": 0.9998}, {"hand": "T8o", "push": 1.0}, {"hand": "T9o", "push": 1.0}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0}, {"hand": "J4o", "push": 0.0003}, {"hand": "J5o", "push": 0.0001}, {"hand": "J6o", "push": 0.0034}, {"hand": "J7o", "push": 0.9988}, {"hand": "J8o", "push": 1.0}, {"hand": "J9o", "push": 0.9999}, {"hand": "JTo", "push": 1.0}, {"hand": "Q2o", "push": 0.001}, {"hand": "Q3o", "push": 0.0008}, {"hand": "Q4o", "push": 0.0482}, {"hand": "Q5o", "push": 0.9882}, {"hand": "Q6o", "push": 0.9997}, {"hand": "Q7o", "push": 0.9967}, {"hand": "Q8o", "push": 1.0}, {"hand": "Q9o", "push": 1.0}, {"hand": "QTo", "push": 1.0}, {"hand": "QJo", "push": 1.0}, {"hand": "K2o", "push": 1.0}, {"hand": "K3o", "push": 1.0}, {"hand": "K4o", "push": 1.0}, {"hand": "K5o", "push": 1.0}, {"hand": "K6o", "push": 1.0}, {"hand": "K7o", "push": 1.0}, {"hand": "K8o", "push": 0.9999}, {"hand": "K9o", "push": 1.0}, {"hand": "KTo", "push": 1.0}, {"hand": "KJo", "push": 1.0}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 1.0}, {"hand": "A3o", "push": 1.0}, {"hand": "A4o", "push": 1.0}, {"hand": "A5o", "push": 1.0}, {"hand": "A6o", "push": 1.0}, {"hand": "A7o", "push": 1.0}, {"hand": "A8o", "push": 1.0}, {"hand": "A9o", "push": 1.0}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}, {"facing": "BTN push", "push_pct": 22.1, "hands": [{"hand": "22", "push": 0.0289}, {"hand": "33", "push": 0.9998}, {"hand": "44", "push": 1.0}, {"hand": "55", "push": 1.0}, {"hand": "66", "push": 1.0}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.0001}, {"hand": "52s", "push": 0.0001}, {"hand": "53s", "push": 0.0001}, {"hand": "54s", "push": 0.0001}, {"hand": "62s", "push": 0.0}, {"hand": "63s", "push": 0.0}, {"hand": "64s", "push": 0.0001}, {"hand": "65s", "push": 0.0001}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0}, {"hand": "74s", "push": 0.0}, {"hand": "75s", "push": 0.0}, {"hand": "76s", "push": 0.0}, {"hand": "82s", "push": 0.0}, {"hand": "83s", "push": 0.0002}, {"hand": "84s", "push": 0.0}, {"hand": "85s", "push": 0.0001}, {"hand": "86s", "push": 0.0001}, {"hand": "87s", "push": 0.0003}, {"hand": "92s", "push": 0.0}, {"hand": "93s", "push": 0.0}, {"hand": "94s", "push": 0.0}, {"hand": "95s", "push": 0.0001}, {"hand": "96s", "push": 0.0003}, {"hand": "97s", "push": 0.0001}, {"hand": "98s", "push": 0.0003}, {"hand": "T2s", "push": 0.0}, {"hand": "T3s", "push": 0.0}, {"hand": "T4s", "push": 0.0001}, {"hand": "T5s", "push": 0.0002}, {"hand": "T6s", "push": 0.0}, {"hand": "T7s", "push": 0.0}, {"hand": "T8s", "push": 0.0007}, {"hand": "T9s", "push": 0.0001}, {"hand": "J2s", "push": 0.0}, {"hand": "J3s", "push": 0.0001}, {"hand": "J4s", "push": 0.0001}, {"hand": "J5s", "push": 0.0001}, {"hand": "J6s", "push": 0.0002}, {"hand": "J7s", "push": 0.0002}, {"hand": "J8s", "push": 0.0001}, {"hand": "J9s", "push": 0.0}, {"hand": "JTs", "push": 0.9052}, {"hand": "Q2s", "push": 0.0}, {"hand": "Q3s", "push": 0.0004}, {"hand": "Q4s", "push": 0.0002}, {"hand": "Q5s", "push": 0.0}, {"hand": "Q6s", "push": 0.0001}, {"hand": "Q7s", "push": 0.0007}, {"hand": "Q8s", "push": 0.0004}, {"hand": "Q9s", "push": 0.0018}, {"hand": "QTs", "push": 0.9998}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 0.0}, {"hand": "K3s", "push": 0.0004}, {"hand": "K4s", "push": 0.0003}, {"hand": "K5s", "push": 0.0027}, {"hand": "K6s", "push": 0.0006}, {"hand": "K7s", "push": 0.0}, {"hand": "K8s", "push": 0.0172}, {"hand": "K9s", "push": 0.9994}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 1.0}, {"hand": "KQs", "push": 0.9998}, {"hand": "A2s", "push": 0.9998}, {"hand": "A3s", "push": 0.9991}, {"hand": "A4s", "push": 0.9983}, {"hand": "A5s", "push": 1.0}, {"hand": "A6s", "push": 0.9999}, {"hand": "A7s", "push": 1.0}, {"hand": "A8s", "push": 1.0}, {"hand": "A9s", "push": 0.9999}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0}, {"hand": "87o", "push": 0.0}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0}, {"hand": "96o", "push": 0.0}, {"hand": "97o", "push": 0.0}, {"hand": "98o", "push": 0.0001}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0}, {"hand": "T6o", "push": 0.0001}, {"hand": "T7o", "push": 0.0}, {"hand": "T8o", "push": 0.0}, {"hand": "T9o", "push": 0.0001}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0}, {"hand": "J4o", "push": 0.0001}, {"hand": "J5o", "push": 0.0}, {"hand": "J6o", "push": 0.0}, {"hand": "J7o", "push": 0.0}, {"hand": "J8o", "push": 0.0}, {"hand": "J9o", "push": 0.0}, {"hand": "JTo", "push": 0.0001}, {"hand": "Q2o", "push": 0.0}, {"hand": "Q3o", "push": 0.0}, {"hand": "Q4o", "push": 0.0001}, {"hand": "Q5o", "push": 0.0001}, {"hand": "Q6o", "push": 0.0}, {"hand": "Q7o", "push": 0.0}, {"hand": "Q8o", "push": 0.0001}, {"hand": "Q9o", "push": 0.0001}, {"hand": "QTo", "push": 0.0004}, {"hand": "QJo", "push": 0.1028}, {"hand": "K2o", "push": 0.0}, {"hand": "K3o", "push": 0.0}, {"hand": "K4o", "push": 0.0002}, {"hand": "K5o", "push": 0.0001}, {"hand": "K6o", "push": 0.0001}, {"hand": "K7o", "push": 0.0005}, {"hand": "K8o", "push": 0.0001}, {"hand": "K9o", "push": 0.0009}, {"hand": "KTo", "push": 1.0}, {"hand": "KJo", "push": 1.0}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 0.0007}, {"hand": "A3o", "push": 0.0005}, {"hand": "A4o", "push": 0.0089}, {"hand": "A5o", "push": 1.0}, {"hand": "A6o", "push": 0.9936}, {"hand": "A7o", "push": 1.0}, {"hand": "A8o", "push": 0.9997}, {"hand": "A9o", "push": 1.0}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}]}, {"name": "BB", "index": 2, "situations": [{"facing": "BTN push", "push_pct": 28.1, "hands": [{"hand": "22", "push": 1.0}, {"hand": "33", "push": 1.0}, {"hand": "44", "push": 1.0}, {"hand": "55", "push": 0.9999}, {"hand": "66", "push": 1.0}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.0}, {"hand": "52s", "push": 0.0001}, {"hand": "53s", "push": 0.0001}, {"hand": "54s", "push": 0.0}, {"hand": "62s", "push": 0.0001}, {"hand": "63s", "push": 0.0004}, {"hand": "64s", "push": 0.0}, {"hand": "65s", "push": 0.0007}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0001}, {"hand": "74s", "push": 0.0}, {"hand": "75s", "push": 0.0002}, {"hand": "76s", "push": 0.0012}, {"hand": "82s", "push": 0.0001}, {"hand": "83s", "push": 0.0002}, {"hand": "84s", "push": 0.0}, {"hand": "85s", "push": 0.0005}, {"hand": "86s", "push": 0.0003}, {"hand": "87s", "push": 0.0006}, {"hand": "92s", "push": 0.0001}, {"hand": "93s", "push": 0.0001}, {"hand": "94s", "push": 0.0001}, {"hand": "95s", "push": 0.0}, {"hand": "96s", "push": 0.0001}, {"hand": "97s", "push": 0.0001}, {"hand": "98s", "push": 0.0012}, {"hand": "T2s", "push": 0.0001}, {"hand": "T3s", "push": 0.0003}, {"hand": "T4s", "push": 0.0001}, {"hand": "T5s", "push": 0.0002}, {"hand": "T6s", "push": 0.0003}, {"hand": "T7s", "push": 0.0001}, {"hand": "T8s", "push": 0.001}, {"hand": "T9s", "push": 0.0247}, {"hand": "J2s", "push": 0.0}, {"hand": "J3s", "push": 0.0}, {"hand": "J4s", "push": 0.0001}, {"hand": "J5s", "push": 0.0}, {"hand": "J6s", "push": 0.0006}, {"hand": "J7s", "push": 0.0031}, {"hand": "J8s", "push": 0.0019}, {"hand": "J9s", "push": 0.0138}, {"hand": "JTs", "push": 0.9994}, {"hand": "Q2s", "push": 0.0}, {"hand": "Q3s", "push": 0.0008}, {"hand": "Q4s", "push": 0.0001}, {"hand": "Q5s", "push": 0.0}, {"hand": "Q6s", "push": 0.001}, {"hand": "Q7s", "push": 0.001}, {"hand": "Q8s", "push": 0.0016}, {"hand": "Q9s", "push": 0.9998}, {"hand": "QTs", "push": 0.9995}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 0.0002}, {"hand": "K3s", "push": 0.0004}, {"hand": "K4s", "push": 0.0002}, {"hand": "K5s", "push": 0.0006}, {"hand": "K6s", "push": 0.2534}, {"hand": "K7s", "push": 0.9961}, {"hand": "K8s", "push": 1.0}, {"hand": "K9s", "push": 0.9999}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 1.0}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 0.9999}, {"hand": "A3s", "push": 1.0}, {"hand": "A4s", "push": 1.0}, {"hand": "A5s", "push": 0.9999}, {"hand": "A6s", "push": 1.0}, {"hand": "A7s", "push": 1.0}, {"hand": "A8s", "push": 0.9999}, {"hand": "A9s", "push": 0.9999}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0001}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0003}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0001}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0}, {"hand": "87o", "push": 0.0001}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0}, {"hand": "96o", "push": 0.0}, {"hand": "97o", "push": 0.0001}, {"hand": "98o", "push": 0.0001}, {"hand": "T2o", "push": 0.0001}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0}, {"hand": "T6o", "push": 0.0}, {"hand": "T7o", "push": 0.0}, {"hand": "T8o", "push": 0.0001}, {"hand": "T9o", "push": 0.0001}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0001}, {"hand": "J4o", "push": 0.0}, {"hand": "J5o", "push": 0.0}, {"hand": "J6o", "push": 0.0}, {"hand": "J7o", "push": 0.0}, {"hand": "J8o", "push": 0.0001}, {"hand": "J9o", "push": 0.0}, {"hand": "JTo", "push": 0.0004}, {"hand": "Q2o", "push": 0.0}, {"hand": "Q3o", "push": 0.0002}, {"hand": "Q4o", "push": 0.0001}, {"hand": "Q5o", "push": 0.0}, {"hand": "Q6o", "push": 0.0}, {"hand": "Q7o", "push": 0.0}, {"hand": "Q8o", "push": 0.0005}, {"hand": "Q9o", "push": 0.0004}, {"hand": "QTo", "push": 0.4875}, {"hand": "QJo", "push": 1.0}, {"hand": "K2o", "push": 0.0}, {"hand": "K3o", "push": 0.0003}, {"hand": "K4o", "push": 0.0002}, {"hand": "K5o", "push": 0.0006}, {"hand": "K6o", "push": 0.0003}, {"hand": "K7o", "push": 0.0002}, {"hand": "K8o", "push": 0.0005}, {"hand": "K9o", "push": 0.5932}, {"hand": "KTo", "push": 1.0}, {"hand": "KJo", "push": 1.0}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 0.9996}, {"hand": "A3o", "push": 1.0}, {"hand": "A4o", "push": 0.9998}, {"hand": "A5o", "push": 1.0}, {"hand": "A6o", "push": 1.0}, {"hand": "A7o", "push": 1.0}, {"hand": "A8o", "push": 1.0}, {"hand": "A9o", "push": 1.0}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}, {"facing": "SB push", "push_pct": 43.1, "hands": [{"hand": "22", "push": 1.0}, {"hand": "33", "push": 1.0}, {"hand": "44", "push": 0.9997}, {"hand": "55", "push": 1.0}, {"hand": "66", "push": 1.0}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0002}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.0}, {"hand": "52s", "push": 0.0}, {"hand": "53s", "push": 0.0003}, {"hand": "54s", "push": 0.0004}, {"hand": "62s", "push": 0.0001}, {"hand": "63s", "push": 0.0001}, {"hand": "64s", "push": 0.0}, {"hand": "65s", "push": 0.0001}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0006}, {"hand": "74s", "push": 0.0}, {"hand": "75s", "push": 0.0003}, {"hand": "76s", "push": 0.0003}, {"hand": "82s", "push": 0.0001}, {"hand": "83s", "push": 0.0}, {"hand": "84s", "push": 0.0001}, {"hand": "85s", "push": 0.0}, {"hand": "86s", "push": 0.0}, {"hand": "87s", "push": 0.0}, {"hand": "92s", "push": 0.0}, {"hand": "93s", "push": 0.0}, {"hand": "94s", "push": 0.0}, {"hand": "95s", "push": 0.0}, {"hand": "96s", "push": 0.0001}, {"hand": "97s", "push": 0.0003}, {"hand": "98s", "push": 0.0094}, {"hand": "T2s", "push": 0.0001}, {"hand": "T3s", "push": 0.0002}, {"hand": "T4s", "push": 0.0001}, {"hand": "T5s", "push": 0.0001}, {"hand": "T6s", "push": 0.0016}, {"hand": "T7s", "push": 0.0034}, {"hand": "T8s", "push": 0.9954}, {"hand": "T9s", "push": 1.0}, {"hand": "J2s", "push": 0.0}, {"hand": "J3s", "push": 0.0}, {"hand": "J4s", "push": 0.0002}, {"hand": "J5s", "push": 0.0002}, {"hand": "J6s", "push": 0.0}, {"hand": "J7s", "push": 0.9765}, {"hand": "J8s", "push": 0.9999}, {"hand": "J9s", "push": 0.9999}, {"hand": "JTs", "push": 1.0}, {"hand": "Q2s", "push": 0.0059}, {"hand": "Q3s", "push": 0.0}, {"hand": "Q4s", "push": 0.6846}, {"hand": "Q5s", "push": 0.9977}, {"hand": "Q6s", "push": 0.9999}, {"hand": "Q7s", "push": 1.0}, {"hand": "Q8s", "push": 0.9997}, {"hand": "Q9s", "push": 0.9999}, {"hand": "QTs", "push": 1.0}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 0.9986}, {"hand": "K3s", "push": 0.9999}, {"hand": "K4s", "push": 1.0}, {"hand": "K5s", "push": 0.9999}, {"hand": "K6s", "push": 1.0}, {"hand": "K7s", "push": 1.0}, {"hand": "K8s", "push": 0.9999}, {"hand": "K9s", "push": 1.0}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 1.0}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 1.0}, {"hand": "A3s", "push": 1.0}, {"hand": "A4s", "push": 1.0}, {"hand": "A5s", "push": 1.0}, {"hand": "A6s", "push": 1.0}, {"hand": "A7s", "push": 1.0}, {"hand": "A8s", "push": 1.0}, {"hand": "A9s", "push": 1.0}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0001}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0001}, {"hand": "87o", "push": 0.0}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0}, {"hand": "96o", "push": 0.0}, {"hand": "97o", "push": 0.0}, {"hand": "98o", "push": 0.0}, {"hand": "T2o", "push": 0.0001}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0001}, {"hand": "T6o", "push": 0.0001}, {"hand": "T7o", "push": 0.0001}, {"hand": "T8o", "push": 0.0003}, {"hand": "T9o", "push": 0.8874}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0001}, {"hand": "J4o", "push": 0.0}, {"hand": "J5o", "push": 0.0001}, {"hand": "J6o", "push": 0.0}, {"hand": "J7o", "push": 0.0002}, {"hand": "J8o", "push": 0.0012}, {"hand": "J9o", "push": 1.0}, {"hand": "JTo", "push": 1.0}, {"hand": "Q2o", "push": 0.0002}, {"hand": "Q3o", "push": 0.0001}, {"hand": "Q4o", "push": 0.0002}, {"hand": "Q5o", "push": 0.0002}, {"hand": "Q6o", "push": 0.0001}, {"hand": "Q7o", "push": 0.0052}, {"hand": "Q8o", "push": 1.0}, {"hand": "Q9o", "push": 1.0}, {"hand": "QTo", "push": 1.0}, {"hand": "QJo", "push": 1.0}, {"hand": "K2o", "push": 0.0085}, {"hand": "K3o", "push": 0.9947}, {"hand": "K4o", "push": 0.9988}, {"hand": "K5o", "push": 1.0}, {"hand": "K6o", "push": 0.9999}, {"hand": "K7o", "push": 0.9999}, {"hand": "K8o", "push": 0.9999}, {"hand": "K9o", "push": 1.0}, {"hand": "KTo", "push": 1.0}, {"hand": "KJo", "push": 1.0}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 1.0}, {"hand": "A3o", "push": 1.0}, {"hand": "A4o", "push": 1.0}, {"hand": "A5o", "push": 1.0}, {"hand": "A6o", "push": 1.0}, {"hand": "A7o", "push": 1.0}, {"hand": "A8o", "push": 1.0}, {"hand": "A9o", "push": 1.0}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}, {"facing": "BTN+SB push", "push_pct": 18.2, "hands": [{"hand": "22", "push": 0.0017}, {"hand": "33", "push": 0.99}, {"hand": "44", "push": 0.9994}, {"hand": "55", "push": 1.0}, {"hand": "66", "push": 1.0}, {"hand": "77", "push": 0.9996}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0008}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.0002}, {"hand": "52s", "push": 0.0005}, {"hand": "53s", "push": 0.0001}, {"hand": "54s", "push": 0.0102}, {"hand": "62s", "push": 0.0}, {"hand": "63s", "push": 0.0001}, {"hand": "64s", "push": 0.0005}, {"hand": "65s", "push": 0.0297}, {"hand": "72s", "push": 0.0005}, {"hand": "73s", "push": 0.0}, {"hand": "74s", "push": 0.0}, {"hand": "75s", "push": 0.0001}, {"hand": "76s", "push": 0.0014}, {"hand": "82s", "push": 0.0}, {"hand": "83s", "push": 0.0002}, {"hand": "84s", "push": 0.0}, {"hand": "85s", "push": 0.0019}, {"hand": "86s", "push": 0.0691}, {"hand": "87s", "push": 0.087}, {"hand": "92s", "push": 0.0002}, {"hand": "93s", "push": 0.0}, {"hand": "94s", "push": 0.0001}, {"hand": "95s", "push": 0.0023}, {"hand": "96s", "push": 0.0058}, {"hand": "97s", "push": 0.007}, {"hand": "98s", "push": 0.9929}, {"hand": "T2s", "push": 0.0}, {"hand": "T3s", "push": 0.0002}, {"hand": "T4s", "push": 0.0007}, {"hand": "T5s", "push": 0.0001}, {"hand": "T6s", "push": 0.0038}, {"hand": "T7s", "push": 0.04}, {"hand": "T8s", "push": 0.2475}, {"hand": "T9s", "push": 0.9996}, {"hand": "J2s", "push": 0.0002}, {"hand": "J3s", "push": 0.0}, {"hand": "J4s", "push": 0.0}, {"hand": "J5s", "push": 0.0004}, {"hand": "J6s", "push": 0.0009}, {"hand": "J7s", "push": 0.0002}, {"hand": "J8s", "push": 0.004}, {"hand": "J9s", "push": 0.9575}, {"hand": "JTs", "push": 0.999}, {"hand": "Q2s", "push": 0.0047}, {"hand": "Q3s", "push": 0.0001}, {"hand": "Q4s", "push": 0.0}, {"hand": "Q5s", "push": 0.0034}, {"hand": "Q6s", "push": 0.0002}, {"hand": "Q7s", "push": 0.0046}, {"hand": "Q8s", "push": 0.0698}, {"hand": "Q9s", "push": 1.0}, {"hand": "QTs", "push": 1.0}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 0.0}, {"hand": "K3s", "push": 0.0028}, {"hand": "K4s", "push": 0.0005}, {"hand": "K5s", "push": 0.0131}, {"hand": "K6s", "push": 0.0033}, {"hand": "K7s", "push": 0.0311}, {"hand": "K8s", "push": 0.0415}, {"hand": "K9s", "push": 0.9906}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 0.9999}, {"hand": "KQs", "push": 0.9999}, {"hand": "A2s", "push": 0.0005}, {"hand": "A3s", "push": 0.0155}, {"hand": "A4s", "push": 0.0017}, {"hand": "A5s", "push": 0.0073}, {"hand": "A6s", "push": 0.0036}, {"hand": "A7s", "push": 0.9441}, {"hand": "A8s", "push": 0.9851}, {"hand": "A9s", "push": 1.0}, {"hand": "ATs", "push": 0.9999}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0002}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0002}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0005}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0001}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0001}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0001}, {"hand": "85o", "push": 0.0002}, {"hand": "86o", "push": 0.0002}, {"hand": "87o", "push": 0.0}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0001}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0001}, {"hand": "96o", "push": 0.0007}, {"hand": "97o", "push": 0.0}, {"hand": "98o", "push": 0.0007}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0002}, {"hand": "T5o", "push": 0.0}, {"hand": "T6o", "push": 0.0002}, {"hand": "T7o", "push": 0.0001}, {"hand": "T8o", "push": 0.0}, {"hand": "T9o", "push": 0.002}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0}, {"hand": "J4o", "push": 0.0001}, {"hand": "J5o", "push": 0.0}, {"hand": "J6o", "push": 0.0}, {"hand": "J7o", "push": 0.0002}, {"hand": "J8o", "push": 0.0001}, {"hand": "J9o", "push": 0.0011}, {"hand": "JTo", "push": 0.0}, {"hand": "Q2o", "push": 0.0}, {"hand": "Q3o", "push": 0.0}, {"hand": "Q4o", "push": 0.0004}, {"hand": "Q5o", "push": 0.0001}, {"hand": "Q6o", "push": 0.0}, {"hand": "Q7o", "push": 0.0001}, {"hand": "Q8o", "push": 0.001}, {"hand": "Q9o", "push": 0.0002}, {"hand": "QTo", "push": 0.0016}, {"hand": "QJo", "push": 0.8778}, {"hand": "K2o", "push": 0.0}, {"hand": "K3o", "push": 0.0}, {"hand": "K4o", "push": 0.0}, {"hand": "K5o", "push": 0.0}, {"hand": "K6o", "push": 0.0005}, {"hand": "K7o", "push": 0.0009}, {"hand": "K8o", "push": 0.0001}, {"hand": "K9o", "push": 0.0004}, {"hand": "KTo", "push": 0.0074}, {"hand": "KJo", "push": 0.9903}, {"hand": "KQo", "push": 0.9999}, {"hand": "A2o", "push": 0.0005}, {"hand": "A3o", "push": 0.0005}, {"hand": "A4o", "push": 0.0002}, {"hand": "A5o", "push": 0.0003}, {"hand": "A6o", "push": 0.0011}, {"hand": "A7o", "push": 0.0009}, {"hand": "A8o", "push": 0.0002}, {"hand": "A9o", "push": 1.0}, {"hand": "ATo", "push": 0.9999}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}]}]},
+  4: {"players": 4, "stack_bb": 8, "ante_bb": 0, "iterations": 1000000000, "seed": 42, "positions": [{"name": "CO", "index": 0, "situations": [{"facing": "no action", "push_pct": 28.7, "hands": [{"hand": "22", "push": 0.994}, {"hand": "33", "push": 0.9999}, {"hand": "44", "push": 1.0}, {"hand": "55", "push": 1.0}, {"hand": "66", "push": 0.9999}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.0}, {"hand": "52s", "push": 0.0002}, {"hand": "53s", "push": 0.0}, {"hand": "54s", "push": 0.0}, {"hand": "62s", "push": 0.0}, {"hand": "63s", "push": 0.0}, {"hand": "64s", "push": 0.0001}, {"hand": "65s", "push": 0.0}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0}, {"hand": "74s", "push": 0.0}, {"hand": "75s", "push": 0.0}, {"hand": "76s", "push": 0.0003}, {"hand": "82s", "push": 0.0}, {"hand": "83s", "push": 0.0}, {"hand": "84s", "push": 0.0}, {"hand": "85s", "push": 0.0}, {"hand": "86s", "push": 0.0}, {"hand": "87s", "push": 0.5709}, {"hand": "92s", "push": 0.0}, {"hand": "93s", "push": 0.0}, {"hand": "94s", "push": 0.0002}, {"hand": "95s", "push": 0.0}, {"hand": "96s", "push": 0.0001}, {"hand": "97s", "push": 0.0079}, {"hand": "98s", "push": 0.9954}, {"hand": "T2s", "push": 0.0002}, {"hand": "T3s", "push": 0.0}, {"hand": "T4s", "push": 0.0001}, {"hand": "T5s", "push": 0.0001}, {"hand": "T6s", "push": 0.0001}, {"hand": "T7s", "push": 0.0}, {"hand": "T8s", "push": 0.9643}, {"hand": "T9s", "push": 0.9991}, {"hand": "J2s", "push": 0.0}, {"hand": "J3s", "push": 0.0}, {"hand": "J4s", "push": 0.0002}, {"hand": "J5s", "push": 0.0002}, {"hand": "J6s", "push": 0.0}, {"hand": "J7s", "push": 0.0001}, {"hand": "J8s", "push": 0.9897}, {"hand": "J9s", "push": 0.9964}, {"hand": "JTs", "push": 0.9994}, {"hand": "Q2s", "push": 0.0}, {"hand": "Q3s", "push": 0.0}, {"hand": "Q4s", "push": 0.0}, {"hand": "Q5s", "push": 0.0}, {"hand": "Q6s", "push": 0.0002}, {"hand": "Q7s", "push": 0.0}, {"hand": "Q8s", "push": 0.8981}, {"hand": "Q9s", "push": 0.9989}, {"hand": "QTs", "push": 1.0}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 0.0}, {"hand": "K3s", "push": 0.0}, {"hand": "K4s", "push": 0.0026}, {"hand": "K5s", "push": 0.018}, {"hand": "K6s", "push": 0.032}, {"hand": "K7s", "push": 0.0105}, {"hand": "K8s", "push": 0.9505}, {"hand": "K9s", "push": 1.0}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 1.0}, {"hand": "KQs", "push": 0.9999}, {"hand": "A2s", "push": 0.9994}, {"hand": "A3s", "push": 1.0}, {"hand": "A4s", "push": 1.0}, {"hand": "A5s", "push": 0.9997}, {"hand": "A6s", "push": 0.9999}, {"hand": "A7s", "push": 1.0}, {"hand": "A8s", "push": 0.9999}, {"hand": "A9s", "push": 1.0}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0}, {"hand": "87o", "push": 0.0}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0}, {"hand": "96o", "push": 0.0}, {"hand": "97o", "push": 0.0}, {"hand": "98o", "push": 0.0002}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0}, {"hand": "T6o", "push": 0.0}, {"hand": "T7o", "push": 0.0}, {"hand": "T8o", "push": 0.0001}, {"hand": "T9o", "push": 0.0003}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0}, {"hand": "J4o", "push": 0.0}, {"hand": "J5o", "push": 0.0}, {"hand": "J6o", "push": 0.0}, {"hand": "J7o", "push": 0.0}, {"hand": "J8o", "push": 0.0001}, {"hand": "J9o", "push": 0.0}, {"hand": "JTo", "push": 0.997}, {"hand": "Q2o", "push": 0.0}, {"hand": "Q3o", "push": 0.0}, {"hand": "Q4o", "push": 0.0}, {"hand": "Q5o", "push": 0.0}, {"hand": "Q6o", "push": 0.0001}, {"hand": "Q7o", "push": 0.0001}, {"hand": "Q8o", "push": 0.0003}, {"hand": "Q9o", "push": 0.0001}, {"hand": "QTo", "push": 0.115}, {"hand": "QJo", "push": 1.0}, {"hand": "K2o", "push": 0.0}, {"hand": "K3o", "push": 0.0}, {"hand": "K4o", "push": 0.0}, {"hand": "K5o", "push": 0.0001}, {"hand": "K6o", "push": 0.0}, {"hand": "K7o", "push": 0.0002}, {"hand": "K8o", "push": 0.0001}, {"hand": "K9o", "push": 0.0023}, {"hand": "KTo", "push": 1.0}, {"hand": "KJo", "push": 0.9999}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 0.0102}, {"hand": "A3o", "push": 0.9621}, {"hand": "A4o", "push": 0.9983}, {"hand": "A5o", "push": 1.0}, {"hand": "A6o", "push": 0.9995}, {"hand": "A7o", "push": 0.9999}, {"hand": "A8o", "push": 1.0}, {"hand": "A9o", "push": 1.0}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}]}, {"name": "BTN", "index": 1, "situations": [{"facing": "no action", "push_pct": 34.3, "hands": [{"hand": "22", "push": 0.9999}, {"hand": "33", "push": 0.9993}, {"hand": "44", "push": 0.9998}, {"hand": "55", "push": 1.0}, {"hand": "66", "push": 1.0}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0001}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.0}, {"hand": "52s", "push": 0.0}, {"hand": "53s", "push": 0.0}, {"hand": "54s", "push": 0.0002}, {"hand": "62s", "push": 0.0}, {"hand": "63s", "push": 0.0001}, {"hand": "64s", "push": 0.0}, {"hand": "65s", "push": 0.1321}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0}, {"hand": "74s", "push": 0.0}, {"hand": "75s", "push": 0.0385}, {"hand": "76s", "push": 0.8591}, {"hand": "82s", "push": 0.0}, {"hand": "83s", "push": 0.0}, {"hand": "84s", "push": 0.0}, {"hand": "85s", "push": 0.0}, {"hand": "86s", "push": 0.7142}, {"hand": "87s", "push": 0.9755}, {"hand": "92s", "push": 0.0001}, {"hand": "93s", "push": 0.0}, {"hand": "94s", "push": 0.0}, {"hand": "95s", "push": 0.0}, {"hand": "96s", "push": 0.0}, {"hand": "97s", "push": 0.9846}, {"hand": "98s", "push": 0.9984}, {"hand": "T2s", "push": 0.0001}, {"hand": "T3s", "push": 0.0}, {"hand": "T4s", "push": 0.0002}, {"hand": "T5s", "push": 0.0}, {"hand": "T6s", "push": 0.0021}, {"hand": "T7s", "push": 0.9658}, {"hand": "T8s", "push": 0.9961}, {"hand": "T9s", "push": 0.9989}, {"hand": "J2s", "push": 0.0001}, {"hand": "J3s", "push": 0.0001}, {"hand": "J4s", "push": 0.0}, {"hand": "J5s", "push": 0.0}, {"hand": "J6s", "push": 0.0016}, {"hand": "J7s", "push": 0.6946}, {"hand": "J8s", "push": 0.9938}, {"hand": "J9s", "push": 0.9999}, {"hand": "JTs", "push": 0.9998}, {"hand": "Q2s", "push": 0.0001}, {"hand": "Q3s", "push": 0.0004}, {"hand": "Q4s", "push": 0.0001}, {"hand": "Q5s", "push": 0.0001}, {"hand": "Q6s", "push": 0.019}, {"hand": "Q7s", "push": 0.0001}, {"hand": "Q8s", "push": 0.992}, {"hand": "Q9s", "push": 0.9999}, {"hand": "QTs", "push": 0.9999}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 0.0034}, {"hand": "K3s", "push": 0.0002}, {"hand": "K4s", "push": 0.7581}, {"hand": "K5s", "push": 0.9999}, {"hand": "K6s", "push": 0.9962}, {"hand": "K7s", "push": 0.9996}, {"hand": "K8s", "push": 0.9994}, {"hand": "K9s", "push": 1.0}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 1.0}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 1.0}, {"hand": "A3s", "push": 0.9998}, {"hand": "A4s", "push": 1.0}, {"hand": "A5s", "push": 0.9998}, {"hand": "A6s", "push": 0.9999}, {"hand": "A7s", "push": 1.0}, {"hand": "A8s", "push": 1.0}, {"hand": "A9s", "push": 1.0}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 0.9999}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0}, {"hand": "87o", "push": 0.0001}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0}, {"hand": "96o", "push": 0.0}, {"hand": "97o", "push": 0.0}, {"hand": "98o", "push": 0.0}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0001}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0}, {"hand": "T6o", "push": 0.0}, {"hand": "T7o", "push": 0.0001}, {"hand": "T8o", "push": 0.0}, {"hand": "T9o", "push": 0.3891}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0}, {"hand": "J4o", "push": 0.0}, {"hand": "J5o", "push": 0.0}, {"hand": "J6o", "push": 0.0}, {"hand": "J7o", "push": 0.0001}, {"hand": "J8o", "push": 0.0001}, {"hand": "J9o", "push": 0.0004}, {"hand": "JTo", "push": 0.9992}, {"hand": "Q2o", "push": 0.0001}, {"hand": "Q3o", "push": 0.0}, {"hand": "Q4o", "push": 0.0002}, {"hand": "Q5o", "push": 0.0}, {"hand": "Q6o", "push": 0.0}, {"hand": "Q7o", "push": 0.0}, {"hand": "Q8o", "push": 0.0002}, {"hand": "Q9o", "push": 0.0017}, {"hand": "QTo", "push": 1.0}, {"hand": "QJo", "push": 1.0}, {"hand": "K2o", "push": 0.0}, {"hand": "K3o", "push": 0.0001}, {"hand": "K4o", "push": 0.0001}, {"hand": "K5o", "push": 0.0006}, {"hand": "K6o", "push": 0.0014}, {"hand": "K7o", "push": 0.0001}, {"hand": "K8o", "push": 0.0033}, {"hand": "K9o", "push": 1.0}, {"hand": "KTo", "push": 1.0}, {"hand": "KJo", "push": 1.0}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 1.0}, {"hand": "A3o", "push": 1.0}, {"hand": "A4o", "push": 0.9999}, {"hand": "A5o", "push": 1.0}, {"hand": "A6o", "push": 1.0}, {"hand": "A7o", "push": 0.9999}, {"hand": "A8o", "push": 1.0}, {"hand": "A9o", "push": 1.0}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}, {"facing": "CO push", "push_pct": 13.1, "hands": [{"hand": "22", "push": 0.0}, {"hand": "33", "push": 0.0004}, {"hand": "44", "push": 0.9966}, {"hand": "55", "push": 1.0}, {"hand": "66", "push": 0.9996}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0001}, {"hand": "42s", "push": 0.0002}, {"hand": "43s", "push": 0.0}, {"hand": "52s", "push": 0.0}, {"hand": "53s", "push": 0.0}, {"hand": "54s", "push": 0.0001}, {"hand": "62s", "push": 0.0001}, {"hand": "63s", "push": 0.0}, {"hand": "64s", "push": 0.0001}, {"hand": "65s", "push": 0.0002}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0001}, {"hand": "74s", "push": 0.0}, {"hand": "75s", "push": 0.0}, {"hand": "76s", "push": 0.0}, {"hand": "82s", "push": 0.0}, {"hand": "83s", "push": 0.0}, {"hand": "84s", "push": 0.0}, {"hand": "85s", "push": 0.0}, {"hand": "86s", "push": 0.0002}, {"hand": "87s", "push": 0.0}, {"hand": "92s", "push": 0.0}, {"hand": "93s", "push": 0.0002}, {"hand": "94s", "push": 0.0}, {"hand": "95s", "push": 0.0}, {"hand": "96s", "push": 0.0}, {"hand": "97s", "push": 0.0}, {"hand": "98s", "push": 0.0001}, {"hand": "T2s", "push": 0.0}, {"hand": "T3s", "push": 0.0}, {"hand": "T4s", "push": 0.0009}, {"hand": "T5s", "push": 0.0005}, {"hand": "T6s", "push": 0.0001}, {"hand": "T7s", "push": 0.0}, {"hand": "T8s", "push": 0.0003}, {"hand": "T9s", "push": 0.002}, {"hand": "J2s", "push": 0.0}, {"hand": "J3s", "push": 0.0001}, {"hand": "J4s", "push": 0.0}, {"hand": "J5s", "push": 0.0001}, {"hand": "J6s", "push": 0.0}, {"hand": "J7s", "push": 0.0004}, {"hand": "J8s", "push": 0.0009}, {"hand": "J9s", "push": 0.0024}, {"hand": "JTs", "push": 0.0001}, {"hand": "Q2s", "push": 0.0005}, {"hand": "Q3s", "push": 0.0005}, {"hand": "Q4s", "push": 0.0}, {"hand": "Q5s", "push": 0.0004}, {"hand": "Q6s", "push": 0.0}, {"hand": "Q7s", "push": 0.0002}, {"hand": "Q8s", "push": 0.0}, {"hand": "Q9s", "push": 0.0}, {"hand": "QTs", "push": 0.0061}, {"hand": "QJs", "push": 0.0012}, {"hand": "K2s", "push": 0.0004}, {"hand": "K3s", "push": 0.0001}, {"hand": "K4s", "push": 0.0005}, {"hand": "K5s", "push": 0.0}, {"hand": "K6s", "push": 0.0001}, {"hand": "K7s", "push": 0.0003}, {"hand": "K8s", "push": 0.0006}, {"hand": "K9s", "push": 0.0004}, {"hand": "KTs", "push": 0.0332}, {"hand": "KJs", "push": 0.9996}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 0.0032}, {"hand": "A3s", "push": 0.0002}, {"hand": "A4s", "push": 0.0068}, {"hand": "A5s", "push": 0.0013}, {"hand": "A6s", "push": 0.0002}, {"hand": "A7s", "push": 0.9889}, {"hand": "A8s", "push": 0.9998}, {"hand": "A9s", "push": 0.9998}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0001}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0001}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0}, {"hand": "87o", "push": 0.0}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0}, {"hand": "96o", "push": 0.0}, {"hand": "97o", "push": 0.0}, {"hand": "98o", "push": 0.0}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0}, {"hand": "T6o", "push": 0.0}, {"hand": "T7o", "push": 0.0001}, {"hand": "T8o", "push": 0.0}, {"hand": "T9o", "push": 0.0}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0}, {"hand": "J4o", "push": 0.0}, {"hand": "J5o", "push": 0.0001}, {"hand": "J6o", "push": 0.0}, {"hand": "J7o", "push": 0.0003}, {"hand": "J8o", "push": 0.0}, {"hand": "J9o", "push": 0.0}, {"hand": "JTo", "push": 0.0001}, {"hand": "Q2o", "push": 0.0}, {"hand": "Q3o", "push": 0.0}, {"hand": "Q4o", "push": 0.0}, {"hand": "Q5o", "push": 0.0}, {"hand": "Q6o", "push": 0.0}, {"hand": "Q7o", "push": 0.0}, {"hand": "Q8o", "push": 0.0002}, {"hand": "Q9o", "push": 0.0001}, {"hand": "QTo", "push": 0.0005}, {"hand": "QJo", "push": 0.0009}, {"hand": "K2o", "push": 0.0}, {"hand": "K3o", "push": 0.0}, {"hand": "K4o", "push": 0.0}, {"hand": "K5o", "push": 0.0001}, {"hand": "K6o", "push": 0.0}, {"hand": "K7o", "push": 0.0}, {"hand": "K8o", "push": 0.0001}, {"hand": "K9o", "push": 0.0001}, {"hand": "KTo", "push": 0.0032}, {"hand": "KJo", "push": 0.0001}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 0.0}, {"hand": "A3o", "push": 0.0006}, {"hand": "A4o", "push": 0.0005}, {"hand": "A5o", "push": 0.0001}, {"hand": "A6o", "push": 0.0008}, {"hand": "A7o", "push": 0.0003}, {"hand": "A8o", "push": 0.002}, {"hand": "A9o", "push": 1.0}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}]}, {"name": "SB", "index": 2, "situations": [{"facing": "no action", "push_pct": 60.9, "hands": [{"hand": "22", "push": 0.9999}, {"hand": "33", "push": 0.9999}, {"hand": "44", "push": 1.0}, {"hand": "55", "push": 1.0}, {"hand": "66", "push": 1.0}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0042}, {"hand": "42s", "push": 0.0014}, {"hand": "43s", "push": 0.0004}, {"hand": "52s", "push": 0.0148}, {"hand": "53s", "push": 0.9989}, {"hand": "54s", "push": 1.0}, {"hand": "62s", "push": 0.0001}, {"hand": "63s", "push": 0.0183}, {"hand": "64s", "push": 0.9983}, {"hand": "65s", "push": 0.9978}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0007}, {"hand": "74s", "push": 0.7976}, {"hand": "75s", "push": 0.9996}, {"hand": "76s", "push": 0.9982}, {"hand": "82s", "push": 0.0004}, {"hand": "83s", "push": 0.0003}, {"hand": "84s", "push": 0.1441}, {"hand": "85s", "push": 1.0}, {"hand": "86s", "push": 0.9991}, {"hand": "87s", "push": 0.999}, {"hand": "92s", "push": 0.0001}, {"hand": "93s", "push": 0.009}, {"hand": "94s", "push": 0.0002}, {"hand": "95s", "push": 0.9955}, {"hand": "96s", "push": 0.9993}, {"hand": "97s", "push": 1.0}, {"hand": "98s", "push": 0.9991}, {"hand": "T2s", "push": 0.031}, {"hand": "T3s", "push": 0.1169}, {"hand": "T4s", "push": 0.7775}, {"hand": "T5s", "push": 1.0}, {"hand": "T6s", "push": 0.9999}, {"hand": "T7s", "push": 0.9996}, {"hand": "T8s", "push": 0.9998}, {"hand": "T9s", "push": 0.9993}, {"hand": "J2s", "push": 0.9963}, {"hand": "J3s", "push": 0.9997}, {"hand": "J4s", "push": 0.9961}, {"hand": "J5s", "push": 1.0}, {"hand": "J6s", "push": 0.9993}, {"hand": "J7s", "push": 0.9979}, {"hand": "J8s", "push": 0.9991}, {"hand": "J9s", "push": 1.0}, {"hand": "JTs", "push": 0.9999}, {"hand": "Q2s", "push": 0.9988}, {"hand": "Q3s", "push": 0.9924}, {"hand": "Q4s", "push": 0.9965}, {"hand": "Q5s", "push": 0.9999}, {"hand": "Q6s", "push": 1.0}, {"hand": "Q7s", "push": 1.0}, {"hand": "Q8s", "push": 1.0}, {"hand": "Q9s", "push": 0.9994}, {"hand": "QTs", "push": 1.0}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 1.0}, {"hand": "K3s", "push": 1.0}, {"hand": "K4s", "push": 0.9999}, {"hand": "K5s", "push": 1.0}, {"hand": "K6s", "push": 1.0}, {"hand": "K7s", "push": 1.0}, {"hand": "K8s", "push": 0.9999}, {"hand": "K9s", "push": 1.0}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 1.0}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 1.0}, {"hand": "A3s", "push": 1.0}, {"hand": "A4s", "push": 1.0}, {"hand": "A5s", "push": 1.0}, {"hand": "A6s", "push": 1.0}, {"hand": "A7s", "push": 1.0}, {"hand": "A8s", "push": 0.9999}, {"hand": "A9s", "push": 1.0}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0001}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0001}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0014}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0001}, {"hand": "65o", "push": 0.0044}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0002}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0007}, {"hand": "76o", "push": 0.9966}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0001}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0023}, {"hand": "87o", "push": 0.9808}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0005}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0022}, {"hand": "96o", "push": 0.0001}, {"hand": "97o", "push": 0.9669}, {"hand": "98o", "push": 0.9995}, {"hand": "T2o", "push": 0.0007}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0008}, {"hand": "T6o", "push": 0.0016}, {"hand": "T7o", "push": 0.9682}, {"hand": "T8o", "push": 0.9984}, {"hand": "T9o", "push": 0.9995}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0019}, {"hand": "J4o", "push": 0.0002}, {"hand": "J5o", "push": 0.0016}, {"hand": "J6o", "push": 0.0011}, {"hand": "J7o", "push": 0.1776}, {"hand": "J8o", "push": 1.0}, {"hand": "J9o", "push": 1.0}, {"hand": "JTo", "push": 0.9999}, {"hand": "Q2o", "push": 0.0002}, {"hand": "Q3o", "push": 0.0021}, {"hand": "Q4o", "push": 0.0851}, {"hand": "Q5o", "push": 0.9994}, {"hand": "Q6o", "push": 1.0}, {"hand": "Q7o", "push": 1.0}, {"hand": "Q8o", "push": 0.9998}, {"hand": "Q9o", "push": 1.0}, {"hand": "QTo", "push": 1.0}, {"hand": "QJo", "push": 1.0}, {"hand": "K2o", "push": 0.9999}, {"hand": "K3o", "push": 0.9999}, {"hand": "K4o", "push": 0.9997}, {"hand": "K5o", "push": 1.0}, {"hand": "K6o", "push": 1.0}, {"hand": "K7o", "push": 1.0}, {"hand": "K8o", "push": 1.0}, {"hand": "K9o", "push": 1.0}, {"hand": "KTo", "push": 1.0}, {"hand": "KJo", "push": 1.0}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 1.0}, {"hand": "A3o", "push": 0.9999}, {"hand": "A4o", "push": 1.0}, {"hand": "A5o", "push": 1.0}, {"hand": "A6o", "push": 1.0}, {"hand": "A7o", "push": 1.0}, {"hand": "A8o", "push": 1.0}, {"hand": "A9o", "push": 1.0}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}, {"facing": "CO push", "push_pct": 17.8, "hands": [{"hand": "22", "push": 0.0024}, {"hand": "33", "push": 0.9895}, {"hand": "44", "push": 0.9999}, {"hand": "55", "push": 0.9991}, {"hand": "66", "push": 1.0}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 0.9999}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0001}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.001}, {"hand": "52s", "push": 0.0}, {"hand": "53s", "push": 0.001}, {"hand": "54s", "push": 0.0}, {"hand": "62s", "push": 0.0002}, {"hand": "63s", "push": 0.0001}, {"hand": "64s", "push": 0.0}, {"hand": "65s", "push": 0.0001}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0}, {"hand": "74s", "push": 0.0}, {"hand": "75s", "push": 0.0}, {"hand": "76s", "push": 0.0001}, {"hand": "82s", "push": 0.0001}, {"hand": "83s", "push": 0.0004}, {"hand": "84s", "push": 0.0}, {"hand": "85s", "push": 0.0004}, {"hand": "86s", "push": 0.0}, {"hand": "87s", "push": 0.0001}, {"hand": "92s", "push": 0.0}, {"hand": "93s", "push": 0.0002}, {"hand": "94s", "push": 0.0}, {"hand": "95s", "push": 0.0002}, {"hand": "96s", "push": 0.0}, {"hand": "97s", "push": 0.0001}, {"hand": "98s", "push": 0.0002}, {"hand": "T2s", "push": 0.0}, {"hand": "T3s", "push": 0.0001}, {"hand": "T4s", "push": 0.0001}, {"hand": "T5s", "push": 0.0}, {"hand": "T6s", "push": 0.0}, {"hand": "T7s", "push": 0.0001}, {"hand": "T8s", "push": 0.0}, {"hand": "T9s", "push": 0.0009}, {"hand": "J2s", "push": 0.0}, {"hand": "J3s", "push": 0.0001}, {"hand": "J4s", "push": 0.0001}, {"hand": "J5s", "push": 0.0003}, {"hand": "J6s", "push": 0.0002}, {"hand": "J7s", "push": 0.0008}, {"hand": "J8s", "push": 0.0005}, {"hand": "J9s", "push": 0.003}, {"hand": "JTs", "push": 0.0002}, {"hand": "Q2s", "push": 0.0001}, {"hand": "Q3s", "push": 0.0}, {"hand": "Q4s", "push": 0.0006}, {"hand": "Q5s", "push": 0.0024}, {"hand": "Q6s", "push": 0.0007}, {"hand": "Q7s", "push": 0.0004}, {"hand": "Q8s", "push": 0.0003}, {"hand": "Q9s", "push": 0.0024}, {"hand": "QTs", "push": 0.0124}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 0.0003}, {"hand": "K3s", "push": 0.0006}, {"hand": "K4s", "push": 0.0007}, {"hand": "K5s", "push": 0.0014}, {"hand": "K6s", "push": 0.001}, {"hand": "K7s", "push": 0.0008}, {"hand": "K8s", "push": 0.0009}, {"hand": "K9s", "push": 0.005}, {"hand": "KTs", "push": 0.9999}, {"hand": "KJs", "push": 1.0}, {"hand": "KQs", "push": 0.9987}, {"hand": "A2s", "push": 0.1054}, {"hand": "A3s", "push": 0.4375}, {"hand": "A4s", "push": 1.0}, {"hand": "A5s", "push": 0.9993}, {"hand": "A6s", "push": 0.9969}, {"hand": "A7s", "push": 0.9999}, {"hand": "A8s", "push": 1.0}, {"hand": "A9s", "push": 1.0}, {"hand": "ATs", "push": 0.9999}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0001}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0}, {"hand": "87o", "push": 0.0002}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0}, {"hand": "96o", "push": 0.0}, {"hand": "97o", "push": 0.0}, {"hand": "98o", "push": 0.0}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0}, {"hand": "T6o", "push": 0.0}, {"hand": "T7o", "push": 0.0003}, {"hand": "T8o", "push": 0.0}, {"hand": "T9o", "push": 0.0001}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0}, {"hand": "J4o", "push": 0.0}, {"hand": "J5o", "push": 0.0}, {"hand": "J6o", "push": 0.0001}, {"hand": "J7o", "push": 0.0}, {"hand": "J8o", "push": 0.0}, {"hand": "J9o", "push": 0.0004}, {"hand": "JTo", "push": 0.0001}, {"hand": "Q2o", "push": 0.0}, {"hand": "Q3o", "push": 0.0}, {"hand": "Q4o", "push": 0.0}, {"hand": "Q5o", "push": 0.0002}, {"hand": "Q6o", "push": 0.0}, {"hand": "Q7o", "push": 0.0002}, {"hand": "Q8o", "push": 0.0}, {"hand": "Q9o", "push": 0.0}, {"hand": "QTo", "push": 0.0}, {"hand": "QJo", "push": 0.0014}, {"hand": "K2o", "push": 0.0}, {"hand": "K3o", "push": 0.0001}, {"hand": "K4o", "push": 0.0}, {"hand": "K5o", "push": 0.0}, {"hand": "K6o", "push": 0.0}, {"hand": "K7o", "push": 0.0002}, {"hand": "K8o", "push": 0.0003}, {"hand": "K9o", "push": 0.0003}, {"hand": "KTo", "push": 0.0023}, {"hand": "KJo", "push": 0.9624}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 0.0007}, {"hand": "A3o", "push": 0.0013}, {"hand": "A4o", "push": 0.0003}, {"hand": "A5o", "push": 0.002}, {"hand": "A6o", "push": 0.0017}, {"hand": "A7o", "push": 0.8302}, {"hand": "A8o", "push": 0.9999}, {"hand": "A9o", "push": 1.0}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}, {"facing": "BTN push", "push_pct": 21.6, "hands": [{"hand": "22", "push": 0.0132}, {"hand": "33", "push": 0.9994}, {"hand": "44", "push": 0.9988}, {"hand": "55", "push": 1.0}, {"hand": "66", "push": 1.0}, {"hand": "77", "push": 0.9999}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0001}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.0001}, {"hand": "52s", "push": 0.0002}, {"hand": "53s", "push": 0.0001}, {"hand": "54s", "push": 0.0}, {"hand": "62s", "push": 0.0}, {"hand": "63s", "push": 0.0001}, {"hand": "64s", "push": 0.0001}, {"hand": "65s", "push": 0.0004}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0}, {"hand": "74s", "push": 0.0006}, {"hand": "75s", "push": 0.0}, {"hand": "76s", "push": 0.0007}, {"hand": "82s", "push": 0.0}, {"hand": "83s", "push": 0.0}, {"hand": "84s", "push": 0.0003}, {"hand": "85s", "push": 0.0002}, {"hand": "86s", "push": 0.0009}, {"hand": "87s", "push": 0.0006}, {"hand": "92s", "push": 0.0}, {"hand": "93s", "push": 0.0002}, {"hand": "94s", "push": 0.0001}, {"hand": "95s", "push": 0.0}, {"hand": "96s", "push": 0.0}, {"hand": "97s", "push": 0.0003}, {"hand": "98s", "push": 0.0003}, {"hand": "T2s", "push": 0.0003}, {"hand": "T3s", "push": 0.0}, {"hand": "T4s", "push": 0.0009}, {"hand": "T5s", "push": 0.0}, {"hand": "T6s", "push": 0.0002}, {"hand": "T7s", "push": 0.0}, {"hand": "T8s", "push": 0.0}, {"hand": "T9s", "push": 0.0019}, {"hand": "J2s", "push": 0.0}, {"hand": "J3s", "push": 0.0}, {"hand": "J4s", "push": 0.0}, {"hand": "J5s", "push": 0.0004}, {"hand": "J6s", "push": 0.0002}, {"hand": "J7s", "push": 0.0004}, {"hand": "J8s", "push": 0.0006}, {"hand": "J9s", "push": 0.0005}, {"hand": "JTs", "push": 0.9223}, {"hand": "Q2s", "push": 0.0}, {"hand": "Q3s", "push": 0.0001}, {"hand": "Q4s", "push": 0.0}, {"hand": "Q5s", "push": 0.0021}, {"hand": "Q6s", "push": 0.0001}, {"hand": "Q7s", "push": 0.0005}, {"hand": "Q8s", "push": 0.0001}, {"hand": "Q9s", "push": 0.0003}, {"hand": "QTs", "push": 1.0}, {"hand": "QJs", "push": 0.9999}, {"hand": "K2s", "push": 0.0}, {"hand": "K3s", "push": 0.0001}, {"hand": "K4s", "push": 0.0034}, {"hand": "K5s", "push": 0.0002}, {"hand": "K6s", "push": 0.0017}, {"hand": "K7s", "push": 0.0003}, {"hand": "K8s", "push": 0.0029}, {"hand": "K9s", "push": 0.97}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 0.9998}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 0.9978}, {"hand": "A3s", "push": 0.9995}, {"hand": "A4s", "push": 0.9997}, {"hand": "A5s", "push": 0.9998}, {"hand": "A6s", "push": 1.0}, {"hand": "A7s", "push": 0.9999}, {"hand": "A8s", "push": 1.0}, {"hand": "A9s", "push": 1.0}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 0.9999}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0001}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0001}, {"hand": "76o", "push": 0.0}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0001}, {"hand": "87o", "push": 0.0}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0}, {"hand": "96o", "push": 0.0}, {"hand": "97o", "push": 0.0002}, {"hand": "98o", "push": 0.0002}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0002}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0001}, {"hand": "T6o", "push": 0.0002}, {"hand": "T7o", "push": 0.0}, {"hand": "T8o", "push": 0.0}, {"hand": "T9o", "push": 0.0002}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0002}, {"hand": "J4o", "push": 0.0}, {"hand": "J5o", "push": 0.0}, {"hand": "J6o", "push": 0.0}, {"hand": "J7o", "push": 0.0001}, {"hand": "J8o", "push": 0.0}, {"hand": "J9o", "push": 0.0002}, {"hand": "JTo", "push": 0.0009}, {"hand": "Q2o", "push": 0.0001}, {"hand": "Q3o", "push": 0.0003}, {"hand": "Q4o", "push": 0.0}, {"hand": "Q5o", "push": 0.0001}, {"hand": "Q6o", "push": 0.0}, {"hand": "Q7o", "push": 0.0001}, {"hand": "Q8o", "push": 0.0}, {"hand": "Q9o", "push": 0.0003}, {"hand": "QTo", "push": 0.0022}, {"hand": "QJo", "push": 0.0036}, {"hand": "K2o", "push": 0.0001}, {"hand": "K3o", "push": 0.0002}, {"hand": "K4o", "push": 0.0003}, {"hand": "K5o", "push": 0.0}, {"hand": "K6o", "push": 0.0004}, {"hand": "K7o", "push": 0.0001}, {"hand": "K8o", "push": 0.0001}, {"hand": "K9o", "push": 0.0005}, {"hand": "KTo", "push": 1.0}, {"hand": "KJo", "push": 0.9999}, {"hand": "KQo", "push": 0.9999}, {"hand": "A2o", "push": 0.0001}, {"hand": "A3o", "push": 0.0007}, {"hand": "A4o", "push": 0.0052}, {"hand": "A5o", "push": 0.6959}, {"hand": "A6o", "push": 0.8572}, {"hand": "A7o", "push": 1.0}, {"hand": "A8o", "push": 1.0}, {"hand": "A9o", "push": 1.0}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}, {"facing": "CO+BTN push", "push_pct": 9.6, "hands": [{"hand": "22", "push": 0.0}, {"hand": "33", "push": 0.0}, {"hand": "44", "push": 0.0}, {"hand": "55", "push": 0.6588}, {"hand": "66", "push": 1.0}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.0}, {"hand": "52s", "push": 0.0}, {"hand": "53s", "push": 0.0}, {"hand": "54s", "push": 0.0}, {"hand": "62s", "push": 0.0}, {"hand": "63s", "push": 0.0}, {"hand": "64s", "push": 0.0}, {"hand": "65s", "push": 0.0}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0}, {"hand": "74s", "push": 0.0}, {"hand": "75s", "push": 0.0}, {"hand": "76s", "push": 0.0}, {"hand": "82s", "push": 0.0}, {"hand": "83s", "push": 0.0}, {"hand": "84s", "push": 0.0}, {"hand": "85s", "push": 0.0}, {"hand": "86s", "push": 0.0}, {"hand": "87s", "push": 0.0}, {"hand": "92s", "push": 0.0}, {"hand": "93s", "push": 0.0}, {"hand": "94s", "push": 0.0}, {"hand": "95s", "push": 0.0}, {"hand": "96s", "push": 0.0}, {"hand": "97s", "push": 0.0}, {"hand": "98s", "push": 0.0}, {"hand": "T2s", "push": 0.0}, {"hand": "T3s", "push": 0.0}, {"hand": "T4s", "push": 0.0}, {"hand": "T5s", "push": 0.0}, {"hand": "T6s", "push": 0.0}, {"hand": "T7s", "push": 0.0}, {"hand": "T8s", "push": 0.0}, {"hand": "T9s", "push": 0.0}, {"hand": "J2s", "push": 0.0}, {"hand": "J3s", "push": 0.0}, {"hand": "J4s", "push": 0.0}, {"hand": "J5s", "push": 0.0}, {"hand": "J6s", "push": 0.0}, {"hand": "J7s", "push": 0.0}, {"hand": "J8s", "push": 0.0}, {"hand": "J9s", "push": 0.0}, {"hand": "JTs", "push": 0.55742}, {"hand": "Q2s", "push": 0.0}, {"hand": "Q3s", "push": 0.0}, {"hand": "Q4s", "push": 0.0}, {"hand": "Q5s", "push": 0.0}, {"hand": "Q6s", "push": 0.0}, {"hand": "Q7s", "push": 0.0}, {"hand": "Q8s", "push": 0.0}, {"hand": "Q9s", "push": 0.0}, {"hand": "QTs", "push": 0.412727}, {"hand": "QJs", "push": 0.80986}, {"hand": "K2s", "push": 0.0}, {"hand": "K3s", "push": 0.0}, {"hand": "K4s", "push": 0.0}, {"hand": "K5s", "push": 0.0}, {"hand": "K6s", "push": 0.0}, {"hand": "K7s", "push": 0.0}, {"hand": "K8s", "push": 0.0}, {"hand": "K9s", "push": 0.0}, {"hand": "KTs", "push": 0.537507}, {"hand": "KJs", "push": 0.91244}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 0.0}, {"hand": "A3s", "push": 0.0}, {"hand": "A4s", "push": 0.0}, {"hand": "A5s", "push": 0.0}, {"hand": "A6s", "push": 0.0}, {"hand": "A7s", "push": 0.0}, {"hand": "A8s", "push": 0.0}, {"hand": "A9s", "push": 0.0}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0}, {"hand": "87o", "push": 0.0}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0}, {"hand": "96o", "push": 0.0}, {"hand": "97o", "push": 0.0}, {"hand": "98o", "push": 0.0}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0}, {"hand": "T6o", "push": 0.0}, {"hand": "T7o", "push": 0.0}, {"hand": "T8o", "push": 0.0}, {"hand": "T9o", "push": 0.0}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0}, {"hand": "J4o", "push": 0.0}, {"hand": "J5o", "push": 0.0}, {"hand": "J6o", "push": 0.0}, {"hand": "J7o", "push": 0.0}, {"hand": "J8o", "push": 0.0}, {"hand": "J9o", "push": 0.0}, {"hand": "JTo", "push": 0.0}, {"hand": "Q2o", "push": 0.0}, {"hand": "Q3o", "push": 0.0}, {"hand": "Q4o", "push": 0.0}, {"hand": "Q5o", "push": 0.0}, {"hand": "Q6o", "push": 0.0}, {"hand": "Q7o", "push": 0.0}, {"hand": "Q8o", "push": 0.0}, {"hand": "Q9o", "push": 0.0}, {"hand": "QTo", "push": 0.0}, {"hand": "QJo", "push": 0.0}, {"hand": "K2o", "push": 0.0}, {"hand": "K3o", "push": 0.0}, {"hand": "K4o", "push": 0.0}, {"hand": "K5o", "push": 0.0}, {"hand": "K6o", "push": 0.0}, {"hand": "K7o", "push": 0.0}, {"hand": "K8o", "push": 0.0}, {"hand": "K9o", "push": 0.0}, {"hand": "KTo", "push": 0.0}, {"hand": "KJo", "push": 0.0}, {"hand": "KQo", "push": 0.018587}, {"hand": "A2o", "push": 0.0}, {"hand": "A3o", "push": 0.0}, {"hand": "A4o", "push": 0.0}, {"hand": "A5o", "push": 0.0}, {"hand": "A6o", "push": 0.0}, {"hand": "A7o", "push": 0.0}, {"hand": "A8o", "push": 0.0}, {"hand": "A9o", "push": 0.0}, {"hand": "ATo", "push": 0.0}, {"hand": "AJo", "push": 0.96548}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}]}, {"name": "BB", "index": 3, "situations": [{"facing": "CO push", "push_pct": 23.8, "hands": [{"hand": "22", "push": 0.9988}, {"hand": "33", "push": 0.9999}, {"hand": "44", "push": 0.9999}, {"hand": "55", "push": 1.0}, {"hand": "66", "push": 0.9998}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.0}, {"hand": "52s", "push": 0.0002}, {"hand": "53s", "push": 0.0008}, {"hand": "54s", "push": 0.0004}, {"hand": "62s", "push": 0.0006}, {"hand": "63s", "push": 0.0002}, {"hand": "64s", "push": 0.0}, {"hand": "65s", "push": 0.0005}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0}, {"hand": "74s", "push": 0.0}, {"hand": "75s", "push": 0.0002}, {"hand": "76s", "push": 0.0}, {"hand": "82s", "push": 0.0}, {"hand": "83s", "push": 0.0001}, {"hand": "84s", "push": 0.0}, {"hand": "85s", "push": 0.0003}, {"hand": "86s", "push": 0.0001}, {"hand": "87s", "push": 0.0001}, {"hand": "92s", "push": 0.0001}, {"hand": "93s", "push": 0.0001}, {"hand": "94s", "push": 0.0001}, {"hand": "95s", "push": 0.0}, {"hand": "96s", "push": 0.0006}, {"hand": "97s", "push": 0.0009}, {"hand": "98s", "push": 0.0}, {"hand": "T2s", "push": 0.0001}, {"hand": "T3s", "push": 0.0001}, {"hand": "T4s", "push": 0.0001}, {"hand": "T5s", "push": 0.0}, {"hand": "T6s", "push": 0.0}, {"hand": "T7s", "push": 0.0}, {"hand": "T8s", "push": 0.0012}, {"hand": "T9s", "push": 0.0004}, {"hand": "J2s", "push": 0.0002}, {"hand": "J3s", "push": 0.0007}, {"hand": "J4s", "push": 0.0}, {"hand": "J5s", "push": 0.0}, {"hand": "J6s", "push": 0.0003}, {"hand": "J7s", "push": 0.0001}, {"hand": "J8s", "push": 0.0017}, {"hand": "J9s", "push": 0.0006}, {"hand": "JTs", "push": 0.9755}, {"hand": "Q2s", "push": 0.0007}, {"hand": "Q3s", "push": 0.0001}, {"hand": "Q4s", "push": 0.0008}, {"hand": "Q5s", "push": 0.0007}, {"hand": "Q6s", "push": 0.001}, {"hand": "Q7s", "push": 0.0003}, {"hand": "Q8s", "push": 0.0011}, {"hand": "Q9s", "push": 0.0424}, {"hand": "QTs", "push": 0.9949}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 0.0}, {"hand": "K3s", "push": 0.0}, {"hand": "K4s", "push": 0.0011}, {"hand": "K5s", "push": 0.0006}, {"hand": "K6s", "push": 0.0008}, {"hand": "K7s", "push": 0.0049}, {"hand": "K8s", "push": 0.0003}, {"hand": "K9s", "push": 0.9187}, {"hand": "KTs", "push": 0.9995}, {"hand": "KJs", "push": 0.9986}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 0.9993}, {"hand": "A3s", "push": 1.0}, {"hand": "A4s", "push": 0.9942}, {"hand": "A5s", "push": 0.9999}, {"hand": "A6s", "push": 0.9993}, {"hand": "A7s", "push": 0.9999}, {"hand": "A8s", "push": 1.0}, {"hand": "A9s", "push": 1.0}, {"hand": "ATs", "push": 0.9999}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0001}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0}, {"hand": "87o", "push": 0.0}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0}, {"hand": "96o", "push": 0.0}, {"hand": "97o", "push": 0.0}, {"hand": "98o", "push": 0.0}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0001}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0}, {"hand": "T6o", "push": 0.0005}, {"hand": "T7o", "push": 0.0}, {"hand": "T8o", "push": 0.0}, {"hand": "T9o", "push": 0.0003}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0}, {"hand": "J4o", "push": 0.0005}, {"hand": "J5o", "push": 0.0}, {"hand": "J6o", "push": 0.0}, {"hand": "J7o", "push": 0.0001}, {"hand": "J8o", "push": 0.0005}, {"hand": "J9o", "push": 0.0}, {"hand": "JTo", "push": 0.0}, {"hand": "Q2o", "push": 0.0}, {"hand": "Q3o", "push": 0.0001}, {"hand": "Q4o", "push": 0.0}, {"hand": "Q5o", "push": 0.0002}, {"hand": "Q6o", "push": 0.0}, {"hand": "Q7o", "push": 0.0001}, {"hand": "Q8o", "push": 0.0002}, {"hand": "Q9o", "push": 0.0003}, {"hand": "QTo", "push": 0.0036}, {"hand": "QJo", "push": 0.4528}, {"hand": "K2o", "push": 0.0}, {"hand": "K3o", "push": 0.0003}, {"hand": "K4o", "push": 0.0}, {"hand": "K5o", "push": 0.0002}, {"hand": "K6o", "push": 0.0002}, {"hand": "K7o", "push": 0.0001}, {"hand": "K8o", "push": 0.0004}, {"hand": "K9o", "push": 0.0003}, {"hand": "KTo", "push": 0.9997}, {"hand": "KJo", "push": 1.0}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 0.0007}, {"hand": "A3o", "push": 0.0258}, {"hand": "A4o", "push": 0.9621}, {"hand": "A5o", "push": 0.9988}, {"hand": "A6o", "push": 1.0}, {"hand": "A7o", "push": 0.9999}, {"hand": "A8o", "push": 1.0}, {"hand": "A9o", "push": 1.0}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}, {"facing": "BTN push", "push_pct": 27.0, "hands": [{"hand": "22", "push": 0.9998}, {"hand": "33", "push": 0.9995}, {"hand": "44", "push": 0.9999}, {"hand": "55", "push": 1.0}, {"hand": "66", "push": 0.9999}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0}, {"hand": "42s", "push": 0.0001}, {"hand": "43s", "push": 0.0004}, {"hand": "52s", "push": 0.0001}, {"hand": "53s", "push": 0.0001}, {"hand": "54s", "push": 0.0003}, {"hand": "62s", "push": 0.0}, {"hand": "63s", "push": 0.0}, {"hand": "64s", "push": 0.0004}, {"hand": "65s", "push": 0.0001}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0001}, {"hand": "74s", "push": 0.0007}, {"hand": "75s", "push": 0.0003}, {"hand": "76s", "push": 0.0}, {"hand": "82s", "push": 0.0}, {"hand": "83s", "push": 0.0}, {"hand": "84s", "push": 0.0}, {"hand": "85s", "push": 0.0003}, {"hand": "86s", "push": 0.0}, {"hand": "87s", "push": 0.0068}, {"hand": "92s", "push": 0.0004}, {"hand": "93s", "push": 0.0001}, {"hand": "94s", "push": 0.0002}, {"hand": "95s", "push": 0.0001}, {"hand": "96s", "push": 0.0001}, {"hand": "97s", "push": 0.0005}, {"hand": "98s", "push": 0.001}, {"hand": "T2s", "push": 0.0001}, {"hand": "T3s", "push": 0.0006}, {"hand": "T4s", "push": 0.0004}, {"hand": "T5s", "push": 0.0003}, {"hand": "T6s", "push": 0.0001}, {"hand": "T7s", "push": 0.0002}, {"hand": "T8s", "push": 0.0016}, {"hand": "T9s", "push": 0.0183}, {"hand": "J2s", "push": 0.0004}, {"hand": "J3s", "push": 0.0001}, {"hand": "J4s", "push": 0.0001}, {"hand": "J5s", "push": 0.0002}, {"hand": "J6s", "push": 0.0023}, {"hand": "J7s", "push": 0.0019}, {"hand": "J8s", "push": 0.0004}, {"hand": "J9s", "push": 0.0086}, {"hand": "JTs", "push": 0.9922}, {"hand": "Q2s", "push": 0.0007}, {"hand": "Q3s", "push": 0.0014}, {"hand": "Q4s", "push": 0.0018}, {"hand": "Q5s", "push": 0.0035}, {"hand": "Q6s", "push": 0.0003}, {"hand": "Q7s", "push": 0.0012}, {"hand": "Q8s", "push": 0.0004}, {"hand": "Q9s", "push": 0.2423}, {"hand": "QTs", "push": 0.9972}, {"hand": "QJs", "push": 0.9999}, {"hand": "K2s", "push": 0.0001}, {"hand": "K3s", "push": 0.0032}, {"hand": "K4s", "push": 0.0027}, {"hand": "K5s", "push": 0.0001}, {"hand": "K6s", "push": 0.0021}, {"hand": "K7s", "push": 0.6719}, {"hand": "K8s", "push": 0.9995}, {"hand": "K9s", "push": 0.9991}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 0.9999}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 1.0}, {"hand": "A3s", "push": 0.9999}, {"hand": "A4s", "push": 1.0}, {"hand": "A5s", "push": 0.9999}, {"hand": "A6s", "push": 1.0}, {"hand": "A7s", "push": 1.0}, {"hand": "A8s", "push": 1.0}, {"hand": "A9s", "push": 1.0}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 0.9999}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0003}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0001}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0004}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0}, {"hand": "87o", "push": 0.0}, {"hand": "92o", "push": 0.0001}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0001}, {"hand": "95o", "push": 0.0}, {"hand": "96o", "push": 0.0001}, {"hand": "97o", "push": 0.0}, {"hand": "98o", "push": 0.0001}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0001}, {"hand": "T5o", "push": 0.0}, {"hand": "T6o", "push": 0.0}, {"hand": "T7o", "push": 0.0002}, {"hand": "T8o", "push": 0.0}, {"hand": "T9o", "push": 0.0004}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0001}, {"hand": "J4o", "push": 0.0}, {"hand": "J5o", "push": 0.0}, {"hand": "J6o", "push": 0.0}, {"hand": "J7o", "push": 0.0005}, {"hand": "J8o", "push": 0.0003}, {"hand": "J9o", "push": 0.0003}, {"hand": "JTo", "push": 0.0022}, {"hand": "Q2o", "push": 0.0}, {"hand": "Q3o", "push": 0.0}, {"hand": "Q4o", "push": 0.0}, {"hand": "Q5o", "push": 0.0}, {"hand": "Q6o", "push": 0.0002}, {"hand": "Q7o", "push": 0.0001}, {"hand": "Q8o", "push": 0.0004}, {"hand": "Q9o", "push": 0.0014}, {"hand": "QTo", "push": 0.3095}, {"hand": "QJo", "push": 1.0}, {"hand": "K2o", "push": 0.0001}, {"hand": "K3o", "push": 0.0002}, {"hand": "K4o", "push": 0.0005}, {"hand": "K5o", "push": 0.0001}, {"hand": "K6o", "push": 0.0002}, {"hand": "K7o", "push": 0.0014}, {"hand": "K8o", "push": 0.0006}, {"hand": "K9o", "push": 0.0496}, {"hand": "KTo", "push": 1.0}, {"hand": "KJo", "push": 1.0}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 0.997}, {"hand": "A3o", "push": 0.9976}, {"hand": "A4o", "push": 0.9999}, {"hand": "A5o", "push": 1.0}, {"hand": "A6o", "push": 0.9998}, {"hand": "A7o", "push": 0.9999}, {"hand": "A8o", "push": 1.0}, {"hand": "A9o", "push": 1.0}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}, {"facing": "CO+BTN push", "push_pct": 11.7, "hands": [{"hand": "22", "push": 0.0}, {"hand": "33", "push": 0.0}, {"hand": "44", "push": 0.539905}, {"hand": "55", "push": 1.0}, {"hand": "66", "push": 1.0}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.0}, {"hand": "52s", "push": 0.0}, {"hand": "53s", "push": 0.0}, {"hand": "54s", "push": 0.0}, {"hand": "62s", "push": 0.0}, {"hand": "63s", "push": 0.0}, {"hand": "64s", "push": 0.0}, {"hand": "65s", "push": 0.0}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0}, {"hand": "74s", "push": 0.0}, {"hand": "75s", "push": 0.0}, {"hand": "76s", "push": 0.0}, {"hand": "82s", "push": 0.0}, {"hand": "83s", "push": 0.0}, {"hand": "84s", "push": 0.0}, {"hand": "85s", "push": 0.0}, {"hand": "86s", "push": 0.0}, {"hand": "87s", "push": 0.029905}, {"hand": "92s", "push": 0.0}, {"hand": "93s", "push": 0.0}, {"hand": "94s", "push": 0.0}, {"hand": "95s", "push": 0.0}, {"hand": "96s", "push": 0.0}, {"hand": "97s", "push": 0.0}, {"hand": "98s", "push": 0.249238}, {"hand": "T2s", "push": 0.0}, {"hand": "T3s", "push": 0.0}, {"hand": "T4s", "push": 0.0}, {"hand": "T5s", "push": 0.0}, {"hand": "T6s", "push": 0.0}, {"hand": "T7s", "push": 0.0}, {"hand": "T8s", "push": 0.0}, {"hand": "T9s", "push": 0.773571}, {"hand": "J2s", "push": 0.0}, {"hand": "J3s", "push": 0.0}, {"hand": "J4s", "push": 0.0}, {"hand": "J5s", "push": 0.0}, {"hand": "J6s", "push": 0.0}, {"hand": "J7s", "push": 0.0}, {"hand": "J8s", "push": 0.0}, {"hand": "J9s", "push": 0.011571}, {"hand": "JTs", "push": 1.0}, {"hand": "Q2s", "push": 0.0}, {"hand": "Q3s", "push": 0.0}, {"hand": "Q4s", "push": 0.0}, {"hand": "Q5s", "push": 0.0}, {"hand": "Q6s", "push": 0.0}, {"hand": "Q7s", "push": 0.0}, {"hand": "Q8s", "push": 0.0}, {"hand": "Q9s", "push": 0.0}, {"hand": "QTs", "push": 1.0}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 0.0}, {"hand": "K3s", "push": 0.0}, {"hand": "K4s", "push": 0.0}, {"hand": "K5s", "push": 0.0}, {"hand": "K6s", "push": 0.0}, {"hand": "K7s", "push": 0.0}, {"hand": "K8s", "push": 0.0}, {"hand": "K9s", "push": 0.0}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 1.0}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 0.0}, {"hand": "A3s", "push": 0.0}, {"hand": "A4s", "push": 0.0}, {"hand": "A5s", "push": 0.0}, {"hand": "A6s", "push": 0.0}, {"hand": "A7s", "push": 0.0}, {"hand": "A8s", "push": 0.0}, {"hand": "A9s", "push": 0.068238}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0}, {"hand": "87o", "push": 0.0}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0}, {"hand": "96o", "push": 0.0}, {"hand": "97o", "push": 0.0}, {"hand": "98o", "push": 0.0}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0}, {"hand": "T6o", "push": 0.0}, {"hand": "T7o", "push": 0.0}, {"hand": "T8o", "push": 0.0}, {"hand": "T9o", "push": 0.0}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0}, {"hand": "J4o", "push": 0.0}, {"hand": "J5o", "push": 0.0}, {"hand": "J6o", "push": 0.0}, {"hand": "J7o", "push": 0.0}, {"hand": "J8o", "push": 0.0}, {"hand": "J9o", "push": 0.0}, {"hand": "JTo", "push": 0.0}, {"hand": "Q2o", "push": 0.0}, {"hand": "Q3o", "push": 0.0}, {"hand": "Q4o", "push": 0.0}, {"hand": "Q5o", "push": 0.0}, {"hand": "Q6o", "push": 0.0}, {"hand": "Q7o", "push": 0.0}, {"hand": "Q8o", "push": 0.0}, {"hand": "Q9o", "push": 0.0}, {"hand": "QTo", "push": 0.0}, {"hand": "QJo", "push": 0.0}, {"hand": "K2o", "push": 0.0}, {"hand": "K3o", "push": 0.0}, {"hand": "K4o", "push": 0.0}, {"hand": "K5o", "push": 0.0}, {"hand": "K6o", "push": 0.0}, {"hand": "K7o", "push": 0.0}, {"hand": "K8o", "push": 0.0}, {"hand": "K9o", "push": 0.0}, {"hand": "KTo", "push": 0.0}, {"hand": "KJo", "push": 0.0}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 0.0}, {"hand": "A3o", "push": 0.0}, {"hand": "A4o", "push": 0.0}, {"hand": "A5o", "push": 0.0}, {"hand": "A6o", "push": 0.0}, {"hand": "A7o", "push": 0.0}, {"hand": "A8o", "push": 0.0}, {"hand": "A9o", "push": 0.0}, {"hand": "ATo", "push": 0.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}, {"facing": "SB push", "push_pct": 41.9, "hands": [{"hand": "22", "push": 0.9998}, {"hand": "33", "push": 1.0}, {"hand": "44", "push": 0.9999}, {"hand": "55", "push": 1.0}, {"hand": "66", "push": 0.9999}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.0}, {"hand": "52s", "push": 0.0001}, {"hand": "53s", "push": 0.0}, {"hand": "54s", "push": 0.0019}, {"hand": "62s", "push": 0.0003}, {"hand": "63s", "push": 0.0001}, {"hand": "64s", "push": 0.0}, {"hand": "65s", "push": 0.0001}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0}, {"hand": "74s", "push": 0.0}, {"hand": "75s", "push": 0.0002}, {"hand": "76s", "push": 0.0004}, {"hand": "82s", "push": 0.0}, {"hand": "83s", "push": 0.0}, {"hand": "84s", "push": 0.0002}, {"hand": "85s", "push": 0.0004}, {"hand": "86s", "push": 0.0}, {"hand": "87s", "push": 0.0}, {"hand": "92s", "push": 0.0001}, {"hand": "93s", "push": 0.0}, {"hand": "94s", "push": 0.0}, {"hand": "95s", "push": 0.0}, {"hand": "96s", "push": 0.0015}, {"hand": "97s", "push": 0.0046}, {"hand": "98s", "push": 0.0137}, {"hand": "T2s", "push": 0.0}, {"hand": "T3s", "push": 0.0017}, {"hand": "T4s", "push": 0.0001}, {"hand": "T5s", "push": 0.0004}, {"hand": "T6s", "push": 0.0}, {"hand": "T7s", "push": 0.001}, {"hand": "T8s", "push": 0.9949}, {"hand": "T9s", "push": 1.0}, {"hand": "J2s", "push": 0.0007}, {"hand": "J3s", "push": 0.0003}, {"hand": "J4s", "push": 0.0}, {"hand": "J5s", "push": 0.0}, {"hand": "J6s", "push": 0.0002}, {"hand": "J7s", "push": 0.3786}, {"hand": "J8s", "push": 0.998}, {"hand": "J9s", "push": 1.0}, {"hand": "JTs", "push": 0.9998}, {"hand": "Q2s", "push": 0.0001}, {"hand": "Q3s", "push": 0.009}, {"hand": "Q4s", "push": 0.0208}, {"hand": "Q5s", "push": 0.9713}, {"hand": "Q6s", "push": 0.9999}, {"hand": "Q7s", "push": 1.0}, {"hand": "Q8s", "push": 1.0}, {"hand": "Q9s", "push": 1.0}, {"hand": "QTs", "push": 0.9999}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 0.9993}, {"hand": "K3s", "push": 1.0}, {"hand": "K4s", "push": 1.0}, {"hand": "K5s", "push": 0.9994}, {"hand": "K6s", "push": 0.9991}, {"hand": "K7s", "push": 0.9999}, {"hand": "K8s", "push": 1.0}, {"hand": "K9s", "push": 0.9999}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 1.0}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 1.0}, {"hand": "A3s", "push": 1.0}, {"hand": "A4s", "push": 1.0}, {"hand": "A5s", "push": 0.9999}, {"hand": "A6s", "push": 0.9999}, {"hand": "A7s", "push": 1.0}, {"hand": "A8s", "push": 1.0}, {"hand": "A9s", "push": 1.0}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0001}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0001}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0001}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0}, {"hand": "87o", "push": 0.0003}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0001}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0001}, {"hand": "96o", "push": 0.0002}, {"hand": "97o", "push": 0.0001}, {"hand": "98o", "push": 0.0008}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0001}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0001}, {"hand": "T6o", "push": 0.0}, {"hand": "T7o", "push": 0.0003}, {"hand": "T8o", "push": 0.0007}, {"hand": "T9o", "push": 0.0061}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0}, {"hand": "J4o", "push": 0.0001}, {"hand": "J5o", "push": 0.0}, {"hand": "J6o", "push": 0.0008}, {"hand": "J7o", "push": 0.0002}, {"hand": "J8o", "push": 0.0006}, {"hand": "J9o", "push": 0.9942}, {"hand": "JTo", "push": 1.0}, {"hand": "Q2o", "push": 0.001}, {"hand": "Q3o", "push": 0.0002}, {"hand": "Q4o", "push": 0.0002}, {"hand": "Q5o", "push": 0.0002}, {"hand": "Q6o", "push": 0.0002}, {"hand": "Q7o", "push": 0.0005}, {"hand": "Q8o", "push": 0.9995}, {"hand": "Q9o", "push": 1.0}, {"hand": "QTo", "push": 1.0}, {"hand": "QJo", "push": 1.0}, {"hand": "K2o", "push": 0.0016}, {"hand": "K3o", "push": 0.9594}, {"hand": "K4o", "push": 0.9988}, {"hand": "K5o", "push": 1.0}, {"hand": "K6o", "push": 1.0}, {"hand": "K7o", "push": 1.0}, {"hand": "K8o", "push": 1.0}, {"hand": "K9o", "push": 1.0}, {"hand": "KTo", "push": 1.0}, {"hand": "KJo", "push": 1.0}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 0.9999}, {"hand": "A3o", "push": 1.0}, {"hand": "A4o", "push": 1.0}, {"hand": "A5o", "push": 0.9999}, {"hand": "A6o", "push": 1.0}, {"hand": "A7o", "push": 1.0}, {"hand": "A8o", "push": 1.0}, {"hand": "A9o", "push": 1.0}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}, {"facing": "CO+SB push", "push_pct": 13.9, "hands": [{"hand": "22", "push": 0.0}, {"hand": "33", "push": 0.005667}, {"hand": "44", "push": 1.0}, {"hand": "55", "push": 1.0}, {"hand": "66", "push": 1.0}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.0}, {"hand": "52s", "push": 0.0}, {"hand": "53s", "push": 0.0}, {"hand": "54s", "push": 0.0}, {"hand": "62s", "push": 0.0}, {"hand": "63s", "push": 0.0}, {"hand": "64s", "push": 0.0}, {"hand": "65s", "push": 0.0}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0}, {"hand": "74s", "push": 0.0}, {"hand": "75s", "push": 0.0}, {"hand": "76s", "push": 0.0}, {"hand": "82s", "push": 0.0}, {"hand": "83s", "push": 0.0}, {"hand": "84s", "push": 0.0}, {"hand": "85s", "push": 0.0}, {"hand": "86s", "push": 0.0}, {"hand": "87s", "push": 0.0}, {"hand": "92s", "push": 0.0}, {"hand": "93s", "push": 0.0}, {"hand": "94s", "push": 0.0}, {"hand": "95s", "push": 0.0}, {"hand": "96s", "push": 0.0}, {"hand": "97s", "push": 0.0}, {"hand": "98s", "push": 0.701667}, {"hand": "T2s", "push": 0.0}, {"hand": "T3s", "push": 0.0}, {"hand": "T4s", "push": 0.0}, {"hand": "T5s", "push": 0.0}, {"hand": "T6s", "push": 0.0}, {"hand": "T7s", "push": 0.0}, {"hand": "T8s", "push": 0.220333}, {"hand": "T9s", "push": 1.0}, {"hand": "J2s", "push": 0.0}, {"hand": "J3s", "push": 0.0}, {"hand": "J4s", "push": 0.0}, {"hand": "J5s", "push": 0.0}, {"hand": "J6s", "push": 0.0}, {"hand": "J7s", "push": 0.0}, {"hand": "J8s", "push": 0.0}, {"hand": "J9s", "push": 0.884}, {"hand": "JTs", "push": 1.0}, {"hand": "Q2s", "push": 0.0}, {"hand": "Q3s", "push": 0.0}, {"hand": "Q4s", "push": 0.0}, {"hand": "Q5s", "push": 0.0}, {"hand": "Q6s", "push": 0.0}, {"hand": "Q7s", "push": 0.0}, {"hand": "Q8s", "push": 0.0}, {"hand": "Q9s", "push": 0.574667}, {"hand": "QTs", "push": 1.0}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 0.0}, {"hand": "K3s", "push": 0.0}, {"hand": "K4s", "push": 0.0}, {"hand": "K5s", "push": 0.0}, {"hand": "K6s", "push": 0.0}, {"hand": "K7s", "push": 0.0}, {"hand": "K8s", "push": 0.0}, {"hand": "K9s", "push": 0.081}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 1.0}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 0.0}, {"hand": "A3s", "push": 0.0}, {"hand": "A4s", "push": 0.0}, {"hand": "A5s", "push": 0.0}, {"hand": "A6s", "push": 0.0}, {"hand": "A7s", "push": 0.0}, {"hand": "A8s", "push": 0.0}, {"hand": "A9s", "push": 1.0}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0}, {"hand": "87o", "push": 0.0}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0}, {"hand": "96o", "push": 0.0}, {"hand": "97o", "push": 0.0}, {"hand": "98o", "push": 0.0}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0}, {"hand": "T6o", "push": 0.0}, {"hand": "T7o", "push": 0.0}, {"hand": "T8o", "push": 0.0}, {"hand": "T9o", "push": 0.0}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0}, {"hand": "J4o", "push": 0.0}, {"hand": "J5o", "push": 0.0}, {"hand": "J6o", "push": 0.0}, {"hand": "J7o", "push": 0.0}, {"hand": "J8o", "push": 0.0}, {"hand": "J9o", "push": 0.0}, {"hand": "JTo", "push": 0.0}, {"hand": "Q2o", "push": 0.0}, {"hand": "Q3o", "push": 0.0}, {"hand": "Q4o", "push": 0.0}, {"hand": "Q5o", "push": 0.0}, {"hand": "Q6o", "push": 0.0}, {"hand": "Q7o", "push": 0.0}, {"hand": "Q8o", "push": 0.0}, {"hand": "Q9o", "push": 0.0}, {"hand": "QTo", "push": 0.0}, {"hand": "QJo", "push": 0.0}, {"hand": "K2o", "push": 0.0}, {"hand": "K3o", "push": 0.0}, {"hand": "K4o", "push": 0.0}, {"hand": "K5o", "push": 0.0}, {"hand": "K6o", "push": 0.0}, {"hand": "K7o", "push": 0.0}, {"hand": "K8o", "push": 0.0}, {"hand": "K9o", "push": 0.0}, {"hand": "KTo", "push": 0.0}, {"hand": "KJo", "push": 0.0}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 0.0}, {"hand": "A3o", "push": 0.0}, {"hand": "A4o", "push": 0.0}, {"hand": "A5o", "push": 0.0}, {"hand": "A6o", "push": 0.0}, {"hand": "A7o", "push": 0.0}, {"hand": "A8o", "push": 0.0}, {"hand": "A9o", "push": 0.0}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}, {"facing": "BTN+SB push", "push_pct": 17.2, "hands": [{"hand": "22", "push": 0.0}, {"hand": "33", "push": 0.816}, {"hand": "44", "push": 1.0}, {"hand": "55", "push": 1.0}, {"hand": "66", "push": 1.0}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.0}, {"hand": "52s", "push": 0.0}, {"hand": "53s", "push": 0.0}, {"hand": "54s", "push": 0.0}, {"hand": "62s", "push": 0.0}, {"hand": "63s", "push": 0.0}, {"hand": "64s", "push": 0.0}, {"hand": "65s", "push": 0.0}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0}, {"hand": "74s", "push": 0.0}, {"hand": "75s", "push": 0.0}, {"hand": "76s", "push": 0.0}, {"hand": "82s", "push": 0.0}, {"hand": "83s", "push": 0.0}, {"hand": "84s", "push": 0.0}, {"hand": "85s", "push": 0.0}, {"hand": "86s", "push": 0.0}, {"hand": "87s", "push": 0.689333}, {"hand": "92s", "push": 0.0}, {"hand": "93s", "push": 0.0}, {"hand": "94s", "push": 0.0}, {"hand": "95s", "push": 0.0}, {"hand": "96s", "push": 0.0}, {"hand": "97s", "push": 0.0}, {"hand": "98s", "push": 0.586}, {"hand": "T2s", "push": 0.0}, {"hand": "T3s", "push": 0.0}, {"hand": "T4s", "push": 0.0}, {"hand": "T5s", "push": 0.0}, {"hand": "T6s", "push": 0.0}, {"hand": "T7s", "push": 0.0}, {"hand": "T8s", "push": 0.323333}, {"hand": "T9s", "push": 1.0}, {"hand": "J2s", "push": 0.0}, {"hand": "J3s", "push": 0.0}, {"hand": "J4s", "push": 0.0}, {"hand": "J5s", "push": 0.0}, {"hand": "J6s", "push": 0.0}, {"hand": "J7s", "push": 0.0}, {"hand": "J8s", "push": 0.108667}, {"hand": "J9s", "push": 0.978667}, {"hand": "JTs", "push": 1.0}, {"hand": "Q2s", "push": 0.0}, {"hand": "Q3s", "push": 0.0}, {"hand": "Q4s", "push": 0.0}, {"hand": "Q5s", "push": 0.0}, {"hand": "Q6s", "push": 0.0}, {"hand": "Q7s", "push": 0.0}, {"hand": "Q8s", "push": 0.0}, {"hand": "Q9s", "push": 1.0}, {"hand": "QTs", "push": 1.0}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 0.0}, {"hand": "K3s", "push": 0.0}, {"hand": "K4s", "push": 0.0}, {"hand": "K5s", "push": 0.0}, {"hand": "K6s", "push": 0.0}, {"hand": "K7s", "push": 0.0}, {"hand": "K8s", "push": 0.0}, {"hand": "K9s", "push": 0.783333}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 1.0}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 0.0}, {"hand": "A3s", "push": 0.0}, {"hand": "A4s", "push": 0.0}, {"hand": "A5s", "push": 0.0}, {"hand": "A6s", "push": 0.0}, {"hand": "A7s", "push": 0.322}, {"hand": "A8s", "push": 1.0}, {"hand": "A9s", "push": 1.0}, {"hand": "ATs", "push": 1.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0}, {"hand": "87o", "push": 0.0}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0}, {"hand": "96o", "push": 0.0}, {"hand": "97o", "push": 0.0}, {"hand": "98o", "push": 0.0}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0}, {"hand": "T6o", "push": 0.0}, {"hand": "T7o", "push": 0.0}, {"hand": "T8o", "push": 0.0}, {"hand": "T9o", "push": 0.0}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0}, {"hand": "J4o", "push": 0.0}, {"hand": "J5o", "push": 0.0}, {"hand": "J6o", "push": 0.0}, {"hand": "J7o", "push": 0.0}, {"hand": "J8o", "push": 0.0}, {"hand": "J9o", "push": 0.0}, {"hand": "JTo", "push": 0.0}, {"hand": "Q2o", "push": 0.0}, {"hand": "Q3o", "push": 0.0}, {"hand": "Q4o", "push": 0.0}, {"hand": "Q5o", "push": 0.0}, {"hand": "Q6o", "push": 0.0}, {"hand": "Q7o", "push": 0.0}, {"hand": "Q8o", "push": 0.0}, {"hand": "Q9o", "push": 0.0}, {"hand": "QTo", "push": 0.0}, {"hand": "QJo", "push": 0.675667}, {"hand": "K2o", "push": 0.0}, {"hand": "K3o", "push": 0.0}, {"hand": "K4o", "push": 0.0}, {"hand": "K5o", "push": 0.0}, {"hand": "K6o", "push": 0.0}, {"hand": "K7o", "push": 0.0}, {"hand": "K8o", "push": 0.0}, {"hand": "K9o", "push": 0.0}, {"hand": "KTo", "push": 0.0}, {"hand": "KJo", "push": 1.0}, {"hand": "KQo", "push": 1.0}, {"hand": "A2o", "push": 0.0}, {"hand": "A3o", "push": 0.0}, {"hand": "A4o", "push": 0.0}, {"hand": "A5o", "push": 0.0}, {"hand": "A6o", "push": 0.0}, {"hand": "A7o", "push": 0.0}, {"hand": "A8o", "push": 0.0}, {"hand": "A9o", "push": 0.442667}, {"hand": "ATo", "push": 1.0}, {"hand": "AJo", "push": 1.0}, {"hand": "AQo", "push": 1.0}, {"hand": "AKo", "push": 1.0}]}, {"facing": "CO+BTN+SB push", "push_pct": 9.7, "hands": [{"hand": "22", "push": 0.0}, {"hand": "33", "push": 0.0}, {"hand": "44", "push": 0.0}, {"hand": "55", "push": 0.083}, {"hand": "66", "push": 1.0}, {"hand": "77", "push": 1.0}, {"hand": "88", "push": 1.0}, {"hand": "99", "push": 1.0}, {"hand": "TT", "push": 1.0}, {"hand": "JJ", "push": 1.0}, {"hand": "QQ", "push": 1.0}, {"hand": "KK", "push": 1.0}, {"hand": "AA", "push": 1.0}, {"hand": "32s", "push": 0.0}, {"hand": "42s", "push": 0.0}, {"hand": "43s", "push": 0.0}, {"hand": "52s", "push": 0.0}, {"hand": "53s", "push": 0.0}, {"hand": "54s", "push": 0.322}, {"hand": "62s", "push": 0.0}, {"hand": "63s", "push": 0.0}, {"hand": "64s", "push": 0.0}, {"hand": "65s", "push": 0.897667}, {"hand": "72s", "push": 0.0}, {"hand": "73s", "push": 0.0}, {"hand": "74s", "push": 0.0}, {"hand": "75s", "push": 0.0}, {"hand": "76s", "push": 0.53}, {"hand": "82s", "push": 0.0}, {"hand": "83s", "push": 0.0}, {"hand": "84s", "push": 0.0}, {"hand": "85s", "push": 0.0}, {"hand": "86s", "push": 0.0}, {"hand": "87s", "push": 0.525333}, {"hand": "92s", "push": 0.0}, {"hand": "93s", "push": 0.0}, {"hand": "94s", "push": 0.0}, {"hand": "95s", "push": 0.0}, {"hand": "96s", "push": 0.0}, {"hand": "97s", "push": 0.0}, {"hand": "98s", "push": 0.474833}, {"hand": "T2s", "push": 0.0}, {"hand": "T3s", "push": 0.0}, {"hand": "T4s", "push": 0.0}, {"hand": "T5s", "push": 0.0}, {"hand": "T6s", "push": 0.0}, {"hand": "T7s", "push": 0.0}, {"hand": "T8s", "push": 0.0}, {"hand": "T9s", "push": 0.724833}, {"hand": "J2s", "push": 0.0}, {"hand": "J3s", "push": 0.0}, {"hand": "J4s", "push": 0.0}, {"hand": "J5s", "push": 0.0}, {"hand": "J6s", "push": 0.0}, {"hand": "J7s", "push": 0.0}, {"hand": "J8s", "push": 0.0}, {"hand": "J9s", "push": 0.0}, {"hand": "JTs", "push": 1.0}, {"hand": "Q2s", "push": 0.0}, {"hand": "Q3s", "push": 0.0}, {"hand": "Q4s", "push": 0.0}, {"hand": "Q5s", "push": 0.0}, {"hand": "Q6s", "push": 0.0}, {"hand": "Q7s", "push": 0.0}, {"hand": "Q8s", "push": 0.0}, {"hand": "Q9s", "push": 0.0}, {"hand": "QTs", "push": 1.0}, {"hand": "QJs", "push": 1.0}, {"hand": "K2s", "push": 0.0}, {"hand": "K3s", "push": 0.0}, {"hand": "K4s", "push": 0.0}, {"hand": "K5s", "push": 0.0}, {"hand": "K6s", "push": 0.0}, {"hand": "K7s", "push": 0.0}, {"hand": "K8s", "push": 0.0}, {"hand": "K9s", "push": 0.0}, {"hand": "KTs", "push": 1.0}, {"hand": "KJs", "push": 1.0}, {"hand": "KQs", "push": 1.0}, {"hand": "A2s", "push": 0.0}, {"hand": "A3s", "push": 0.0}, {"hand": "A4s", "push": 0.0}, {"hand": "A5s", "push": 0.0}, {"hand": "A6s", "push": 0.0}, {"hand": "A7s", "push": 0.0}, {"hand": "A8s", "push": 0.0}, {"hand": "A9s", "push": 0.0}, {"hand": "ATs", "push": 0.0}, {"hand": "AJs", "push": 1.0}, {"hand": "AQs", "push": 1.0}, {"hand": "AKs", "push": 1.0}, {"hand": "32o", "push": 0.0}, {"hand": "42o", "push": 0.0}, {"hand": "43o", "push": 0.0}, {"hand": "52o", "push": 0.0}, {"hand": "53o", "push": 0.0}, {"hand": "54o", "push": 0.0}, {"hand": "62o", "push": 0.0}, {"hand": "63o", "push": 0.0}, {"hand": "64o", "push": 0.0}, {"hand": "65o", "push": 0.0}, {"hand": "72o", "push": 0.0}, {"hand": "73o", "push": 0.0}, {"hand": "74o", "push": 0.0}, {"hand": "75o", "push": 0.0}, {"hand": "76o", "push": 0.0}, {"hand": "82o", "push": 0.0}, {"hand": "83o", "push": 0.0}, {"hand": "84o", "push": 0.0}, {"hand": "85o", "push": 0.0}, {"hand": "86o", "push": 0.0}, {"hand": "87o", "push": 0.0}, {"hand": "92o", "push": 0.0}, {"hand": "93o", "push": 0.0}, {"hand": "94o", "push": 0.0}, {"hand": "95o", "push": 0.0}, {"hand": "96o", "push": 0.0}, {"hand": "97o", "push": 0.0}, {"hand": "98o", "push": 0.0}, {"hand": "T2o", "push": 0.0}, {"hand": "T3o", "push": 0.0}, {"hand": "T4o", "push": 0.0}, {"hand": "T5o", "push": 0.0}, {"hand": "T6o", "push": 0.0}, {"hand": "T7o", "push": 0.0}, {"hand": "T8o", "push": 0.0}, {"hand": "T9o", "push": 0.0}, {"hand": "J2o", "push": 0.0}, {"hand": "J3o", "push": 0.0}, {"hand": "J4o", "push": 0.0}, {"hand": "J5o", "push": 0.0}, {"hand": "J6o", "push": 0.0}, {"hand": "J7o", "push": 0.0}, {"hand": "J8o", "push": 0.0}, {"hand": "J9o", "push": 0.0}, {"hand": "JTo", "push": 0.0}, {"hand": "Q2o", "push": 0.0}, {"hand": "Q3o", "push": 0.0}, {"hand": "Q4o", "push": 0.0}, {"hand": "Q5o", "push": 0.0}, {"hand": "Q6o", "push": 0.0}, {"hand": "Q7o", "push": 0.0}, {"hand": "Q8o", "push": 0.0}, {"hand": "Q9o", "push": 0.0}, {"hand": "QTo", "push": 0.0}, {"hand": "QJo", "push": 0.0}, {"hand": "K2o", "push": 0.0}, {"hand": "K3o", "push": 0.0}, {"hand": "K4o", "push": 0.0}, {"hand": "K5o", "push": 0.0}, {"hand": "K6o", "push": 0.0}, {"hand": "K7o", "push": 0.0}, {"hand": "K8o", "push": 0.0}, {"hand": "K9o", "push": 0.0}, {"hand": "KTo", "push": 0.0}, {"hand": "KJo", "push": 0.0}, {"hand": "KQo", "push": 0.063667}, {"hand": "A2o", "push": 0.0}, {"hand": "A3o", "push": 0.0}, {"hand": "A4o", "push": 0.0}, {"hand": "A5o", "push": 0.0}, {"hand": "A6o", "push": 0.0}, {"hand": "A7o", "push": 0.0}, {"hand": "A8o", "push": 0.0}, {"hand": "A9o", "push": 0.0}, {"hand": "ATo", "push": 0.0}, {"hand": "AJo", "push": 0.0}, {"hand": "AQo", "push": 0.935}, {"hand": "AKo", "push": 1.0}]}]}]}
+};
+
+// ─── Constants ─────────────────────────────────────────────────────────────
+const RANKS = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+const RANK_IDX = Object.fromEntries(RANKS.map((r,i) => [r,i]));
+
+// ─── State ──────────────────────────────────────────────────────────────────
+let state = {
+  players: 2,
+  posIdx: 0,
+  sitIdx: 0,
+  selectedHand: null
+};
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+function getColor(pct) {
+  if (pct >= 0.97) return '#017a5a';
+  if (pct >= 0.90) return '#018F69';
+  if (pct >= 0.70) return '#4ade80';
+  if (pct >= 0.50) return '#2ab88e';
+  if (pct >= 0.30) return '#f0b429';
+  if (pct >= 0.10) return '#e87040';
+  if (pct >= 0.03) return '#d45050';
+  return '#1a2d42';
+}
+
+function getCellColor(pct) {
+  const base = getColor(pct);
+  return base;
+}
+
+function parseHand(name) {
+  // Returns { r1, r2, type } where type = 'pair'|'suited'|'offsuit'
+  if (name.length === 2) {
+    return { r1: name[0], r2: name[1], type: 'pair' };
+  }
+  const suited = name.endsWith('s');
+  return {
+    r1: name[0],
+    r2: name[1],
+    type: suited ? 'suited' : 'offsuit'
+  };
+}
+
+function canonicalName(row, col) {
+  // row = index into RANKS (0=A), col = index into RANKS (0=A)
+  // Above diagonal (col > row) = suited: RANKS[row]+RANKS[col]+'s'
+  // Below diagonal (col < row) = offsuit: RANKS[col]+RANKS[row]+'o'
+  // Diagonal (col === row) = pair: RANKS[row]+RANKS[row]
+  if (row === col) return RANKS[row] + RANKS[row];
+  if (col > row) return RANKS[row] + RANKS[col] + 's'; // above diagonal = suited
+  return RANKS[col] + RANKS[row] + 'o'; // below diagonal = offsuit
+}
+
+function buildHandMap(hands) {
+  const map = {};
+  for (const h of hands) {
+    map[h.hand] = h.push;
+  }
+  return map;
+}
+
+// ─── Current data ────────────────────────────────────────────────────────────
+function currentSituation() {
+  const d = DATA[state.players];
+  const pos = d.positions[state.posIdx];
+  const sit = pos.situations[state.sitIdx];
+  return { pos, sit };
+}
+
+// ─── Render controls ─────────────────────────────────────────────────────────
+function renderPositionButtons() {
+  const d = DATA[state.players];
+  const grp = document.getElementById('position-group');
+  grp.innerHTML = '';
+  d.positions.forEach((pos, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn' + (i === state.posIdx ? ' active' : '');
+    btn.textContent = pos.name;
+    btn.dataset.posIdx = i;
+    btn.addEventListener('click', () => {
+      state.posIdx = i;
+      state.sitIdx = 0;
+      state.selectedHand = null;
+      renderPositionButtons();
+      renderSituationButtons();
+      renderGrid();
+      renderStats();
+      clearSelectedCard();
+    });
+    grp.appendChild(btn);
+  });
+}
+
+function renderSituationButtons() {
+  const d = DATA[state.players];
+  const pos = d.positions[state.posIdx];
+  const grp = document.getElementById('situation-group');
+  grp.innerHTML = '';
+  pos.situations.forEach((sit, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn' + (i === state.sitIdx ? ' active' : '');
+    const label = sit.facing === 'no action' ? 'No action' : 'vs ' + sit.facing.replace(' push', ' push');
+    btn.textContent = label;
+    btn.dataset.sitIdx = i;
+    btn.addEventListener('click', () => {
+      state.sitIdx = i;
+      state.selectedHand = null;
+      renderSituationButtons();
+      renderGrid();
+      renderStats();
+      clearSelectedCard();
+    });
+    grp.appendChild(btn);
+  });
+}
+
+// ─── Render grid ──────────────────────────────────────────────────────────────
+function renderGrid() {
+  const { pos, sit } = currentSituation();
+  const handMap = buildHandMap(sit.hands);
+  const grid = document.getElementById('hand-grid');
+  grid.innerHTML = '';
+
+  // Title
+  document.getElementById('grid-title').textContent =
+    pos.name + ' — ' + (sit.facing === 'no action' ? 'No action ahead' : 'Facing ' + sit.facing);
+  document.getElementById('push-pct-display').textContent = sit.push_pct.toFixed(1);
+
+  // Top-left corner spacer
+  const corner = document.createElement('div');
+  grid.appendChild(corner);
+
+  // Column labels
+  RANKS.forEach(r => {
+    const lbl = document.createElement('div');
+    lbl.className = 'grid-label';
+    lbl.textContent = r;
+    grid.appendChild(lbl);
+  });
+
+  // Rows
+  RANKS.forEach((rowRank, ri) => {
+    // Row label
+    const rowLbl = document.createElement('div');
+    rowLbl.className = 'grid-label';
+    rowLbl.textContent = rowRank;
+    grid.appendChild(rowLbl);
+
+    // Cells
+    RANKS.forEach((colRank, ci) => {
+      const handName = canonicalName(ri, ci);
+      const push = handMap[handName] ?? 0;
+      const cell = document.createElement('div');
+      cell.className = 'hand-cell';
+      if (handName === state.selectedHand) cell.classList.add('selected');
+
+      const bg = getCellColor(push);
+      cell.style.background = bg;
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'cell-name';
+      nameEl.textContent = handName;
+
+      const pctEl = document.createElement('div');
+      pctEl.className = 'cell-pct';
+      pctEl.textContent = push >= 0.005 ? (push * 100).toFixed(0) + '%' : '';
+
+      cell.appendChild(nameEl);
+      cell.appendChild(pctEl);
+
+      // Hover
+      cell.addEventListener('mouseenter', (e) => showTooltip(e, handName, push));
+      cell.addEventListener('mousemove', (e) => moveTooltip(e));
+      cell.addEventListener('mouseleave', hideTooltip);
+
+      // Click
+      cell.addEventListener('click', () => {
+        state.selectedHand = state.selectedHand === handName ? null : handName;
+        document.querySelectorAll('.hand-cell').forEach(c => c.classList.remove('selected'));
+        if (state.selectedHand) {
+          cell.classList.add('selected');
+          renderSelectedCard(handName, push);
+        } else {
+          clearSelectedCard();
+        }
+        // also highlight in top lists
+        highlightTopList(state.selectedHand);
+      });
+
+      grid.appendChild(cell);
+    });
+  });
+}
+
+// ─── Tooltip ──────────────────────────────────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+
+function showTooltip(e, hand, push) {
+  document.getElementById('tt-hand').textContent = hand;
+  const pct = (push * 100).toFixed(2) + '%';
+  document.getElementById('tt-pct').textContent = 'Push: ' + pct;
+  const action = push >= 0.97 ? 'Pure push' :
+                 push <= 0.03 ? 'Pure fold' :
+                 'Mixed strategy';
+  document.getElementById('tt-action').textContent = action;
+  tooltip.classList.add('visible');
+  moveTooltip(e);
+}
+function moveTooltip(e) {
+  const x = e.clientX + 16;
+  const y = e.clientY - 10;
+  const tw = tooltip.offsetWidth;
+  const th = tooltip.offsetHeight;
+  tooltip.style.left = (x + tw > window.innerWidth ? e.clientX - tw - 8 : x) + 'px';
+  tooltip.style.top = (y + th > window.innerHeight ? e.clientY - th - 8 : y) + 'px';
+}
+function hideTooltip() {
+  tooltip.classList.remove('visible');
+}
+
+// ─── Stats ────────────────────────────────────────────────────────────────────
+function renderStats() {
+  const { sit } = currentSituation();
+  const hands = sit.hands;
+  let purePush = 0, pureFold = 0, mixed = 0;
+  for (const h of hands) {
+    if (h.push >= 0.97) purePush++;
+    else if (h.push <= 0.03) pureFold++;
+    else mixed++;
+  }
+  document.getElementById('stat-push-pct').textContent = sit.push_pct.toFixed(1) + '%';
+  document.getElementById('stat-pure-push').textContent = purePush + ' hands';
+  document.getElementById('stat-pure-fold').textContent = pureFold + ' hands';
+  document.getElementById('stat-mixed').textContent = mixed + ' hands';
+
+  // Top 5 push hands (highest push, non-pure-fold)
+  const sorted = [...hands].sort((a, b) => b.push - a.push);
+  renderHandList('top-push-list', sorted.slice(0, 6));
+
+  // Top 5 fold hands (lowest push that are not pure push)
+  const foldSorted = [...hands].sort((a, b) => a.push - b.push);
+  // Show pure fold ones first, then near-fold
+  renderHandList('top-fold-list', foldSorted.slice(0, 6));
+}
+
+function renderHandList(id, hands) {
+  const el = document.getElementById(id);
+  el.innerHTML = '';
+  for (const h of hands) {
+    const item = document.createElement('div');
+    item.className = 'hand-list-item';
+    item.dataset.hand = h.hand;
+    const nameEl = document.createElement('span');
+    nameEl.className = 'hl-name';
+    nameEl.textContent = h.hand;
+    const pctEl = document.createElement('span');
+    pctEl.className = 'hl-pct';
+    pctEl.textContent = (h.push * 100).toFixed(1) + '%';
+    pctEl.style.color = getCellColor(h.push);
+    item.appendChild(nameEl);
+    item.appendChild(pctEl);
+    item.addEventListener('click', () => {
+      state.selectedHand = h.hand;
+      renderGrid();
+      renderSelectedCard(h.hand, h.push);
+      highlightTopList(h.hand);
+    });
+    el.appendChild(item);
+  }
+}
+
+function highlightTopList(handName) {
+  document.querySelectorAll('.hand-list-item').forEach(item => {
+    item.style.outline = item.dataset.hand === handName ? '1px solid var(--accent)' : '';
+  });
+}
+
+// ─── Selected card ────────────────────────────────────────────────────────────
+function renderSelectedCard(hand, push) {
+  const card = document.getElementById('selected-card');
+  const pct = push * 100;
+  const color = getCellColor(push);
+  const action = pct >= 97 ? 'Pure push' :
+                 pct <= 3 ? 'Pure fold' :
+                 'Mixed strategy';
+  const handInfo = parseHand(hand);
+  const typeLabel = handInfo.type === 'pair' ? 'Pocket pair' :
+                    handInfo.type === 'suited' ? 'Suited' : 'Offsuit';
+
+  card.innerHTML = `
+    <h3>Selected Hand</h3>
+    <div class="selected-hand-name">${hand}</div>
+    <div class="selected-hand-pct" style="color:${color}">${pct.toFixed(2)}%</div>
+    <div class="selected-hand-type">${typeLabel} &bull; ${action}</div>
+    <div class="pct-bar-container">
+      <div class="pct-bar-fill" style="width:${pct}%;background:${color}"></div>
+    </div>
+  `;
+}
+
+function clearSelectedCard() {
+  const card = document.getElementById('selected-card');
+  card.innerHTML = '<h3>Selected Hand</h3><div style="color:var(--text-muted);font-family:DM Mono,monospace;font-size:12px;">Click any cell</div>';
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.getElementById('players-group').querySelectorAll('.btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.players = parseInt(btn.dataset.players);
+    state.posIdx = 0;
+    state.sitIdx = 0;
+    state.selectedHand = null;
+    document.querySelectorAll('#players-group .btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderPositionButtons();
+    renderSituationButtons();
+    renderGrid();
+    renderStats();
+    clearSelectedCard();
+  });
+});
+
+// Default: 2 players active
+document.querySelector('[data-players="2"]').classList.add('active');
+renderPositionButtons();
+renderSituationButtons();
+renderGrid();
+renderStats();
+</script>
+</body>
+</html>

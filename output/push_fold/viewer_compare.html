@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Push/Fold Comparison: Original vs Fixed</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg-0: #0a1628;
+    --bg-1: #0f1d30;
+    --bg-2: #142538;
+    --bg-3: #1a2d42;
+    --border: #1e3a5c;
+    --border-active: #2a5f8f;
+    --text-primary: #e8ecf0;
+    --text-secondary: #7a9bb8;
+    --text-muted: #3d6080;
+    --accent: #018F69;
+    --accent-glow: rgba(1,143,105,0.15);
+    --c-pure-push: #017a5a;
+    --c-high-push: #018F69;
+    --c-med-high: #2ab88e;
+    --c-mixed: #f0b429;
+    --c-med-low: #e87040;
+    --c-low: #d45050;
+    --c-pure-fold: #1a2d42;
+    --diff-promote: #00e676;
+    --diff-demote: #ff5252;
+    --diff-small: #ffd740;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg-0);
+    color: var(--text-primary);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.2;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px 56px;
+  }
+
+  .header {
+    padding: 28px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+  .header .subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 28px;
+    align-items: flex-start;
+  }
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .control-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding-left: 2px;
+  }
+  .btn-group { display: flex; gap: 4px; flex-wrap: wrap; }
+  .btn {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-2);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--bg-3); border-color: var(--border-active); color: var(--text-primary); }
+  .btn.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    padding: 14px 18px;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    align-items: center;
+  }
+  .stats-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .stats-item-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .stats-item-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+  .stats-item-value .orig { color: var(--c-med-low); }
+  .stats-item-value .arrow { color: var(--text-muted); margin: 0 6px; }
+  .stats-item-value .fixed { color: var(--c-high-push); }
+  .stats-item-value .delta-pos { color: var(--diff-promote); font-size: 12px; margin-left: 6px; }
+  .stats-item-value .delta-neg { color: var(--diff-demote); font-size: 12px; margin-left: 6px; }
+  .stats-item-value .delta-zero { color: var(--text-muted); font-size: 12px; margin-left: 6px; }
+  .stats-sep {
+    width: 1px;
+    height: 32px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  /* Grids side by side */
+  .grids-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  @media (max-width: 960px) {
+    .grids-row { grid-template-columns: 1fr; }
+  }
+
+  .grid-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .grid-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .grid-panel-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+  }
+  .grid-panel-title .tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-right: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .tag-orig { background: rgba(232,112,64,0.15); color: var(--c-med-low); border: 1px solid rgba(232,112,64,0.3); }
+  .tag-fixed { background: var(--accent-glow); color: var(--accent); border: 1px solid rgba(1,143,105,0.3); }
+
+  .push-pct-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .push-pct-badge span { color: var(--c-high-push); font-size: 16px; font-weight: 500; }
+
+  .hand-grid-wrapper { overflow: auto; }
+  .hand-grid {
+    display: grid;
+    grid-template-columns: 18px repeat(13, 1fr);
+    grid-template-rows: 18px repeat(13, 1fr);
+    gap: 2px;
+    min-width: 380px;
+  }
+  .grid-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+  .hand-cell {
+    aspect-ratio: 1;
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    border: 2px solid transparent;
+    overflow: hidden;
+  }
+  .hand-cell:hover {
+    transform: scale(1.1);
+    z-index: 10;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  }
+  .cell-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.92);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .cell-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.65);
+    margin-top: 1px;
+    line-height: 1;
+  }
+
+  /* Diff border styles on fixed grid cells */
+  .diff-promote { border-color: var(--diff-promote) !important; box-shadow: 0 0 6px rgba(0,230,118,0.4); }
+  .diff-demote  { border-color: var(--diff-demote)  !important; box-shadow: 0 0 6px rgba(255,82,82,0.4); }
+  .diff-small   { border-color: var(--diff-small)   !important; box-shadow: 0 0 4px rgba(255,215,64,0.3); }
+
+  /* Legend */
+  .diff-legend {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 28px;
+  }
+  .diff-legend-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-right: 4px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    border: 2px solid transparent;
+    background: var(--bg-2);
+    flex-shrink: 0;
+  }
+  .legend-swatch.promote { border-color: var(--diff-promote); box-shadow: 0 0 4px rgba(0,230,118,0.4); }
+  .legend-swatch.demote  { border-color: var(--diff-demote);  box-shadow: 0 0 4px rgba(255,82,82,0.4); }
+  .legend-swatch.small   { border-color: var(--diff-small);   box-shadow: 0 0 3px rgba(255,215,64,0.3); }
+
+  /* Diff table */
+  .diff-section {
+    background: var(--bg-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 32px;
+  }
+  .diff-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .diff-section h2 {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .diff-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .diff-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+  }
+  .diff-table th {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .diff-table th:hover { color: var(--text-secondary); }
+  .diff-table th .sort-icon { margin-left: 4px; opacity: 0.4; }
+  .diff-table th.sorted .sort-icon { opacity: 1; color: var(--accent); }
+  .diff-table td {
+    padding: 7px 12px;
+    border-bottom: 1px solid rgba(30,58,92,0.5);
+    vertical-align: middle;
+  }
+  .diff-table tr:last-child td { border-bottom: none; }
+  .diff-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .dt-hand { font-weight: 500; color: var(--text-primary); font-size: 13px; }
+  .dt-orig  { color: var(--c-med-low); }
+  .dt-fixed { color: var(--c-high-push); }
+  .dt-delta-pos { color: var(--diff-promote); }
+  .dt-delta-neg { color: var(--diff-demote); }
+  .dt-delta-bar-wrap {
+    width: 80px;
+    height: 6px;
+    background: var(--bg-2);
+    border-radius: 3px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 8px;
+  }
+  .dt-delta-bar { height: 100%; border-radius: 3px; }
+
+  .dir-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .dir-promote { background: rgba(0,230,118,0.12); color: var(--diff-promote); }
+  .dir-demote  { background: rgba(255,82,82,0.12);  color: var(--diff-demote); }
+  .dir-small   { background: rgba(255,215,64,0.08); color: var(--diff-small); }
+
+  /* Tooltip */
+  .tooltip {
+    position: fixed;
+    background: var(--bg-1);
+    border: 1px solid var(--border-active);
+    border-radius: 8px;
+    padding: 10px 14px;
+    pointer-events: none;
+    z-index: 1000;
+    display: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    min-width: 160px;
+  }
+  .tooltip.visible { display: block; }
+  .tt-hand { font-size: 15px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; font-family: 'Syne', sans-serif; }
+  .tt-row { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 2px; }
+  .tt-label { color: var(--text-muted); }
+  .tt-val-orig  { color: var(--c-med-low); }
+  .tt-val-fixed { color: var(--c-high-push); }
+  .tt-val-delta-pos { color: var(--diff-promote); }
+  .tt-val-delta-neg { color: var(--diff-demote); }
+  .tt-val-delta-neu { color: var(--text-muted); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Push/Fold Comparison</h1>
+    <div class="subtitle">Original (1B MCCFR) vs Fixed (MC Equity) &bull; 4-max 8bb</div>
+  </div>
+
+  <div class="controls">
+    <div class="control-group">
+      <div class="control-label">Position</div>
+      <div class="btn-group" id="position-group"></div>
+    </div>
+    <div class="control-group">
+      <div class="control-label">Situation</div>
+      <div class="btn-group" id="situation-group"></div>
+    </div>
+  </div>
+
+  <div class="stats-bar" id="stats-bar">
+    <!-- populated by JS -->
+  </div>
+
+  <div class="diff-legend">
+    <span class="diff-legend-label">Border key</span>
+    <div class="legend-item"><div class="legend-swatch promote"></div> Promoted &gt;5pp</div>
+    <div class="legend-item"><div class="legend-swatch demote"></div> Demoted &gt;5pp</div>
+    <div class="legend-item"><div class="legend-swatch small"></div> Changed 1–5pp</div>
+  </div>
+
+  <div class="grids-row">
+    <div class="grid-panel">
+      <div class="grid-panel-header">
+        <div class="grid-panel-title"><span class="tag tag-orig">Original</span> 1B MCCFR</div>
+        <div class="push-pct-badge">Push: <span id="orig-push-pct">—</span>%</div>
+      </div>
+      <div class="hand-grid-wrapper">
+        <div class="hand-grid" id="grid-orig"></div>
+      </div>
+    </div>
+    <div class="grid-panel">
+      <div class="grid-panel-header">
+        <div class="grid-panel-title"><span class="tag tag-fixed">Fixed</span> MC Equity</div>
+        <div class="push-pct-badge">Push: <span id="fixed-push-pct">—</span>%</div>
+      </div>
+      <div class="hand-grid-wrapper">
+        <div class="hand-grid" id="grid-fixed"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="diff-section">
+    <div class="diff-section-header">
+      <h2>Changed Hands</h2>
+      <div class="diff-count" id="diff-count"></div>
+    </div>
+    <table class="diff-table" id="diff-table">
+      <thead>
+        <tr>
+          <th data-col="hand">Hand <span class="sort-icon">↕</span></th>
+          <th data-col="orig">Original % <span class="sort-icon">↕</span></th>
+          <th data-col="fixed">Fixed % <span class="sort-icon">↕</span></th>
+          <th data-col="delta">Change <span class="sort-icon">↓</span></th>
+          <th data-col="dir">Direction <span class="sort-icon">↕</span></th>
+        </tr>
+      </thead>
+      <tbody id="diff-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip">
+  <div class="tt-hand" id="tt-hand"></div>
+  <div class="tt-row"><span class="tt-label">Original</span><span class="tt-val-orig" id="tt-orig"></span></div>
+  <div class="tt-row"><span class="tt-label">Fixed</span><span class="tt-val-fixed" id="tt-fixed"></span></div>
+  <div class="tt-row"><span class="tt-label">Change</span><span id="tt-delta"></span></div>
+</div>
+
+<script>
+const ORIGINAL = {"players":4,"stack_bb":8,"ante_bb":0,"iterations":1000000000,"seed":42,"positions":[{"name":"CO","index":0,"situations":[{"facing":"no action","push_pct":28.7,"hands":[{"hand":"22","push":0.994},{"hand":"33","push":0.9999},{"hand":"44","push":1.0},{"hand":"55","push":1.0},{"hand":"66","push":0.9999},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0},{"hand":"42s","push":0.0},{"hand":"43s","push":0.0},{"hand":"52s","push":0.0002},{"hand":"53s","push":0.0},{"hand":"54s","push":0.0},{"hand":"62s","push":0.0},{"hand":"63s","push":0.0},{"hand":"64s","push":0.0001},{"hand":"65s","push":0.0},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0},{"hand":"74s","push":0.0},{"hand":"75s","push":0.0},{"hand":"76s","push":0.0003},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0},{"hand":"86s","push":0.0},{"hand":"87s","push":0.5709},{"hand":"92s","push":0.0},{"hand":"93s","push":0.0},{"hand":"94s","push":0.0002},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0001},{"hand":"97s","push":0.0079},{"hand":"98s","push":0.9954},{"hand":"T2s","push":0.0002},{"hand":"T3s","push":0.0},{"hand":"T4s","push":0.0001},{"hand":"T5s","push":0.0001},{"hand":"T6s","push":0.0001},{"hand":"T7s","push":0.0},{"hand":"T8s","push":0.9643},{"hand":"T9s","push":0.9991},{"hand":"J2s","push":0.0},{"hand":"J3s","push":0.0},{"hand":"J4s","push":0.0002},{"hand":"J5s","push":0.0002},{"hand":"J6s","push":0.0},{"hand":"J7s","push":0.0001},{"hand":"J8s","push":0.9897},{"hand":"J9s","push":0.9964},{"hand":"JTs","push":0.9994},{"hand":"Q2s","push":0.0},{"hand":"Q3s","push":0.0},{"hand":"Q4s","push":0.0},{"hand":"Q5s","push":0.0},{"hand":"Q6s","push":0.0002},{"hand":"Q7s","push":0.0},{"hand":"Q8s","push":0.8981},{"hand":"Q9s","push":0.9989},{"hand":"QTs","push":1.0},{"hand":"QJs","push":1.0},{"hand":"K2s","push":0.0},{"hand":"K3s","push":0.0},{"hand":"K4s","push":0.0026},{"hand":"K5s","push":0.018},{"hand":"K6s","push":0.032},{"hand":"K7s","push":0.0105},{"hand":"K8s","push":0.9505},{"hand":"K9s","push":1.0},{"hand":"KTs","push":1.0},{"hand":"KJs","push":1.0},{"hand":"KQs","push":0.9999},{"hand":"A2s","push":0.9994},{"hand":"A3s","push":1.0},{"hand":"A4s","push":1.0},{"hand":"A5s","push":0.9997},{"hand":"A6s","push":0.9999},{"hand":"A7s","push":1.0},{"hand":"A8s","push":0.9999},{"hand":"A9s","push":1.0},{"hand":"ATs","push":1.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0002},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0},{"hand":"T8o","push":0.0001},{"hand":"T9o","push":0.0003},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0},{"hand":"J8o","push":0.0001},{"hand":"J9o","push":0.0},{"hand":"JTo","push":0.997},{"hand":"Q2o","push":0.0},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0},{"hand":"Q6o","push":0.0001},{"hand":"Q7o","push":0.0001},{"hand":"Q8o","push":0.0003},{"hand":"Q9o","push":0.0001},{"hand":"QTo","push":0.115},{"hand":"QJo","push":1.0},{"hand":"K2o","push":0.0},{"hand":"K3o","push":0.0},{"hand":"K4o","push":0.0},{"hand":"K5o","push":0.0001},{"hand":"K6o","push":0.0},{"hand":"K7o","push":0.0002},{"hand":"K8o","push":0.0001},{"hand":"K9o","push":0.0023},{"hand":"KTo","push":1.0},{"hand":"KJo","push":0.9999},{"hand":"KQo","push":1.0},{"hand":"A2o","push":0.0102},{"hand":"A3o","push":0.9621},{"hand":"A4o","push":0.9983},{"hand":"A5o","push":1.0},{"hand":"A6o","push":0.9995},{"hand":"A7o","push":0.9999},{"hand":"A8o","push":1.0},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]}]},{"name":"BTN","index":1,"situations":[{"facing":"no action","push_pct":34.3,"hands":[{"hand":"22","push":0.9999},{"hand":"33","push":0.9993},{"hand":"44","push":0.9998},{"hand":"55","push":1.0},{"hand":"66","push":1.0},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0001},{"hand":"42s","push":0.0},{"hand":"43s","push":0.0},{"hand":"52s","push":0.0},{"hand":"53s","push":0.0},{"hand":"54s","push":0.0002},{"hand":"62s","push":0.0},{"hand":"63s","push":0.0001},{"hand":"64s","push":0.0},{"hand":"65s","push":0.1321},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0},{"hand":"74s","push":0.0},{"hand":"75s","push":0.0385},{"hand":"76s","push":0.8591},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0},{"hand":"86s","push":0.7142},{"hand":"87s","push":0.9755},{"hand":"92s","push":0.0001},{"hand":"93s","push":0.0},{"hand":"94s","push":0.0},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0},{"hand":"97s","push":0.9846},{"hand":"98s","push":0.9984},{"hand":"T2s","push":0.0001},{"hand":"T3s","push":0.0},{"hand":"T4s","push":0.0002},{"hand":"T5s","push":0.0},{"hand":"T6s","push":0.0021},{"hand":"T7s","push":0.9658},{"hand":"T8s","push":0.9961},{"hand":"T9s","push":0.9989},{"hand":"J2s","push":0.0001},{"hand":"J3s","push":0.0001},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0},{"hand":"J6s","push":0.0016},{"hand":"J7s","push":0.6946},{"hand":"J8s","push":0.9938},{"hand":"J9s","push":0.9999},{"hand":"JTs","push":0.9998},{"hand":"Q2s","push":0.0001},{"hand":"Q3s","push":0.0004},{"hand":"Q4s","push":0.0001},{"hand":"Q5s","push":0.0001},{"hand":"Q6s","push":0.019},{"hand":"Q7s","push":0.0001},{"hand":"Q8s","push":0.992},{"hand":"Q9s","push":0.9999},{"hand":"QTs","push":0.9999},{"hand":"QJs","push":1.0},{"hand":"K2s","push":0.0034},{"hand":"K3s","push":0.0002},{"hand":"K4s","push":0.7581},{"hand":"K5s","push":0.9999},{"hand":"K6s","push":0.9962},{"hand":"K7s","push":0.9996},{"hand":"K8s","push":0.9994},{"hand":"K9s","push":1.0},{"hand":"KTs","push":1.0},{"hand":"KJs","push":1.0},{"hand":"KQs","push":1.0},{"hand":"A2s","push":1.0},{"hand":"A3s","push":0.9998},{"hand":"A4s","push":1.0},{"hand":"A5s","push":0.9998},{"hand":"A6s","push":0.9999},{"hand":"A7s","push":1.0},{"hand":"A8s","push":1.0},{"hand":"A9s","push":1.0},{"hand":"ATs","push":1.0},{"hand":"AJs","push":0.9999},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0001},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0001},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0001},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.3891},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0001},{"hand":"J8o","push":0.0001},{"hand":"J9o","push":0.0004},{"hand":"JTo","push":0.9992},{"hand":"Q2o","push":0.0001},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0002},{"hand":"Q5o","push":0.0},{"hand":"Q6o","push":0.0},{"hand":"Q7o","push":0.0},{"hand":"Q8o","push":0.0002},{"hand":"Q9o","push":0.0017},{"hand":"QTo","push":1.0},{"hand":"QJo","push":1.0},{"hand":"K2o","push":0.0},{"hand":"K3o","push":0.0001},{"hand":"K4o","push":0.0001},{"hand":"K5o","push":0.0006},{"hand":"K6o","push":0.0014},{"hand":"K7o","push":0.0001},{"hand":"K8o","push":0.0033},{"hand":"K9o","push":1.0},{"hand":"KTo","push":1.0},{"hand":"KJo","push":1.0},{"hand":"KQo","push":1.0},{"hand":"A2o","push":1.0},{"hand":"A3o","push":1.0},{"hand":"A4o","push":0.9999},{"hand":"A5o","push":1.0},{"hand":"A6o","push":1.0},{"hand":"A7o","push":0.9999},{"hand":"A8o","push":1.0},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"CO push","push_pct":13.1,"hands":[{"hand":"22","push":0.0},{"hand":"33","push":0.0004},{"hand":"44","push":0.9966},{"hand":"55","push":1.0},{"hand":"66","push":0.9996},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0001},{"hand":"42s","push":0.0002},{"hand":"43s","push":0.0},{"hand":"52s","push":0.0},{"hand":"53s","push":0.0},{"hand":"54s","push":0.0001},{"hand":"62s","push":0.0001},{"hand":"63s","push":0.0},{"hand":"64s","push":0.0001},{"hand":"65s","push":0.0002},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0001},{"hand":"74s","push":0.0},{"hand":"75s","push":0.0},{"hand":"76s","push":0.0},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0},{"hand":"86s","push":0.0002},{"hand":"87s","push":0.0},{"hand":"92s","push":0.0},{"hand":"93s","push":0.0002},{"hand":"94s","push":0.0},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0},{"hand":"97s","push":0.0},{"hand":"98s","push":0.0001},{"hand":"T2s","push":0.0},{"hand":"T3s","push":0.0},{"hand":"T4s","push":0.0009},{"hand":"T5s","push":0.0005},{"hand":"T6s","push":0.0001},{"hand":"T7s","push":0.0},{"hand":"T8s","push":0.0003},{"hand":"T9s","push":0.002},{"hand":"J2s","push":0.0},{"hand":"J3s","push":0.0001},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0001},{"hand":"J6s","push":0.0},{"hand":"J7s","push":0.0004},{"hand":"J8s","push":0.0009},{"hand":"J9s","push":0.0024},{"hand":"JTs","push":0.0001},{"hand":"Q2s","push":0.0005},{"hand":"Q3s","push":0.0005},{"hand":"Q4s","push":0.0},{"hand":"Q5s","push":0.0004},{"hand":"Q6s","push":0.0},{"hand":"Q7s","push":0.0002},{"hand":"Q8s","push":0.0},{"hand":"Q9s","push":0.0},{"hand":"QTs","push":0.0061},{"hand":"QJs","push":0.0012},{"hand":"K2s","push":0.0004},{"hand":"K3s","push":0.0001},{"hand":"K4s","push":0.0005},{"hand":"K5s","push":0.0},{"hand":"K6s","push":0.0001},{"hand":"K7s","push":0.0003},{"hand":"K8s","push":0.0006},{"hand":"K9s","push":0.0004},{"hand":"KTs","push":0.0332},{"hand":"KJs","push":0.9996},{"hand":"KQs","push":1.0},{"hand":"A2s","push":0.0032},{"hand":"A3s","push":0.0002},{"hand":"A4s","push":0.0068},{"hand":"A5s","push":0.0013},{"hand":"A6s","push":0.0002},{"hand":"A7s","push":0.9889},{"hand":"A8s","push":0.9998},{"hand":"A9s","push":0.9998},{"hand":"ATs","push":1.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0001},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0001},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0001},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0001},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0003},{"hand":"J8o","push":0.0},{"hand":"J9o","push":0.0},{"hand":"JTo","push":0.0001},{"hand":"Q2o","push":0.0},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0},{"hand":"Q6o","push":0.0},{"hand":"Q7o","push":0.0},{"hand":"Q8o","push":0.0002},{"hand":"Q9o","push":0.0001},{"hand":"QTo","push":0.0005},{"hand":"QJo","push":0.0009},{"hand":"K2o","push":0.0},{"hand":"K3o","push":0.0},{"hand":"K4o","push":0.0},{"hand":"K5o","push":0.0001},{"hand":"K6o","push":0.0},{"hand":"K7o","push":0.0},{"hand":"K8o","push":0.0001},{"hand":"K9o","push":0.0001},{"hand":"KTo","push":0.0032},{"hand":"KJo","push":0.0001},{"hand":"KQo","push":1.0},{"hand":"A2o","push":0.0},{"hand":"A3o","push":0.0006},{"hand":"A4o","push":0.0005},{"hand":"A5o","push":0.0001},{"hand":"A6o","push":0.0008},{"hand":"A7o","push":0.0003},{"hand":"A8o","push":0.002},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]}]},{"name":"SB","index":2,"situations":[{"facing":"no action","push_pct":60.9,"hands":[{"hand":"22","push":0.9999},{"hand":"33","push":0.9999},{"hand":"44","push":1.0},{"hand":"55","push":1.0},{"hand":"66","push":1.0},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0042},{"hand":"42s","push":0.0014},{"hand":"43s","push":0.0004},{"hand":"52s","push":0.0148},{"hand":"53s","push":0.9989},{"hand":"54s","push":1.0},{"hand":"62s","push":0.0001},{"hand":"63s","push":0.0183},{"hand":"64s","push":0.9983},{"hand":"65s","push":0.9978},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0007},{"hand":"74s","push":0.7976},{"hand":"75s","push":0.9996},{"hand":"76s","push":0.9982},{"hand":"82s","push":0.0004},{"hand":"83s","push":0.0003},{"hand":"84s","push":0.1441},{"hand":"85s","push":1.0},{"hand":"86s","push":0.9991},{"hand":"87s","push":0.999},{"hand":"92s","push":0.0001},{"hand":"93s","push":0.009},{"hand":"94s","push":0.0002},{"hand":"95s","push":0.9955},{"hand":"96s","push":0.9993},{"hand":"97s","push":1.0},{"hand":"98s","push":0.9991},{"hand":"T2s","push":0.031},{"hand":"T3s","push":0.1169},{"hand":"T4s","push":0.7775},{"hand":"T5s","push":1.0},{"hand":"T6s","push":0.9999},{"hand":"T7s","push":0.9996},{"hand":"T8s","push":0.9998},{"hand":"T9s","push":0.9993},{"hand":"J2s","push":0.9963},{"hand":"J3s","push":0.9997},{"hand":"J4s","push":0.9961},{"hand":"J5s","push":1.0},{"hand":"J6s","push":0.9993},{"hand":"J7s","push":0.9979},{"hand":"J8s","push":0.9991},{"hand":"J9s","push":1.0},{"hand":"JTs","push":0.9999},{"hand":"Q2s","push":0.9988},{"hand":"Q3s","push":0.9924},{"hand":"Q4s","push":0.9965},{"hand":"Q5s","push":0.9999},{"hand":"Q6s","push":1.0},{"hand":"Q7s","push":1.0},{"hand":"Q8s","push":1.0},{"hand":"Q9s","push":0.9994},{"hand":"QTs","push":1.0},{"hand":"QJs","push":1.0},{"hand":"K2s","push":1.0},{"hand":"K3s","push":1.0},{"hand":"K4s","push":0.9999},{"hand":"K5s","push":1.0},{"hand":"K6s","push":1.0},{"hand":"K7s","push":1.0},{"hand":"K8s","push":0.9999},{"hand":"K9s","push":1.0},{"hand":"KTs","push":1.0},{"hand":"KJs","push":1.0},{"hand":"KQs","push":1.0},{"hand":"A2s","push":1.0},{"hand":"A3s","push":1.0},{"hand":"A4s","push":1.0},{"hand":"A5s","push":1.0},{"hand":"A6s","push":1.0},{"hand":"A7s","push":1.0},{"hand":"A8s","push":0.9999},{"hand":"A9s","push":1.0},{"hand":"ATs","push":1.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0001},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0001},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0014},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0001},{"hand":"65o","push":0.0044},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0002},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0007},{"hand":"76o","push":0.9966},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0001},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0023},{"hand":"87o","push":0.9808},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0005},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0022},{"hand":"96o","push":0.0001},{"hand":"97o","push":0.9669},{"hand":"98o","push":0.9995},{"hand":"T2o","push":0.0007},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0008},{"hand":"T6o","push":0.0016},{"hand":"T7o","push":0.9682},{"hand":"T8o","push":0.9984},{"hand":"T9o","push":0.9995},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0019},{"hand":"J4o","push":0.0002},{"hand":"J5o","push":0.0016},{"hand":"J6o","push":0.0011},{"hand":"J7o","push":0.1776},{"hand":"J8o","push":1.0},{"hand":"J9o","push":1.0},{"hand":"JTo","push":0.9999},{"hand":"Q2o","push":0.0002},{"hand":"Q3o","push":0.0021},{"hand":"Q4o","push":0.0851},{"hand":"Q5o","push":0.9994},{"hand":"Q6o","push":1.0},{"hand":"Q7o","push":1.0},{"hand":"Q8o","push":0.9998},{"hand":"Q9o","push":1.0},{"hand":"QTo","push":1.0},{"hand":"QJo","push":1.0},{"hand":"K2o","push":0.9999},{"hand":"K3o","push":0.9999},{"hand":"K4o","push":0.9997},{"hand":"K5o","push":1.0},{"hand":"K6o","push":1.0},{"hand":"K7o","push":1.0},{"hand":"K8o","push":1.0},{"hand":"K9o","push":1.0},{"hand":"KTo","push":1.0},{"hand":"KJo","push":1.0},{"hand":"KQo","push":1.0},{"hand":"A2o","push":1.0},{"hand":"A3o","push":0.9999},{"hand":"A4o","push":1.0},{"hand":"A5o","push":1.0},{"hand":"A6o","push":1.0},{"hand":"A7o","push":1.0},{"hand":"A8o","push":1.0},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"CO push","push_pct":17.8,"hands":[{"hand":"22","push":0.0024},{"hand":"33","push":0.9895},{"hand":"44","push":0.9999},{"hand":"55","push":0.9991},{"hand":"66","push":1.0},{"hand":"77","push":1.0},{"hand":"88","push":0.9999},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0001},{"hand":"42s","push":0.0},{"hand":"43s","push":0.001},{"hand":"52s","push":0.0},{"hand":"53s","push":0.001},{"hand":"54s","push":0.0},{"hand":"62s","push":0.0002},{"hand":"63s","push":0.0001},{"hand":"64s","push":0.0},{"hand":"65s","push":0.0001},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0},{"hand":"74s","push":0.0},{"hand":"75s","push":0.0},{"hand":"76s","push":0.0001},{"hand":"82s","push":0.0001},{"hand":"83s","push":0.0004},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0004},{"hand":"86s","push":0.0},{"hand":"87s","push":0.0001},{"hand":"92s","push":0.0},{"hand":"93s","push":0.0002},{"hand":"94s","push":0.0},{"hand":"95s","push":0.0002},{"hand":"96s","push":0.0},{"hand":"97s","push":0.0001},{"hand":"98s","push":0.0002},{"hand":"T2s","push":0.0},{"hand":"T3s","push":0.0001},{"hand":"T4s","push":0.0001},{"hand":"T5s","push":0.0},{"hand":"T6s","push":0.0},{"hand":"T7s","push":0.0001},{"hand":"T8s","push":0.0},{"hand":"T9s","push":0.0009},{"hand":"J2s","push":0.0},{"hand":"J3s","push":0.0001},{"hand":"J4s","push":0.0001},{"hand":"J5s","push":0.0003},{"hand":"J6s","push":0.0002},{"hand":"J7s","push":0.0008},{"hand":"J8s","push":0.0005},{"hand":"J9s","push":0.003},{"hand":"JTs","push":0.0002},{"hand":"Q2s","push":0.0001},{"hand":"Q3s","push":0.0},{"hand":"Q4s","push":0.0006},{"hand":"Q5s","push":0.0024},{"hand":"Q6s","push":0.0007},{"hand":"Q7s","push":0.0004},{"hand":"Q8s","push":0.0003},{"hand":"Q9s","push":0.0024},{"hand":"QTs","push":0.0124},{"hand":"QJs","push":1.0},{"hand":"K2s","push":0.0003},{"hand":"K3s","push":0.0006},{"hand":"K4s","push":0.0007},{"hand":"K5s","push":0.0014},{"hand":"K6s","push":0.001},{"hand":"K7s","push":0.0008},{"hand":"K8s","push":0.0009},{"hand":"K9s","push":0.005},{"hand":"KTs","push":0.9999},{"hand":"KJs","push":1.0},{"hand":"KQs","push":0.9987},{"hand":"A2s","push":0.1054},{"hand":"A3s","push":0.4375},{"hand":"A4s","push":1.0},{"hand":"A5s","push":0.9993},{"hand":"A6s","push":0.9969},{"hand":"A7s","push":0.9999},{"hand":"A8s","push":1.0},{"hand":"A9s","push":1.0},{"hand":"ATs","push":0.9999},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0001},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0002},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0003},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0001},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0001},{"hand":"J7o","push":0.0},{"hand":"J8o","push":0.0},{"hand":"J9o","push":0.0004},{"hand":"JTo","push":0.0001},{"hand":"Q2o","push":0.0},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0002},{"hand":"Q6o","push":0.0},{"hand":"Q7o","push":0.0002},{"hand":"Q8o","push":0.0},{"hand":"Q9o","push":0.0},{"hand":"QTo","push":0.0},{"hand":"QJo","push":0.0014},{"hand":"K2o","push":0.0},{"hand":"K3o","push":0.0001},{"hand":"K4o","push":0.0},{"hand":"K5o","push":0.0},{"hand":"K6o","push":0.0},{"hand":"K7o","push":0.0002},{"hand":"K8o","push":0.0003},{"hand":"K9o","push":0.0003},{"hand":"KTo","push":0.0023},{"hand":"KJo","push":0.9624},{"hand":"KQo","push":1.0},{"hand":"A2o","push":0.0007},{"hand":"A3o","push":0.0013},{"hand":"A4o","push":0.0003},{"hand":"A5o","push":0.002},{"hand":"A6o","push":0.0017},{"hand":"A7o","push":0.8302},{"hand":"A8o","push":0.9999},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"BTN push","push_pct":21.6,"hands":[{"hand":"22","push":0.0132},{"hand":"33","push":0.9994},{"hand":"44","push":0.9988},{"hand":"55","push":1.0},{"hand":"66","push":1.0},{"hand":"77","push":0.9999},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0001},{"hand":"42s","push":0.0},{"hand":"43s","push":0.0001},{"hand":"52s","push":0.0002},{"hand":"53s","push":0.0001},{"hand":"54s","push":0.0},{"hand":"62s","push":0.0},{"hand":"63s","push":0.0001},{"hand":"64s","push":0.0001},{"hand":"65s","push":0.0004},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0},{"hand":"74s","push":0.0006},{"hand":"75s","push":0.0},{"hand":"76s","push":0.0007},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0003},{"hand":"85s","push":0.0002},{"hand":"86s","push":0.0009},{"hand":"87s","push":0.0006},{"hand":"92s","push":0.0},{"hand":"93s","push":0.0002},{"hand":"94s","push":0.0001},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0},{"hand":"97s","push":0.0003},{"hand":"98s","push":0.0003},{"hand":"T2s","push":0.0003},{"hand":"T3s","push":0.0},{"hand":"T4s","push":0.0009},{"hand":"T5s","push":0.0},{"hand":"T6s","push":0.0002},{"hand":"T7s","push":0.0},{"hand":"T8s","push":0.0},{"hand":"T9s","push":0.0019},{"hand":"J2s","push":0.0},{"hand":"J3s","push":0.0},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0004},{"hand":"J6s","push":0.0002},{"hand":"J7s","push":0.0004},{"hand":"J8s","push":0.0006},{"hand":"J9s","push":0.0005},{"hand":"JTs","push":0.9223},{"hand":"Q2s","push":0.0},{"hand":"Q3s","push":0.0001},{"hand":"Q4s","push":0.0},{"hand":"Q5s","push":0.0021},{"hand":"Q6s","push":0.0001},{"hand":"Q7s","push":0.0005},{"hand":"Q8s","push":0.0001},{"hand":"Q9s","push":0.0003},{"hand":"QTs","push":1.0},{"hand":"QJs","push":0.9999},{"hand":"K2s","push":0.0},{"hand":"K3s","push":0.0001},{"hand":"K4s","push":0.0034},{"hand":"K5s","push":0.0002},{"hand":"K6s","push":0.0017},{"hand":"K7s","push":0.0003},{"hand":"K8s","push":0.0029},{"hand":"K9s","push":0.97},{"hand":"KTs","push":1.0},{"hand":"KJs","push":0.9998},{"hand":"KQs","push":1.0},{"hand":"A2s","push":0.9978},{"hand":"A3s","push":0.9995},{"hand":"A4s","push":0.9997},{"hand":"A5s","push":0.9998},{"hand":"A6s","push":1.0},{"hand":"A7s","push":0.9999},{"hand":"A8s","push":1.0},{"hand":"A9s","push":1.0},{"hand":"ATs","push":1.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":0.9999},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0001},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0001},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0001},{"hand":"87o","push":0.0},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0002},{"hand":"98o","push":0.0002},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0002},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0001},{"hand":"T6o","push":0.0002},{"hand":"T7o","push":0.0},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0002},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0002},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0001},{"hand":"J8o","push":0.0},{"hand":"J9o","push":0.0002},{"hand":"JTo","push":0.0009},{"hand":"Q2o","push":0.0001},{"hand":"Q3o","push":0.0003},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0001},{"hand":"Q6o","push":0.0},{"hand":"Q7o","push":0.0001},{"hand":"Q8o","push":0.0},{"hand":"Q9o","push":0.0003},{"hand":"QTo","push":0.0022},{"hand":"QJo","push":0.0036},{"hand":"K2o","push":0.0001},{"hand":"K3o","push":0.0002},{"hand":"K4o","push":0.0003},{"hand":"K5o","push":0.0},{"hand":"K6o","push":0.0004},{"hand":"K7o","push":0.0001},{"hand":"K8o","push":0.0001},{"hand":"K9o","push":0.0005},{"hand":"KTo","push":1.0},{"hand":"KJo","push":0.9999},{"hand":"KQo","push":0.9999},{"hand":"A2o","push":0.0001},{"hand":"A3o","push":0.0007},{"hand":"A4o","push":0.0052},{"hand":"A5o","push":0.6959},{"hand":"A6o","push":0.8572},{"hand":"A7o","push":1.0},{"hand":"A8o","push":1.0},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"CO+BTN push","push_pct":9.8,"hands":[{"hand":"22","push":0.0032},{"hand":"33","push":0.0001},{"hand":"44","push":0.0011},{"hand":"55","push":0.6687},{"hand":"66","push":0.9997},{"hand":"77","push":1.0},{"hand":"88","push":0.9996},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0011},{"hand":"42s","push":0.0},{"hand":"43s","push":0.0001},{"hand":"52s","push":0.0001},{"hand":"53s","push":0.0016},{"hand":"54s","push":0.0043},{"hand":"62s","push":0.0001},{"hand":"63s","push":0.0057},{"hand":"64s","push":0.0054},{"hand":"65s","push":0.0},{"hand":"72s","push":0.0003},{"hand":"73s","push":0.0001},{"hand":"74s","push":0.0005},{"hand":"75s","push":0.0015},{"hand":"76s","push":0.0549},{"hand":"82s","push":0.0004},{"hand":"83s","push":0.0039},{"hand":"84s","push":0.0017},{"hand":"85s","push":0.0005},{"hand":"86s","push":0.0},{"hand":"87s","push":0.0107},{"hand":"92s","push":0.0001},{"hand":"93s","push":0.0},{"hand":"94s","push":0.0024},{"hand":"95s","push":0.0006},{"hand":"96s","push":0.0056},{"hand":"97s","push":0.0006},{"hand":"98s","push":0.0204},{"hand":"T2s","push":0.0002},{"hand":"T3s","push":0.0053},{"hand":"T4s","push":0.003},{"hand":"T5s","push":0.002},{"hand":"T6s","push":0.0009},{"hand":"T7s","push":0.008},{"hand":"T8s","push":0.0127},{"hand":"T9s","push":0.1242},{"hand":"J2s","push":0.0001},{"hand":"J3s","push":0.0015},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0002},{"hand":"J6s","push":0.0028},{"hand":"J7s","push":0.0003},{"hand":"J8s","push":0.0},{"hand":"J9s","push":0.0549},{"hand":"JTs","push":0.4939},{"hand":"Q2s","push":0.0003},{"hand":"Q3s","push":0.0},{"hand":"Q4s","push":0.0002},{"hand":"Q5s","push":0.0044},{"hand":"Q6s","push":0.0057},{"hand":"Q7s","push":0.0097},{"hand":"Q8s","push":0.0005},{"hand":"Q9s","push":0.02},{"hand":"QTs","push":0.4347},{"hand":"QJs","push":1.0},{"hand":"K2s","push":0.0006},{"hand":"K3s","push":0.0018},{"hand":"K4s","push":0.0022},{"hand":"K5s","push":0.0001},{"hand":"K6s","push":0.0},{"hand":"K7s","push":0.0045},{"hand":"K8s","push":0.0008},{"hand":"K9s","push":0.0294},{"hand":"KTs","push":0.4146},{"hand":"KJs","push":0.9993},{"hand":"KQs","push":0.9888},{"hand":"A2s","push":0.0001},{"hand":"A3s","push":0.0013},{"hand":"A4s","push":0.0092},{"hand":"A5s","push":0.0035},{"hand":"A6s","push":0.0001},{"hand":"A7s","push":0.0292},{"hand":"A8s","push":0.0107},{"hand":"A9s","push":0.0021},{"hand":"ATs","push":0.9755},{"hand":"AJs","push":1.0},{"hand":"AQs","push":0.9984},{"hand":"AKs","push":0.9999},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0004},{"hand":"54o","push":0.0002},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0001},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0001},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0004},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0001},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0009},{"hand":"92o","push":0.0003},{"hand":"93o","push":0.0001},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0001},{"hand":"97o","push":0.0003},{"hand":"98o","push":0.0},{"hand":"T2o","push":0.0002},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0001},{"hand":"T7o","push":0.0007},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0014},{"hand":"J2o","push":0.0004},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0003},{"hand":"J6o","push":0.0001},{"hand":"J7o","push":0.0},{"hand":"J8o","push":0.0004},{"hand":"J9o","push":0.0001},{"hand":"JTo","push":0.0034},{"hand":"Q2o","push":0.0},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0},{"hand":"Q6o","push":0.0},{"hand":"Q7o","push":0.0007},{"hand":"Q8o","push":0.0},{"hand":"Q9o","push":0.002},{"hand":"QTo","push":0.0},{"hand":"QJo","push":0.006},{"hand":"K2o","push":0.0},{"hand":"K3o","push":0.0},{"hand":"K4o","push":0.0},{"hand":"K5o","push":0.0004},{"hand":"K6o","push":0.0013},{"hand":"K7o","push":0.0003},{"hand":"K8o","push":0.0009},{"hand":"K9o","push":0.0012},{"hand":"KTo","push":0.0011},{"hand":"KJo","push":0.0239},{"hand":"KQo","push":0.0055},{"hand":"A2o","push":0.0002},{"hand":"A3o","push":0.0002},{"hand":"A4o","push":0.002},{"hand":"A5o","push":0.0006},{"hand":"A6o","push":0.0004},{"hand":"A7o","push":0.0009},{"hand":"A8o","push":0.0015},{"hand":"A9o","push":0.0085},{"hand":"ATo","push":0.0134},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":0.9999}]}]},{"name":"BB","index":3,"situations":[{"facing":"CO push","push_pct":23.8,"hands":[{"hand":"22","push":0.9988},{"hand":"33","push":0.9999},{"hand":"44","push":0.9999},{"hand":"55","push":1.0},{"hand":"66","push":0.9998},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0},{"hand":"42s","push":0.0},{"hand":"43s","push":0.0},{"hand":"52s","push":0.0002},{"hand":"53s","push":0.0008},{"hand":"54s","push":0.0004},{"hand":"62s","push":0.0006},{"hand":"63s","push":0.0002},{"hand":"64s","push":0.0},{"hand":"65s","push":0.0005},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0},{"hand":"74s","push":0.0},{"hand":"75s","push":0.0002},{"hand":"76s","push":0.0},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0001},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0003},{"hand":"86s","push":0.0001},{"hand":"87s","push":0.0001},{"hand":"92s","push":0.0001},{"hand":"93s","push":0.0001},{"hand":"94s","push":0.0001},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0006},{"hand":"97s","push":0.0009},{"hand":"98s","push":0.0},{"hand":"T2s","push":0.0001},{"hand":"T3s","push":0.0001},{"hand":"T4s","push":0.0001},{"hand":"T5s","push":0.0},{"hand":"T6s","push":0.0},{"hand":"T7s","push":0.0},{"hand":"T8s","push":0.0012},{"hand":"T9s","push":0.0004},{"hand":"J2s","push":0.0002},{"hand":"J3s","push":0.0007},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0},{"hand":"J6s","push":0.0003},{"hand":"J7s","push":0.0001},{"hand":"J8s","push":0.0017},{"hand":"J9s","push":0.0006},{"hand":"JTs","push":0.9755},{"hand":"Q2s","push":0.0007},{"hand":"Q3s","push":0.0001},{"hand":"Q4s","push":0.0008},{"hand":"Q5s","push":0.0007},{"hand":"Q6s","push":0.001},{"hand":"Q7s","push":0.0003},{"hand":"Q8s","push":0.0011},{"hand":"Q9s","push":0.0424},{"hand":"QTs","push":0.9949},{"hand":"QJs","push":1.0},{"hand":"K2s","push":0.0},{"hand":"K3s","push":0.0},{"hand":"K4s","push":0.0011},{"hand":"K5s","push":0.0006},{"hand":"K6s","push":0.0008},{"hand":"K7s","push":0.0049},{"hand":"K8s","push":0.0003},{"hand":"K9s","push":0.9187},{"hand":"KTs","push":0.9995},{"hand":"KJs","push":0.9986},{"hand":"KQs","push":1.0},{"hand":"A2s","push":0.9993},{"hand":"A3s","push":1.0},{"hand":"A4s","push":0.9942},{"hand":"A5s","push":0.9999},{"hand":"A6s","push":0.9993},{"hand":"A7s","push":0.9999},{"hand":"A8s","push":1.0},{"hand":"A9s","push":1.0},{"hand":"ATs","push":0.9999},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0001},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0001},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0005},{"hand":"T7o","push":0.0},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0003},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0005},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0001},{"hand":"J8o","push":0.0005},{"hand":"J9o","push":0.0},{"hand":"JTo","push":0.0},{"hand":"Q2o","push":0.0},{"hand":"Q3o","push":0.0001},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0002},{"hand":"Q6o","push":0.0},{"hand":"Q7o","push":0.0001},{"hand":"Q8o","push":0.0002},{"hand":"Q9o","push":0.0003},{"hand":"QTo","push":0.0036},{"hand":"QJo","push":0.4528},{"hand":"K2o","push":0.0},{"hand":"K3o","push":0.0003},{"hand":"K4o","push":0.0},{"hand":"K5o","push":0.0002},{"hand":"K6o","push":0.0002},{"hand":"K7o","push":0.0001},{"hand":"K8o","push":0.0004},{"hand":"K9o","push":0.0003},{"hand":"KTo","push":0.9997},{"hand":"KJo","push":1.0},{"hand":"KQo","push":1.0},{"hand":"A2o","push":0.0007},{"hand":"A3o","push":0.0258},{"hand":"A4o","push":0.9621},{"hand":"A5o","push":0.9988},{"hand":"A6o","push":1.0},{"hand":"A7o","push":0.9999},{"hand":"A8o","push":1.0},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"BTN push","push_pct":27.0,"hands":[{"hand":"22","push":0.9998},{"hand":"33","push":0.9995},{"hand":"44","push":0.9999},{"hand":"55","push":1.0},{"hand":"66","push":0.9999},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0},{"hand":"42s","push":0.0001},{"hand":"43s","push":0.0004},{"hand":"52s","push":0.0001},{"hand":"53s","push":0.0001},{"hand":"54s","push":0.0003},{"hand":"62s","push":0.0},{"hand":"63s","push":0.0},{"hand":"64s","push":0.0004},{"hand":"65s","push":0.0001},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0001},{"hand":"74s","push":0.0007},{"hand":"75s","push":0.0003},{"hand":"76s","push":0.0},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0003},{"hand":"86s","push":0.0},{"hand":"87s","push":0.0068},{"hand":"92s","push":0.0004},{"hand":"93s","push":0.0001},{"hand":"94s","push":0.0002},{"hand":"95s","push":0.0001},{"hand":"96s","push":0.0001},{"hand":"97s","push":0.0005},{"hand":"98s","push":0.001},{"hand":"T2s","push":0.0001},{"hand":"T3s","push":0.0006},{"hand":"T4s","push":0.0004},{"hand":"T5s","push":0.0003},{"hand":"T6s","push":0.0001},{"hand":"T7s","push":0.0002},{"hand":"T8s","push":0.0016},{"hand":"T9s","push":0.0183},{"hand":"J2s","push":0.0004},{"hand":"J3s","push":0.0001},{"hand":"J4s","push":0.0001},{"hand":"J5s","push":0.0002},{"hand":"J6s","push":0.0023},{"hand":"J7s","push":0.0019},{"hand":"J8s","push":0.0004},{"hand":"J9s","push":0.0086},{"hand":"JTs","push":0.9922},{"hand":"Q2s","push":0.0007},{"hand":"Q3s","push":0.0014},{"hand":"Q4s","push":0.0018},{"hand":"Q5s","push":0.0035},{"hand":"Q6s","push":0.0003},{"hand":"Q7s","push":0.0012},{"hand":"Q8s","push":0.0004},{"hand":"Q9s","push":0.2423},{"hand":"QTs","push":0.9972},{"hand":"QJs","push":0.9999},{"hand":"K2s","push":0.0001},{"hand":"K3s","push":0.0032},{"hand":"K4s","push":0.0027},{"hand":"K5s","push":0.0001},{"hand":"K6s","push":0.0021},{"hand":"K7s","push":0.6719},{"hand":"K8s","push":0.9995},{"hand":"K9s","push":0.9991},{"hand":"KTs","push":1.0},{"hand":"KJs","push":0.9999},{"hand":"KQs","push":1.0},{"hand":"A2s","push":1.0},{"hand":"A3s","push":0.9999},{"hand":"A4s","push":1.0},{"hand":"A5s","push":0.9999},{"hand":"A6s","push":1.0},{"hand":"A7s","push":1.0},{"hand":"A8s","push":1.0},{"hand":"A9s","push":1.0},{"hand":"ATs","push":1.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":0.9999},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0003},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0001},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0004},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0},{"hand":"92o","push":0.0001},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0001},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0001},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0001},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0001},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0002},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0004},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0001},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0005},{"hand":"J8o","push":0.0003},{"hand":"J9o","push":0.0003},{"hand":"JTo","push":0.0022},{"hand":"Q2o","push":0.0},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0},{"hand":"Q6o","push":0.0002},{"hand":"Q7o","push":0.0001},{"hand":"Q8o","push":0.0004},{"hand":"Q9o","push":0.0014},{"hand":"QTo","push":0.3095},{"hand":"QJo","push":1.0},{"hand":"K2o","push":0.0001},{"hand":"K3o","push":0.0002},{"hand":"K4o","push":0.0005},{"hand":"K5o","push":0.0001},{"hand":"K6o","push":0.0002},{"hand":"K7o","push":0.0014},{"hand":"K8o","push":0.0006},{"hand":"K9o","push":0.0496},{"hand":"KTo","push":1.0},{"hand":"KJo","push":1.0},{"hand":"KQo","push":1.0},{"hand":"A2o","push":0.997},{"hand":"A3o","push":0.9976},{"hand":"A4o","push":0.9999},{"hand":"A5o","push":1.0},{"hand":"A6o","push":0.9998},{"hand":"A7o","push":0.9999},{"hand":"A8o","push":1.0},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"CO+BTN push","push_pct":12.0,"hands":[{"hand":"22","push":0.006},{"hand":"33","push":0.0086},{"hand":"44","push":0.3055},{"hand":"55","push":0.9921},{"hand":"66","push":1.0},{"hand":"77","push":0.9981},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":0.9998},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":0.9999},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0009},{"hand":"42s","push":0.0013},{"hand":"43s","push":0.0011},{"hand":"52s","push":0.0035},{"hand":"53s","push":0.001},{"hand":"54s","push":0.0015},{"hand":"62s","push":0.0},{"hand":"63s","push":0.0002},{"hand":"64s","push":0.0033},{"hand":"65s","push":0.0123},{"hand":"72s","push":0.0008},{"hand":"73s","push":0.0017},{"hand":"74s","push":0.0116},{"hand":"75s","push":0.0053},{"hand":"76s","push":0.0028},{"hand":"82s","push":0.0006},{"hand":"83s","push":0.0009},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0124},{"hand":"86s","push":0.0118},{"hand":"87s","push":0.009},{"hand":"92s","push":0.0021},{"hand":"93s","push":0.0033},{"hand":"94s","push":0.0012},{"hand":"95s","push":0.0012},{"hand":"96s","push":0.0051},{"hand":"97s","push":0.0343},{"hand":"98s","push":0.1181},{"hand":"T2s","push":0.0},{"hand":"T3s","push":0.0009},{"hand":"T4s","push":0.0},{"hand":"T5s","push":0.0005},{"hand":"T6s","push":0.0004},{"hand":"T7s","push":0.0003},{"hand":"T8s","push":0.0284},{"hand":"T9s","push":0.986},{"hand":"J2s","push":0.0017},{"hand":"J3s","push":0.0049},{"hand":"J4s","push":0.0002},{"hand":"J5s","push":0.0},{"hand":"J6s","push":0.002},{"hand":"J7s","push":0.0},{"hand":"J8s","push":0.0335},{"hand":"J9s","push":0.06},{"hand":"JTs","push":0.9969},{"hand":"Q2s","push":0.0003},{"hand":"Q3s","push":0.0002},{"hand":"Q4s","push":0.0},{"hand":"Q5s","push":0.0111},{"hand":"Q6s","push":0.0002},{"hand":"Q7s","push":0.0015},{"hand":"Q8s","push":0.0006},{"hand":"Q9s","push":0.0886},{"hand":"QTs","push":0.9988},{"hand":"QJs","push":0.9999},{"hand":"K2s","push":0.0059},{"hand":"K3s","push":0.0014},{"hand":"K4s","push":0.0},{"hand":"K5s","push":0.004},{"hand":"K6s","push":0.0018},{"hand":"K7s","push":0.0147},{"hand":"K8s","push":0.0107},{"hand":"K9s","push":0.059},{"hand":"KTs","push":0.9473},{"hand":"KJs","push":0.9937},{"hand":"KQs","push":0.9989},{"hand":"A2s","push":0.0082},{"hand":"A3s","push":0.0},{"hand":"A4s","push":0.0081},{"hand":"A5s","push":0.015},{"hand":"A6s","push":0.0046},{"hand":"A7s","push":0.0101},{"hand":"A8s","push":0.0719},{"hand":"A9s","push":0.0901},{"hand":"ATs","push":0.9987},{"hand":"AJs","push":0.9998},{"hand":"AQs","push":0.9999},{"hand":"AKs","push":0.9997},{"hand":"32o","push":0.0001},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0001},{"hand":"53o","push":0.0002},{"hand":"54o","push":0.0063},{"hand":"62o","push":0.0001},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0022},{"hand":"65o","push":0.0002},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0004},{"hand":"74o","push":0.0001},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0001},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0002},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0001},{"hand":"96o","push":0.0011},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0},{"hand":"T2o","push":0.0002},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0001},{"hand":"T5o","push":0.0001},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0012},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0001},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0002},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0},{"hand":"J8o","push":0.0002},{"hand":"J9o","push":0.0001},{"hand":"JTo","push":0.0},{"hand":"Q2o","push":0.0001},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0001},{"hand":"Q5o","push":0.0007},{"hand":"Q6o","push":0.0},{"hand":"Q7o","push":0.0003},{"hand":"Q8o","push":0.001},{"hand":"Q9o","push":0.0013},{"hand":"QTo","push":0.0008},{"hand":"QJo","push":0.0596},{"hand":"K2o","push":0.0004},{"hand":"K3o","push":0.0001},{"hand":"K4o","push":0.0007},{"hand":"K5o","push":0.0},{"hand":"K6o","push":0.0003},{"hand":"K7o","push":0.0002},{"hand":"K8o","push":0.002},{"hand":"K9o","push":0.0001},{"hand":"KTo","push":0.0023},{"hand":"KJo","push":0.0998},{"hand":"KQo","push":0.9957},{"hand":"A2o","push":0.0004},{"hand":"A3o","push":0.0},{"hand":"A4o","push":0.0002},{"hand":"A5o","push":0.0003},{"hand":"A6o","push":0.0003},{"hand":"A7o","push":0.0011},{"hand":"A8o","push":0.0024},{"hand":"A9o","push":0.002},{"hand":"ATo","push":0.0111},{"hand":"AJo","push":0.9986},{"hand":"AQo","push":0.9997},{"hand":"AKo","push":0.9999}]},{"facing":"SB push","push_pct":41.9,"hands":[{"hand":"22","push":0.9998},{"hand":"33","push":1.0},{"hand":"44","push":0.9999},{"hand":"55","push":1.0},{"hand":"66","push":0.9999},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0},{"hand":"42s","push":0.0},{"hand":"43s","push":0.0},{"hand":"52s","push":0.0001},{"hand":"53s","push":0.0},{"hand":"54s","push":0.0019},{"hand":"62s","push":0.0003},{"hand":"63s","push":0.0001},{"hand":"64s","push":0.0},{"hand":"65s","push":0.0001},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0},{"hand":"74s","push":0.0},{"hand":"75s","push":0.0002},{"hand":"76s","push":0.0004},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0002},{"hand":"85s","push":0.0004},{"hand":"86s","push":0.0},{"hand":"87s","push":0.0},{"hand":"92s","push":0.0001},{"hand":"93s","push":0.0},{"hand":"94s","push":0.0},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0015},{"hand":"97s","push":0.0046},{"hand":"98s","push":0.0137},{"hand":"T2s","push":0.0},{"hand":"T3s","push":0.0017},{"hand":"T4s","push":0.0001},{"hand":"T5s","push":0.0004},{"hand":"T6s","push":0.0},{"hand":"T7s","push":0.001},{"hand":"T8s","push":0.9949},{"hand":"T9s","push":1.0},{"hand":"J2s","push":0.0007},{"hand":"J3s","push":0.0003},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0},{"hand":"J6s","push":0.0002},{"hand":"J7s","push":0.3786},{"hand":"J8s","push":0.998},{"hand":"J9s","push":1.0},{"hand":"JTs","push":0.9998},{"hand":"Q2s","push":0.0001},{"hand":"Q3s","push":0.009},{"hand":"Q4s","push":0.0208},{"hand":"Q5s","push":0.9713},{"hand":"Q6s","push":0.9999},{"hand":"Q7s","push":1.0},{"hand":"Q8s","push":1.0},{"hand":"Q9s","push":1.0},{"hand":"QTs","push":0.9999},{"hand":"QJs","push":1.0},{"hand":"K2s","push":0.9993},{"hand":"K3s","push":1.0},{"hand":"K4s","push":1.0},{"hand":"K5s","push":0.9994},{"hand":"K6s","push":0.9991},{"hand":"K7s","push":0.9999},{"hand":"K8s","push":1.0},{"hand":"K9s","push":0.9999},{"hand":"KTs","push":1.0},{"hand":"KJs","push":1.0},{"hand":"KQs","push":1.0},{"hand":"A2s","push":1.0},{"hand":"A3s","push":1.0},{"hand":"A4s","push":1.0},{"hand":"A5s","push":0.9999},{"hand":"A6s","push":0.9999},{"hand":"A7s","push":1.0},{"hand":"A8s","push":1.0},{"hand":"A9s","push":1.0},{"hand":"ATs","push":1.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0001},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0001},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0001},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0003},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0001},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0001},{"hand":"96o","push":0.0002},{"hand":"97o","push":0.0001},{"hand":"98o","push":0.0008},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0001},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0001},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0003},{"hand":"T8o","push":0.0007},{"hand":"T9o","push":0.0061},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0001},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0008},{"hand":"J7o","push":0.0002},{"hand":"J8o","push":0.0006},{"hand":"J9o","push":0.9942},{"hand":"JTo","push":1.0},{"hand":"Q2o","push":0.001},{"hand":"Q3o","push":0.0002},{"hand":"Q4o","push":0.0002},{"hand":"Q5o","push":0.0002},{"hand":"Q6o","push":0.0002},{"hand":"Q7o","push":0.0005},{"hand":"Q8o","push":0.9995},{"hand":"Q9o","push":1.0},{"hand":"QTo","push":1.0},{"hand":"QJo","push":1.0},{"hand":"K2o","push":0.0016},{"hand":"K3o","push":0.9594},{"hand":"K4o","push":0.9988},{"hand":"K5o","push":1.0},{"hand":"K6o","push":1.0},{"hand":"K7o","push":1.0},{"hand":"K8o","push":1.0},{"hand":"K9o","push":1.0},{"hand":"KTo","push":1.0},{"hand":"KJo","push":1.0},{"hand":"KQo","push":1.0},{"hand":"A2o","push":0.9999},{"hand":"A3o","push":1.0},{"hand":"A4o","push":1.0},{"hand":"A5o","push":0.9999},{"hand":"A6o","push":1.0},{"hand":"A7o","push":1.0},{"hand":"A8o","push":1.0},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"CO+SB push","push_pct":13.8,"hands":[{"hand":"22","push":0.0045},{"hand":"33","push":0.0341},{"hand":"44","push":0.9965},{"hand":"55","push":0.9998},{"hand":"66","push":0.999},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":0.9999},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0},{"hand":"42s","push":0.0},{"hand":"43s","push":0.003},{"hand":"52s","push":0.0},{"hand":"53s","push":0.0061},{"hand":"54s","push":0.0007},{"hand":"62s","push":0.0001},{"hand":"63s","push":0.0016},{"hand":"64s","push":0.0013},{"hand":"65s","push":0.0},{"hand":"72s","push":0.0011},{"hand":"73s","push":0.0005},{"hand":"74s","push":0.0129},{"hand":"75s","push":0.0096},{"hand":"76s","push":0.0},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0001},{"hand":"84s","push":0.0024},{"hand":"85s","push":0.0235},{"hand":"86s","push":0.0498},{"hand":"87s","push":0.0139},{"hand":"92s","push":0.0003},{"hand":"93s","push":0.0},{"hand":"94s","push":0.0001},{"hand":"95s","push":0.0002},{"hand":"96s","push":0.0049},{"hand":"97s","push":0.0014},{"hand":"98s","push":0.9944},{"hand":"T2s","push":0.0004},{"hand":"T3s","push":0.0},{"hand":"T4s","push":0.002},{"hand":"T5s","push":0.0001},{"hand":"T6s","push":0.0064},{"hand":"T7s","push":0.0464},{"hand":"T8s","push":0.0014},{"hand":"T9s","push":0.9749},{"hand":"J2s","push":0.0006},{"hand":"J3s","push":0.0018},{"hand":"J4s","push":0.0002},{"hand":"J5s","push":0.003},{"hand":"J6s","push":0.0},{"hand":"J7s","push":0.0023},{"hand":"J8s","push":0.0273},{"hand":"J9s","push":0.3198},{"hand":"JTs","push":0.9999},{"hand":"Q2s","push":0.0003},{"hand":"Q3s","push":0.0},{"hand":"Q4s","push":0.0001},{"hand":"Q5s","push":0.0},{"hand":"Q6s","push":0.0056},{"hand":"Q7s","push":0.0005},{"hand":"Q8s","push":0.0069},{"hand":"Q9s","push":0.0002},{"hand":"QTs","push":0.9933},{"hand":"QJs","push":0.9587},{"hand":"K2s","push":0.0047},{"hand":"K3s","push":0.0},{"hand":"K4s","push":0.0},{"hand":"K5s","push":0.0009},{"hand":"K6s","push":0.0019},{"hand":"K7s","push":0.0086},{"hand":"K8s","push":0.0028},{"hand":"K9s","push":0.2877},{"hand":"KTs","push":0.9478},{"hand":"KJs","push":0.9996},{"hand":"KQs","push":1.0},{"hand":"A2s","push":0.0003},{"hand":"A3s","push":0.0028},{"hand":"A4s","push":0.0},{"hand":"A5s","push":0.0025},{"hand":"A6s","push":0.0114},{"hand":"A7s","push":0.0111},{"hand":"A8s","push":0.0347},{"hand":"A9s","push":0.924},{"hand":"ATs","push":1.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":0.9997},{"hand":"AKs","push":0.9991},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0007},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0012},{"hand":"65o","push":0.0002},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0039},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0001},{"hand":"84o","push":0.0009},{"hand":"85o","push":0.0002},{"hand":"86o","push":0.0002},{"hand":"87o","push":0.0004},{"hand":"92o","push":0.0001},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0001},{"hand":"95o","push":0.0001},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0004},{"hand":"98o","push":0.0},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0013},{"hand":"T8o","push":0.0038},{"hand":"T9o","push":0.0001},{"hand":"J2o","push":0.0001},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0},{"hand":"J8o","push":0.0004},{"hand":"J9o","push":0.0},{"hand":"JTo","push":0.0115},{"hand":"Q2o","push":0.0},{"hand":"Q3o","push":0.0008},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0001},{"hand":"Q6o","push":0.0005},{"hand":"Q7o","push":0.0002},{"hand":"Q8o","push":0.0003},{"hand":"Q9o","push":0.0015},{"hand":"QTo","push":0.0013},{"hand":"QJo","push":0.0002},{"hand":"K2o","push":0.0005},{"hand":"K3o","push":0.0},{"hand":"K4o","push":0.0015},{"hand":"K5o","push":0.0003},{"hand":"K6o","push":0.0001},{"hand":"K7o","push":0.001},{"hand":"K8o","push":0.0004},{"hand":"K9o","push":0.0075},{"hand":"KTo","push":0.02},{"hand":"KJo","push":0.0322},{"hand":"KQo","push":1.0},{"hand":"A2o","push":0.0003},{"hand":"A3o","push":0.0015},{"hand":"A4o","push":0.0006},{"hand":"A5o","push":0.0008},{"hand":"A6o","push":0.0045},{"hand":"A7o","push":0.0},{"hand":"A8o","push":0.0034},{"hand":"A9o","push":0.0167},{"hand":"ATo","push":0.9993},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"BTN+SB push","push_pct":16.7,"hands":[{"hand":"22","push":0.0101},{"hand":"33","push":0.5385},{"hand":"44","push":0.9945},{"hand":"55","push":1.0},{"hand":"66","push":0.9998},{"hand":"77","push":0.9999},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":0.9999},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0},{"hand":"42s","push":0.0005},{"hand":"43s","push":0.0},{"hand":"52s","push":0.005},{"hand":"53s","push":0.0014},{"hand":"54s","push":0.0054},{"hand":"62s","push":0.0},{"hand":"63s","push":0.0057},{"hand":"64s","push":0.0063},{"hand":"65s","push":0.0091},{"hand":"72s","push":0.0002},{"hand":"73s","push":0.0026},{"hand":"74s","push":0.0018},{"hand":"75s","push":0.0024},{"hand":"76s","push":0.0077},{"hand":"82s","push":0.0008},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0001},{"hand":"85s","push":0.012},{"hand":"86s","push":0.0248},{"hand":"87s","push":0.0146},{"hand":"92s","push":0.0003},{"hand":"93s","push":0.0},{"hand":"94s","push":0.0008},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0012},{"hand":"97s","push":0.0154},{"hand":"98s","push":0.9327},{"hand":"T2s","push":0.0},{"hand":"T3s","push":0.0},{"hand":"T4s","push":0.0},{"hand":"T5s","push":0.0021},{"hand":"T6s","push":0.0064},{"hand":"T7s","push":0.0003},{"hand":"T8s","push":0.0222},{"hand":"T9s","push":0.9932},{"hand":"J2s","push":0.0019},{"hand":"J3s","push":0.0019},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0027},{"hand":"J6s","push":0.0011},{"hand":"J7s","push":0.0059},{"hand":"J8s","push":0.002},{"hand":"J9s","push":0.9891},{"hand":"JTs","push":0.9972},{"hand":"Q2s","push":0.0},{"hand":"Q3s","push":0.0001},{"hand":"Q4s","push":0.0002},{"hand":"Q5s","push":0.0014},{"hand":"Q6s","push":0.0019},{"hand":"Q7s","push":0.0066},{"hand":"Q8s","push":0.027},{"hand":"Q9s","push":0.9424},{"hand":"QTs","push":0.9999},{"hand":"QJs","push":1.0},{"hand":"K2s","push":0.0013},{"hand":"K3s","push":0.0001},{"hand":"K4s","push":0.0045},{"hand":"K5s","push":0.0018},{"hand":"K6s","push":0.0211},{"hand":"K7s","push":0.002},{"hand":"K8s","push":0.0065},{"hand":"K9s","push":0.1382},{"hand":"KTs","push":1.0},{"hand":"KJs","push":1.0},{"hand":"KQs","push":1.0},{"hand":"A2s","push":0.0006},{"hand":"A3s","push":0.0084},{"hand":"A4s","push":0.031},{"hand":"A5s","push":0.2308},{"hand":"A6s","push":0.0007},{"hand":"A7s","push":0.258},{"hand":"A8s","push":0.9998},{"hand":"A9s","push":1.0},{"hand":"ATs","push":0.9999},{"hand":"AJs","push":0.9999},{"hand":"AQs","push":0.9998},{"hand":"AKs","push":0.9999},{"hand":"32o","push":0.0002},{"hand":"42o","push":0.0012},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0004},{"hand":"62o","push":0.0005},{"hand":"63o","push":0.0002},{"hand":"64o","push":0.0001},{"hand":"65o","push":0.0003},{"hand":"72o","push":0.0001},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0001},{"hand":"75o","push":0.0005},{"hand":"76o","push":0.0001},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0001},{"hand":"85o","push":0.0001},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0011},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0003},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0},{"hand":"98o","push":0.003},{"hand":"T2o","push":0.0001},{"hand":"T3o","push":0.0001},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0002},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0005},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0015},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0001},{"hand":"J4o","push":0.0001},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0001},{"hand":"J7o","push":0.0004},{"hand":"J8o","push":0.0001},{"hand":"J9o","push":0.0004},{"hand":"JTo","push":0.011},{"hand":"Q2o","push":0.0001},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0001},{"hand":"Q5o","push":0.0},{"hand":"Q6o","push":0.0003},{"hand":"Q7o","push":0.0002},{"hand":"Q8o","push":0.0},{"hand":"Q9o","push":0.0004},{"hand":"QTo","push":0.0062},{"hand":"QJo","push":0.0842},{"hand":"K2o","push":0.0},{"hand":"K3o","push":0.0001},{"hand":"K4o","push":0.0005},{"hand":"K5o","push":0.0002},{"hand":"K6o","push":0.0005},{"hand":"K7o","push":0.0015},{"hand":"K8o","push":0.0005},{"hand":"K9o","push":0.0034},{"hand":"KTo","push":0.0012},{"hand":"KJo","push":1.0},{"hand":"KQo","push":1.0},{"hand":"A2o","push":0.0001},{"hand":"A3o","push":0.0022},{"hand":"A4o","push":0.0019},{"hand":"A5o","push":0.0005},{"hand":"A6o","push":0.0024},{"hand":"A7o","push":0.0009},{"hand":"A8o","push":0.0079},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":0.9998},{"hand":"AKo","push":1.0}]},{"facing":"CO+BTN+SB push","push_pct":12.1,"hands":[{"hand":"22","push":0.1287},{"hand":"33","push":0.0273},{"hand":"44","push":0.0508},{"hand":"55","push":0.6976},{"hand":"66","push":0.7015},{"hand":"77","push":0.9997},{"hand":"88","push":0.9957},{"hand":"99","push":0.9999},{"hand":"TT","push":0.9854},{"hand":"JJ","push":0.9986},{"hand":"QQ","push":1.0},{"hand":"KK","push":0.9997},{"hand":"AA","push":0.9997},{"hand":"32s","push":0.001},{"hand":"42s","push":0.0473},{"hand":"43s","push":0.0749},{"hand":"52s","push":0.1541},{"hand":"53s","push":0.4249},{"hand":"54s","push":0.5922},{"hand":"62s","push":0.0149},{"hand":"63s","push":0.0122},{"hand":"64s","push":0.0228},{"hand":"65s","push":0.5479},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0041},{"hand":"74s","push":0.003},{"hand":"75s","push":0.174},{"hand":"76s","push":0.9567},{"hand":"82s","push":0.0269},{"hand":"83s","push":0.0192},{"hand":"84s","push":0.0276},{"hand":"85s","push":0.0182},{"hand":"86s","push":0.4547},{"hand":"87s","push":0.0447},{"hand":"92s","push":0.0008},{"hand":"93s","push":0.0001},{"hand":"94s","push":0.0093},{"hand":"95s","push":0.0112},{"hand":"96s","push":0.0008},{"hand":"97s","push":0.2615},{"hand":"98s","push":0.8606},{"hand":"T2s","push":0.0032},{"hand":"T3s","push":0.0041},{"hand":"T4s","push":0.011},{"hand":"T5s","push":0.0001},{"hand":"T6s","push":0.0003},{"hand":"T7s","push":0.0473},{"hand":"T8s","push":0.4239},{"hand":"T9s","push":0.5564},{"hand":"J2s","push":0.0244},{"hand":"J3s","push":0.0009},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0009},{"hand":"J6s","push":0.0056},{"hand":"J7s","push":0.1812},{"hand":"J8s","push":0.0512},{"hand":"J9s","push":0.0184},{"hand":"JTs","push":0.898},{"hand":"Q2s","push":0.0015},{"hand":"Q3s","push":0.0276},{"hand":"Q4s","push":0.0184},{"hand":"Q5s","push":0.0783},{"hand":"Q6s","push":0.0324},{"hand":"Q7s","push":0.0574},{"hand":"Q8s","push":0.1672},{"hand":"Q9s","push":0.0209},{"hand":"QTs","push":0.5907},{"hand":"QJs","push":0.3265},{"hand":"K2s","push":0.0041},{"hand":"K3s","push":0.0002},{"hand":"K4s","push":0.0184},{"hand":"K5s","push":0.0877},{"hand":"K6s","push":0.0},{"hand":"K7s","push":0.0984},{"hand":"K8s","push":0.0434},{"hand":"K9s","push":0.3126},{"hand":"KTs","push":0.9755},{"hand":"KJs","push":0.9083},{"hand":"KQs","push":0.9923},{"hand":"A2s","push":0.0516},{"hand":"A3s","push":0.0526},{"hand":"A4s","push":0.0941},{"hand":"A5s","push":0.1016},{"hand":"A6s","push":0.0001},{"hand":"A7s","push":0.0},{"hand":"A8s","push":0.0392},{"hand":"A9s","push":0.0},{"hand":"ATs","push":0.7364},{"hand":"AJs","push":0.9829},{"hand":"AQs","push":0.9463},{"hand":"AKs","push":0.9988},{"hand":"32o","push":0.0009},{"hand":"42o","push":0.0009},{"hand":"43o","push":0.0009},{"hand":"52o","push":0.0012},{"hand":"53o","push":0.002},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0061},{"hand":"64o","push":0.0068},{"hand":"65o","push":0.0119},{"hand":"72o","push":0.0004},{"hand":"73o","push":0.0003},{"hand":"74o","push":0.0017},{"hand":"75o","push":0.0001},{"hand":"76o","push":0.003},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0013},{"hand":"85o","push":0.0014},{"hand":"86o","push":0.0001},{"hand":"87o","push":0.0002},{"hand":"92o","push":0.0021},{"hand":"93o","push":0.0032},{"hand":"94o","push":0.0012},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0002},{"hand":"97o","push":0.0013},{"hand":"98o","push":0.0095},{"hand":"T2o","push":0.0006},{"hand":"T3o","push":0.0014},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0012},{"hand":"T6o","push":0.0043},{"hand":"T7o","push":0.0004},{"hand":"T8o","push":0.0123},{"hand":"T9o","push":0.0005},{"hand":"J2o","push":0.0008},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0001},{"hand":"J5o","push":0.0012},{"hand":"J6o","push":0.0006},{"hand":"J7o","push":0.0114},{"hand":"J8o","push":0.015},{"hand":"J9o","push":0.0271},{"hand":"JTo","push":0.0022},{"hand":"Q2o","push":0.001},{"hand":"Q3o","push":0.0029},{"hand":"Q4o","push":0.0002},{"hand":"Q5o","push":0.0},{"hand":"Q6o","push":0.0061},{"hand":"Q7o","push":0.0011},{"hand":"Q8o","push":0.019},{"hand":"Q9o","push":0.0099},{"hand":"QTo","push":0.0463},{"hand":"QJo","push":0.0166},{"hand":"K2o","push":0.0001},{"hand":"K3o","push":0.0065},{"hand":"K4o","push":0.0181},{"hand":"K5o","push":0.0021},{"hand":"K6o","push":0.0002},{"hand":"K7o","push":0.0002},{"hand":"K8o","push":0.0042},{"hand":"K9o","push":0.008},{"hand":"KTo","push":0.0623},{"hand":"KJo","push":0.0053},{"hand":"KQo","push":0.9314},{"hand":"A2o","push":0.0001},{"hand":"A3o","push":0.0098},{"hand":"A4o","push":0.0003},{"hand":"A5o","push":0.0005},{"hand":"A6o","push":0.0027},{"hand":"A7o","push":0.001},{"hand":"A8o","push":0.0039},{"hand":"A9o","push":0.0},{"hand":"ATo","push":0.0261},{"hand":"AJo","push":0.0082},{"hand":"AQo","push":0.9863},{"hand":"AKo","push":1.0}]}]}]};
+const FIXED = {"players":4,"stack_bb":8,"ante_bb":0,"iterations":1000000000,"seed":42,"positions":[{"name":"CO","index":0,"situations":[{"facing":"no action","push_pct":28.7,"hands":[{"hand":"22","push":0.994},{"hand":"33","push":0.9999},{"hand":"44","push":1.0},{"hand":"55","push":1.0},{"hand":"66","push":0.9999},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0},{"hand":"42s","push":0.0},{"hand":"43s","push":0.0},{"hand":"52s","push":0.0002},{"hand":"53s","push":0.0},{"hand":"54s","push":0.0},{"hand":"62s","push":0.0},{"hand":"63s","push":0.0},{"hand":"64s","push":0.0001},{"hand":"65s","push":0.0},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0},{"hand":"74s","push":0.0},{"hand":"75s","push":0.0},{"hand":"76s","push":0.0003},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0},{"hand":"86s","push":0.0},{"hand":"87s","push":0.5709},{"hand":"92s","push":0.0},{"hand":"93s","push":0.0},{"hand":"94s","push":0.0002},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0001},{"hand":"97s","push":0.0079},{"hand":"98s","push":0.9954},{"hand":"T2s","push":0.0002},{"hand":"T3s","push":0.0},{"hand":"T4s","push":0.0001},{"hand":"T5s","push":0.0001},{"hand":"T6s","push":0.0001},{"hand":"T7s","push":0.0},{"hand":"T8s","push":0.9643},{"hand":"T9s","push":0.9991},{"hand":"J2s","push":0.0},{"hand":"J3s","push":0.0},{"hand":"J4s","push":0.0002},{"hand":"J5s","push":0.0002},{"hand":"J6s","push":0.0},{"hand":"J7s","push":0.0001},{"hand":"J8s","push":0.9897},{"hand":"J9s","push":0.9964},{"hand":"JTs","push":0.9994},{"hand":"Q2s","push":0.0},{"hand":"Q3s","push":0.0},{"hand":"Q4s","push":0.0},{"hand":"Q5s","push":0.0},{"hand":"Q6s","push":0.0002},{"hand":"Q7s","push":0.0},{"hand":"Q8s","push":0.8981},{"hand":"Q9s","push":0.9989},{"hand":"QTs","push":1.0},{"hand":"QJs","push":1.0},{"hand":"K2s","push":0.0},{"hand":"K3s","push":0.0},{"hand":"K4s","push":0.0026},{"hand":"K5s","push":0.018},{"hand":"K6s","push":0.032},{"hand":"K7s","push":0.0105},{"hand":"K8s","push":0.9505},{"hand":"K9s","push":1.0},{"hand":"KTs","push":1.0},{"hand":"KJs","push":1.0},{"hand":"KQs","push":0.9999},{"hand":"A2s","push":0.9994},{"hand":"A3s","push":1.0},{"hand":"A4s","push":1.0},{"hand":"A5s","push":0.9997},{"hand":"A6s","push":0.9999},{"hand":"A7s","push":1.0},{"hand":"A8s","push":0.9999},{"hand":"A9s","push":1.0},{"hand":"ATs","push":1.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0002},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0},{"hand":"T8o","push":0.0001},{"hand":"T9o","push":0.0003},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0},{"hand":"J8o","push":0.0001},{"hand":"J9o","push":0.0},{"hand":"JTo","push":0.997},{"hand":"Q2o","push":0.0},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0},{"hand":"Q6o","push":0.0001},{"hand":"Q7o","push":0.0001},{"hand":"Q8o","push":0.0003},{"hand":"Q9o","push":0.0001},{"hand":"QTo","push":0.115},{"hand":"QJo","push":1.0},{"hand":"K2o","push":0.0},{"hand":"K3o","push":0.0},{"hand":"K4o","push":0.0},{"hand":"K5o","push":0.0001},{"hand":"K6o","push":0.0},{"hand":"K7o","push":0.0002},{"hand":"K8o","push":0.0001},{"hand":"K9o","push":0.0023},{"hand":"KTo","push":1.0},{"hand":"KJo","push":0.9999},{"hand":"KQo","push":1.0},{"hand":"A2o","push":0.0102},{"hand":"A3o","push":0.9621},{"hand":"A4o","push":0.9983},{"hand":"A5o","push":1.0},{"hand":"A6o","push":0.9995},{"hand":"A7o","push":0.9999},{"hand":"A8o","push":1.0},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]}]},{"name":"BTN","index":1,"situations":[{"facing":"no action","push_pct":34.3,"hands":[{"hand":"22","push":0.9999},{"hand":"33","push":0.9993},{"hand":"44","push":0.9998},{"hand":"55","push":1.0},{"hand":"66","push":1.0},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0001},{"hand":"42s","push":0.0},{"hand":"43s","push":0.0},{"hand":"52s","push":0.0},{"hand":"53s","push":0.0},{"hand":"54s","push":0.0002},{"hand":"62s","push":0.0},{"hand":"63s","push":0.0001},{"hand":"64s","push":0.0},{"hand":"65s","push":0.1321},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0},{"hand":"74s","push":0.0},{"hand":"75s","push":0.0385},{"hand":"76s","push":0.8591},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0},{"hand":"86s","push":0.7142},{"hand":"87s","push":0.9755},{"hand":"92s","push":0.0001},{"hand":"93s","push":0.0},{"hand":"94s","push":0.0},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0},{"hand":"97s","push":0.9846},{"hand":"98s","push":0.9984},{"hand":"T2s","push":0.0001},{"hand":"T3s","push":0.0},{"hand":"T4s","push":0.0002},{"hand":"T5s","push":0.0},{"hand":"T6s","push":0.0021},{"hand":"T7s","push":0.9658},{"hand":"T8s","push":0.9961},{"hand":"T9s","push":0.9989},{"hand":"J2s","push":0.0001},{"hand":"J3s","push":0.0001},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0},{"hand":"J6s","push":0.0016},{"hand":"J7s","push":0.6946},{"hand":"J8s","push":0.9938},{"hand":"J9s","push":0.9999},{"hand":"JTs","push":0.9998},{"hand":"Q2s","push":0.0001},{"hand":"Q3s","push":0.0004},{"hand":"Q4s","push":0.0001},{"hand":"Q5s","push":0.0001},{"hand":"Q6s","push":0.019},{"hand":"Q7s","push":0.0001},{"hand":"Q8s","push":0.992},{"hand":"Q9s","push":0.9999},{"hand":"QTs","push":0.9999},{"hand":"QJs","push":1.0},{"hand":"K2s","push":0.0034},{"hand":"K3s","push":0.0002},{"hand":"K4s","push":0.7581},{"hand":"K5s","push":0.9999},{"hand":"K6s","push":0.9962},{"hand":"K7s","push":0.9996},{"hand":"K8s","push":0.9994},{"hand":"K9s","push":1.0},{"hand":"KTs","push":1.0},{"hand":"KJs","push":1.0},{"hand":"KQs","push":1.0},{"hand":"A2s","push":1.0},{"hand":"A3s","push":0.9998},{"hand":"A4s","push":1.0},{"hand":"A5s","push":0.9998},{"hand":"A6s","push":0.9999},{"hand":"A7s","push":1.0},{"hand":"A8s","push":1.0},{"hand":"A9s","push":1.0},{"hand":"ATs","push":1.0},{"hand":"AJs","push":0.9999},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0001},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0001},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0001},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.3891},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0001},{"hand":"J8o","push":0.0001},{"hand":"J9o","push":0.0004},{"hand":"JTo","push":0.9992},{"hand":"Q2o","push":0.0001},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0002},{"hand":"Q5o","push":0.0},{"hand":"Q6o","push":0.0},{"hand":"Q7o","push":0.0},{"hand":"Q8o","push":0.0002},{"hand":"Q9o","push":0.0017},{"hand":"QTo","push":1.0},{"hand":"QJo","push":1.0},{"hand":"K2o","push":0.0},{"hand":"K3o","push":0.0001},{"hand":"K4o","push":0.0001},{"hand":"K5o","push":0.0006},{"hand":"K6o","push":0.0014},{"hand":"K7o","push":0.0001},{"hand":"K8o","push":0.0033},{"hand":"K9o","push":1.0},{"hand":"KTo","push":1.0},{"hand":"KJo","push":1.0},{"hand":"KQo","push":1.0},{"hand":"A2o","push":1.0},{"hand":"A3o","push":1.0},{"hand":"A4o","push":0.9999},{"hand":"A5o","push":1.0},{"hand":"A6o","push":1.0},{"hand":"A7o","push":0.9999},{"hand":"A8o","push":1.0},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"CO push","push_pct":13.1,"hands":[{"hand":"22","push":0.0},{"hand":"33","push":0.0004},{"hand":"44","push":0.9966},{"hand":"55","push":1.0},{"hand":"66","push":0.9996},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0001},{"hand":"42s","push":0.0002},{"hand":"43s","push":0.0},{"hand":"52s","push":0.0},{"hand":"53s","push":0.0},{"hand":"54s","push":0.0001},{"hand":"62s","push":0.0001},{"hand":"63s","push":0.0},{"hand":"64s","push":0.0001},{"hand":"65s","push":0.0002},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0001},{"hand":"74s","push":0.0},{"hand":"75s","push":0.0},{"hand":"76s","push":0.0},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0},{"hand":"86s","push":0.0002},{"hand":"87s","push":0.0},{"hand":"92s","push":0.0},{"hand":"93s","push":0.0002},{"hand":"94s","push":0.0},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0},{"hand":"97s","push":0.0},{"hand":"98s","push":0.0001},{"hand":"T2s","push":0.0},{"hand":"T3s","push":0.0},{"hand":"T4s","push":0.0009},{"hand":"T5s","push":0.0005},{"hand":"T6s","push":0.0001},{"hand":"T7s","push":0.0},{"hand":"T8s","push":0.0003},{"hand":"T9s","push":0.002},{"hand":"J2s","push":0.0},{"hand":"J3s","push":0.0001},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0001},{"hand":"J6s","push":0.0},{"hand":"J7s","push":0.0004},{"hand":"J8s","push":0.0009},{"hand":"J9s","push":0.0024},{"hand":"JTs","push":0.0001},{"hand":"Q2s","push":0.0005},{"hand":"Q3s","push":0.0005},{"hand":"Q4s","push":0.0},{"hand":"Q5s","push":0.0004},{"hand":"Q6s","push":0.0},{"hand":"Q7s","push":0.0002},{"hand":"Q8s","push":0.0},{"hand":"Q9s","push":0.0},{"hand":"QTs","push":0.0061},{"hand":"QJs","push":0.0012},{"hand":"K2s","push":0.0004},{"hand":"K3s","push":0.0001},{"hand":"K4s","push":0.0005},{"hand":"K5s","push":0.0},{"hand":"K6s","push":0.0001},{"hand":"K7s","push":0.0003},{"hand":"K8s","push":0.0006},{"hand":"K9s","push":0.0004},{"hand":"KTs","push":0.0332},{"hand":"KJs","push":0.9996},{"hand":"KQs","push":1.0},{"hand":"A2s","push":0.0032},{"hand":"A3s","push":0.0002},{"hand":"A4s","push":0.0068},{"hand":"A5s","push":0.0013},{"hand":"A6s","push":0.0002},{"hand":"A7s","push":0.9889},{"hand":"A8s","push":0.9998},{"hand":"A9s","push":0.9998},{"hand":"ATs","push":1.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0001},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0001},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0001},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0001},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0003},{"hand":"J8o","push":0.0},{"hand":"J9o","push":0.0},{"hand":"JTo","push":0.0001},{"hand":"Q2o","push":0.0},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0},{"hand":"Q6o","push":0.0},{"hand":"Q7o","push":0.0},{"hand":"Q8o","push":0.0002},{"hand":"Q9o","push":0.0001},{"hand":"QTo","push":0.0005},{"hand":"QJo","push":0.0009},{"hand":"K2o","push":0.0},{"hand":"K3o","push":0.0},{"hand":"K4o","push":0.0},{"hand":"K5o","push":0.0001},{"hand":"K6o","push":0.0},{"hand":"K7o","push":0.0},{"hand":"K8o","push":0.0001},{"hand":"K9o","push":0.0001},{"hand":"KTo","push":0.0032},{"hand":"KJo","push":0.0001},{"hand":"KQo","push":1.0},{"hand":"A2o","push":0.0},{"hand":"A3o","push":0.0006},{"hand":"A4o","push":0.0005},{"hand":"A5o","push":0.0001},{"hand":"A6o","push":0.0008},{"hand":"A7o","push":0.0003},{"hand":"A8o","push":0.002},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]}]},{"name":"SB","index":2,"situations":[{"facing":"no action","push_pct":60.9,"hands":[{"hand":"22","push":0.9999},{"hand":"33","push":0.9999},{"hand":"44","push":1.0},{"hand":"55","push":1.0},{"hand":"66","push":1.0},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0042},{"hand":"42s","push":0.0014},{"hand":"43s","push":0.0004},{"hand":"52s","push":0.0148},{"hand":"53s","push":0.9989},{"hand":"54s","push":1.0},{"hand":"62s","push":0.0001},{"hand":"63s","push":0.0183},{"hand":"64s","push":0.9983},{"hand":"65s","push":0.9978},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0007},{"hand":"74s","push":0.7976},{"hand":"75s","push":0.9996},{"hand":"76s","push":0.9982},{"hand":"82s","push":0.0004},{"hand":"83s","push":0.0003},{"hand":"84s","push":0.1441},{"hand":"85s","push":1.0},{"hand":"86s","push":0.9991},{"hand":"87s","push":0.999},{"hand":"92s","push":0.0001},{"hand":"93s","push":0.009},{"hand":"94s","push":0.0002},{"hand":"95s","push":0.9955},{"hand":"96s","push":0.9993},{"hand":"97s","push":1.0},{"hand":"98s","push":0.9991},{"hand":"T2s","push":0.031},{"hand":"T3s","push":0.1169},{"hand":"T4s","push":0.7775},{"hand":"T5s","push":1.0},{"hand":"T6s","push":0.9999},{"hand":"T7s","push":0.9996},{"hand":"T8s","push":0.9998},{"hand":"T9s","push":0.9993},{"hand":"J2s","push":0.9963},{"hand":"J3s","push":0.9997},{"hand":"J4s","push":0.9961},{"hand":"J5s","push":1.0},{"hand":"J6s","push":0.9993},{"hand":"J7s","push":0.9979},{"hand":"J8s","push":0.9991},{"hand":"J9s","push":1.0},{"hand":"JTs","push":0.9999},{"hand":"Q2s","push":0.9988},{"hand":"Q3s","push":0.9924},{"hand":"Q4s","push":0.9965},{"hand":"Q5s","push":0.9999},{"hand":"Q6s","push":1.0},{"hand":"Q7s","push":1.0},{"hand":"Q8s","push":1.0},{"hand":"Q9s","push":0.9994},{"hand":"QTs","push":1.0},{"hand":"QJs","push":1.0},{"hand":"K2s","push":1.0},{"hand":"K3s","push":1.0},{"hand":"K4s","push":0.9999},{"hand":"K5s","push":1.0},{"hand":"K6s","push":1.0},{"hand":"K7s","push":1.0},{"hand":"K8s","push":0.9999},{"hand":"K9s","push":1.0},{"hand":"KTs","push":1.0},{"hand":"KJs","push":1.0},{"hand":"KQs","push":1.0},{"hand":"A2s","push":1.0},{"hand":"A3s","push":1.0},{"hand":"A4s","push":1.0},{"hand":"A5s","push":1.0},{"hand":"A6s","push":1.0},{"hand":"A7s","push":1.0},{"hand":"A8s","push":0.9999},{"hand":"A9s","push":1.0},{"hand":"ATs","push":1.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0001},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0001},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0014},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0001},{"hand":"65o","push":0.0044},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0002},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0007},{"hand":"76o","push":0.9966},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0001},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0023},{"hand":"87o","push":0.9808},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0005},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0022},{"hand":"96o","push":0.0001},{"hand":"97o","push":0.9669},{"hand":"98o","push":0.9995},{"hand":"T2o","push":0.0007},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0008},{"hand":"T6o","push":0.0016},{"hand":"T7o","push":0.9682},{"hand":"T8o","push":0.9984},{"hand":"T9o","push":0.9995},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0019},{"hand":"J4o","push":0.0002},{"hand":"J5o","push":0.0016},{"hand":"J6o","push":0.0011},{"hand":"J7o","push":0.1776},{"hand":"J8o","push":1.0},{"hand":"J9o","push":1.0},{"hand":"JTo","push":0.9999},{"hand":"Q2o","push":0.0002},{"hand":"Q3o","push":0.0021},{"hand":"Q4o","push":0.0851},{"hand":"Q5o","push":0.9994},{"hand":"Q6o","push":1.0},{"hand":"Q7o","push":1.0},{"hand":"Q8o","push":0.9998},{"hand":"Q9o","push":1.0},{"hand":"QTo","push":1.0},{"hand":"QJo","push":1.0},{"hand":"K2o","push":0.9999},{"hand":"K3o","push":0.9999},{"hand":"K4o","push":0.9997},{"hand":"K5o","push":1.0},{"hand":"K6o","push":1.0},{"hand":"K7o","push":1.0},{"hand":"K8o","push":1.0},{"hand":"K9o","push":1.0},{"hand":"KTo","push":1.0},{"hand":"KJo","push":1.0},{"hand":"KQo","push":1.0},{"hand":"A2o","push":1.0},{"hand":"A3o","push":0.9999},{"hand":"A4o","push":1.0},{"hand":"A5o","push":1.0},{"hand":"A6o","push":1.0},{"hand":"A7o","push":1.0},{"hand":"A8o","push":1.0},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"CO push","push_pct":17.8,"hands":[{"hand":"22","push":0.0024},{"hand":"33","push":0.9895},{"hand":"44","push":0.9999},{"hand":"55","push":0.9991},{"hand":"66","push":1.0},{"hand":"77","push":1.0},{"hand":"88","push":0.9999},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0001},{"hand":"42s","push":0.0},{"hand":"43s","push":0.001},{"hand":"52s","push":0.0},{"hand":"53s","push":0.001},{"hand":"54s","push":0.0},{"hand":"62s","push":0.0002},{"hand":"63s","push":0.0001},{"hand":"64s","push":0.0},{"hand":"65s","push":0.0001},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0},{"hand":"74s","push":0.0},{"hand":"75s","push":0.0},{"hand":"76s","push":0.0001},{"hand":"82s","push":0.0001},{"hand":"83s","push":0.0004},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0004},{"hand":"86s","push":0.0},{"hand":"87s","push":0.0001},{"hand":"92s","push":0.0},{"hand":"93s","push":0.0002},{"hand":"94s","push":0.0},{"hand":"95s","push":0.0002},{"hand":"96s","push":0.0},{"hand":"97s","push":0.0001},{"hand":"98s","push":0.0002},{"hand":"T2s","push":0.0},{"hand":"T3s","push":0.0001},{"hand":"T4s","push":0.0001},{"hand":"T5s","push":0.0},{"hand":"T6s","push":0.0},{"hand":"T7s","push":0.0001},{"hand":"T8s","push":0.0},{"hand":"T9s","push":0.0009},{"hand":"J2s","push":0.0},{"hand":"J3s","push":0.0001},{"hand":"J4s","push":0.0001},{"hand":"J5s","push":0.0003},{"hand":"J6s","push":0.0002},{"hand":"J7s","push":0.0008},{"hand":"J8s","push":0.0005},{"hand":"J9s","push":0.003},{"hand":"JTs","push":0.0002},{"hand":"Q2s","push":0.0001},{"hand":"Q3s","push":0.0},{"hand":"Q4s","push":0.0006},{"hand":"Q5s","push":0.0024},{"hand":"Q6s","push":0.0007},{"hand":"Q7s","push":0.0004},{"hand":"Q8s","push":0.0003},{"hand":"Q9s","push":0.0024},{"hand":"QTs","push":0.0124},{"hand":"QJs","push":1.0},{"hand":"K2s","push":0.0003},{"hand":"K3s","push":0.0006},{"hand":"K4s","push":0.0007},{"hand":"K5s","push":0.0014},{"hand":"K6s","push":0.001},{"hand":"K7s","push":0.0008},{"hand":"K8s","push":0.0009},{"hand":"K9s","push":0.005},{"hand":"KTs","push":0.9999},{"hand":"KJs","push":1.0},{"hand":"KQs","push":0.9987},{"hand":"A2s","push":0.1054},{"hand":"A3s","push":0.4375},{"hand":"A4s","push":1.0},{"hand":"A5s","push":0.9993},{"hand":"A6s","push":0.9969},{"hand":"A7s","push":0.9999},{"hand":"A8s","push":1.0},{"hand":"A9s","push":1.0},{"hand":"ATs","push":0.9999},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0001},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0002},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0003},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0001},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0001},{"hand":"J7o","push":0.0},{"hand":"J8o","push":0.0},{"hand":"J9o","push":0.0004},{"hand":"JTo","push":0.0001},{"hand":"Q2o","push":0.0},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0002},{"hand":"Q6o","push":0.0},{"hand":"Q7o","push":0.0002},{"hand":"Q8o","push":0.0},{"hand":"Q9o","push":0.0},{"hand":"QTo","push":0.0},{"hand":"QJo","push":0.0014},{"hand":"K2o","push":0.0},{"hand":"K3o","push":0.0001},{"hand":"K4o","push":0.0},{"hand":"K5o","push":0.0},{"hand":"K6o","push":0.0},{"hand":"K7o","push":0.0002},{"hand":"K8o","push":0.0003},{"hand":"K9o","push":0.0003},{"hand":"KTo","push":0.0023},{"hand":"KJo","push":0.9624},{"hand":"KQo","push":1.0},{"hand":"A2o","push":0.0007},{"hand":"A3o","push":0.0013},{"hand":"A4o","push":0.0003},{"hand":"A5o","push":0.002},{"hand":"A6o","push":0.0017},{"hand":"A7o","push":0.8302},{"hand":"A8o","push":0.9999},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"BTN push","push_pct":21.6,"hands":[{"hand":"22","push":0.0132},{"hand":"33","push":0.9994},{"hand":"44","push":0.9988},{"hand":"55","push":1.0},{"hand":"66","push":1.0},{"hand":"77","push":0.9999},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0001},{"hand":"42s","push":0.0},{"hand":"43s","push":0.0001},{"hand":"52s","push":0.0002},{"hand":"53s","push":0.0001},{"hand":"54s","push":0.0},{"hand":"62s","push":0.0},{"hand":"63s","push":0.0001},{"hand":"64s","push":0.0001},{"hand":"65s","push":0.0004},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0},{"hand":"74s","push":0.0006},{"hand":"75s","push":0.0},{"hand":"76s","push":0.0007},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0003},{"hand":"85s","push":0.0002},{"hand":"86s","push":0.0009},{"hand":"87s","push":0.0006},{"hand":"92s","push":0.0},{"hand":"93s","push":0.0002},{"hand":"94s","push":0.0001},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0},{"hand":"97s","push":0.0003},{"hand":"98s","push":0.0003},{"hand":"T2s","push":0.0003},{"hand":"T3s","push":0.0},{"hand":"T4s","push":0.0009},{"hand":"T5s","push":0.0},{"hand":"T6s","push":0.0002},{"hand":"T7s","push":0.0},{"hand":"T8s","push":0.0},{"hand":"T9s","push":0.0019},{"hand":"J2s","push":0.0},{"hand":"J3s","push":0.0},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0004},{"hand":"J6s","push":0.0002},{"hand":"J7s","push":0.0004},{"hand":"J8s","push":0.0006},{"hand":"J9s","push":0.0005},{"hand":"JTs","push":0.9223},{"hand":"Q2s","push":0.0},{"hand":"Q3s","push":0.0001},{"hand":"Q4s","push":0.0},{"hand":"Q5s","push":0.0021},{"hand":"Q6s","push":0.0001},{"hand":"Q7s","push":0.0005},{"hand":"Q8s","push":0.0001},{"hand":"Q9s","push":0.0003},{"hand":"QTs","push":1.0},{"hand":"QJs","push":0.9999},{"hand":"K2s","push":0.0},{"hand":"K3s","push":0.0001},{"hand":"K4s","push":0.0034},{"hand":"K5s","push":0.0002},{"hand":"K6s","push":0.0017},{"hand":"K7s","push":0.0003},{"hand":"K8s","push":0.0029},{"hand":"K9s","push":0.97},{"hand":"KTs","push":1.0},{"hand":"KJs","push":0.9998},{"hand":"KQs","push":1.0},{"hand":"A2s","push":0.9978},{"hand":"A3s","push":0.9995},{"hand":"A4s","push":0.9997},{"hand":"A5s","push":0.9998},{"hand":"A6s","push":1.0},{"hand":"A7s","push":0.9999},{"hand":"A8s","push":1.0},{"hand":"A9s","push":1.0},{"hand":"ATs","push":1.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":0.9999},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0001},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0001},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0001},{"hand":"87o","push":0.0},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0002},{"hand":"98o","push":0.0002},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0002},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0001},{"hand":"T6o","push":0.0002},{"hand":"T7o","push":0.0},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0002},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0002},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0001},{"hand":"J8o","push":0.0},{"hand":"J9o","push":0.0002},{"hand":"JTo","push":0.0009},{"hand":"Q2o","push":0.0001},{"hand":"Q3o","push":0.0003},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0001},{"hand":"Q6o","push":0.0},{"hand":"Q7o","push":0.0001},{"hand":"Q8o","push":0.0},{"hand":"Q9o","push":0.0003},{"hand":"QTo","push":0.0022},{"hand":"QJo","push":0.0036},{"hand":"K2o","push":0.0001},{"hand":"K3o","push":0.0002},{"hand":"K4o","push":0.0003},{"hand":"K5o","push":0.0},{"hand":"K6o","push":0.0004},{"hand":"K7o","push":0.0001},{"hand":"K8o","push":0.0001},{"hand":"K9o","push":0.0005},{"hand":"KTo","push":1.0},{"hand":"KJo","push":0.9999},{"hand":"KQo","push":0.9999},{"hand":"A2o","push":0.0001},{"hand":"A3o","push":0.0007},{"hand":"A4o","push":0.0052},{"hand":"A5o","push":0.6959},{"hand":"A6o","push":0.8572},{"hand":"A7o","push":1.0},{"hand":"A8o","push":1.0},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"CO+BTN push","push_pct":9.6,"hands":[{"hand":"22","push":0.0},{"hand":"33","push":0.0},{"hand":"44","push":0.0},{"hand":"55","push":0.6588},{"hand":"66","push":1.0},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0},{"hand":"42s","push":0.0},{"hand":"43s","push":0.0},{"hand":"52s","push":0.0},{"hand":"53s","push":0.0},{"hand":"54s","push":0.0},{"hand":"62s","push":0.0},{"hand":"63s","push":0.0},{"hand":"64s","push":0.0},{"hand":"65s","push":0.0},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0},{"hand":"74s","push":0.0},{"hand":"75s","push":0.0},{"hand":"76s","push":0.0},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0},{"hand":"86s","push":0.0},{"hand":"87s","push":0.0},{"hand":"92s","push":0.0},{"hand":"93s","push":0.0},{"hand":"94s","push":0.0},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0},{"hand":"97s","push":0.0},{"hand":"98s","push":0.0},{"hand":"T2s","push":0.0},{"hand":"T3s","push":0.0},{"hand":"T4s","push":0.0},{"hand":"T5s","push":0.0},{"hand":"T6s","push":0.0},{"hand":"T7s","push":0.0},{"hand":"T8s","push":0.0},{"hand":"T9s","push":0.0},{"hand":"J2s","push":0.0},{"hand":"J3s","push":0.0},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0},{"hand":"J6s","push":0.0},{"hand":"J7s","push":0.0},{"hand":"J8s","push":0.0},{"hand":"J9s","push":0.0},{"hand":"JTs","push":0.55742},{"hand":"Q2s","push":0.0},{"hand":"Q3s","push":0.0},{"hand":"Q4s","push":0.0},{"hand":"Q5s","push":0.0},{"hand":"Q6s","push":0.0},{"hand":"Q7s","push":0.0},{"hand":"Q8s","push":0.0},{"hand":"Q9s","push":0.0},{"hand":"QTs","push":0.412727},{"hand":"QJs","push":0.80986},{"hand":"K2s","push":0.0},{"hand":"K3s","push":0.0},{"hand":"K4s","push":0.0},{"hand":"K5s","push":0.0},{"hand":"K6s","push":0.0},{"hand":"K7s","push":0.0},{"hand":"K8s","push":0.0},{"hand":"K9s","push":0.0},{"hand":"KTs","push":0.537507},{"hand":"KJs","push":0.91244},{"hand":"KQs","push":1.0},{"hand":"A2s","push":0.0},{"hand":"A3s","push":0.0},{"hand":"A4s","push":0.0},{"hand":"A5s","push":0.0},{"hand":"A6s","push":0.0},{"hand":"A7s","push":0.0},{"hand":"A8s","push":0.0},{"hand":"A9s","push":0.0},{"hand":"ATs","push":1.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0},{"hand":"J8o","push":0.0},{"hand":"J9o","push":0.0},{"hand":"JTo","push":0.0},{"hand":"Q2o","push":0.0},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0},{"hand":"Q6o","push":0.0},{"hand":"Q7o","push":0.0},{"hand":"Q8o","push":0.0},{"hand":"Q9o","push":0.0},{"hand":"QTo","push":0.0},{"hand":"QJo","push":0.0},{"hand":"K2o","push":0.0},{"hand":"K3o","push":0.0},{"hand":"K4o","push":0.0},{"hand":"K5o","push":0.0},{"hand":"K6o","push":0.0},{"hand":"K7o","push":0.0},{"hand":"K8o","push":0.0},{"hand":"K9o","push":0.0},{"hand":"KTo","push":0.0},{"hand":"KJo","push":0.0},{"hand":"KQo","push":0.018587},{"hand":"A2o","push":0.0},{"hand":"A3o","push":0.0},{"hand":"A4o","push":0.0},{"hand":"A5o","push":0.0},{"hand":"A6o","push":0.0},{"hand":"A7o","push":0.0},{"hand":"A8o","push":0.0},{"hand":"A9o","push":0.0},{"hand":"ATo","push":0.0},{"hand":"AJo","push":0.96548},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]}]},{"name":"BB","index":3,"situations":[{"facing":"CO push","push_pct":23.8,"hands":[{"hand":"22","push":0.9988},{"hand":"33","push":0.9999},{"hand":"44","push":0.9999},{"hand":"55","push":1.0},{"hand":"66","push":0.9998},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0},{"hand":"42s","push":0.0},{"hand":"43s","push":0.0},{"hand":"52s","push":0.0002},{"hand":"53s","push":0.0008},{"hand":"54s","push":0.0004},{"hand":"62s","push":0.0006},{"hand":"63s","push":0.0002},{"hand":"64s","push":0.0},{"hand":"65s","push":0.0005},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0},{"hand":"74s","push":0.0},{"hand":"75s","push":0.0002},{"hand":"76s","push":0.0},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0001},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0003},{"hand":"86s","push":0.0001},{"hand":"87s","push":0.0001},{"hand":"92s","push":0.0001},{"hand":"93s","push":0.0001},{"hand":"94s","push":0.0001},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0006},{"hand":"97s","push":0.0009},{"hand":"98s","push":0.0},{"hand":"T2s","push":0.0001},{"hand":"T3s","push":0.0001},{"hand":"T4s","push":0.0001},{"hand":"T5s","push":0.0},{"hand":"T6s","push":0.0},{"hand":"T7s","push":0.0},{"hand":"T8s","push":0.0012},{"hand":"T9s","push":0.0004},{"hand":"J2s","push":0.0002},{"hand":"J3s","push":0.0007},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0},{"hand":"J6s","push":0.0003},{"hand":"J7s","push":0.0001},{"hand":"J8s","push":0.0017},{"hand":"J9s","push":0.0006},{"hand":"JTs","push":0.9755},{"hand":"Q2s","push":0.0007},{"hand":"Q3s","push":0.0001},{"hand":"Q4s","push":0.0008},{"hand":"Q5s","push":0.0007},{"hand":"Q6s","push":0.001},{"hand":"Q7s","push":0.0003},{"hand":"Q8s","push":0.0011},{"hand":"Q9s","push":0.0424},{"hand":"QTs","push":0.9949},{"hand":"QJs","push":1.0},{"hand":"K2s","push":0.0},{"hand":"K3s","push":0.0},{"hand":"K4s","push":0.0011},{"hand":"K5s","push":0.0006},{"hand":"K6s","push":0.0008},{"hand":"K7s","push":0.0049},{"hand":"K8s","push":0.0003},{"hand":"K9s","push":0.9187},{"hand":"KTs","push":0.9995},{"hand":"KJs","push":0.9986},{"hand":"KQs","push":1.0},{"hand":"A2s","push":0.9993},{"hand":"A3s","push":1.0},{"hand":"A4s","push":0.9942},{"hand":"A5s","push":0.9999},{"hand":"A6s","push":0.9993},{"hand":"A7s","push":0.9999},{"hand":"A8s","push":1.0},{"hand":"A9s","push":1.0},{"hand":"ATs","push":0.9999},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0001},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0001},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0005},{"hand":"T7o","push":0.0},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0003},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0005},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0001},{"hand":"J8o","push":0.0005},{"hand":"J9o","push":0.0},{"hand":"JTo","push":0.0},{"hand":"Q2o","push":0.0},{"hand":"Q3o","push":0.0001},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0002},{"hand":"Q6o","push":0.0},{"hand":"Q7o","push":0.0001},{"hand":"Q8o","push":0.0002},{"hand":"Q9o","push":0.0003},{"hand":"QTo","push":0.0036},{"hand":"QJo","push":0.4528},{"hand":"K2o","push":0.0},{"hand":"K3o","push":0.0003},{"hand":"K4o","push":0.0},{"hand":"K5o","push":0.0002},{"hand":"K6o","push":0.0002},{"hand":"K7o","push":0.0001},{"hand":"K8o","push":0.0004},{"hand":"K9o","push":0.0003},{"hand":"KTo","push":0.9997},{"hand":"KJo","push":1.0},{"hand":"KQo","push":1.0},{"hand":"A2o","push":0.0007},{"hand":"A3o","push":0.0258},{"hand":"A4o","push":0.9621},{"hand":"A5o","push":0.9988},{"hand":"A6o","push":1.0},{"hand":"A7o","push":0.9999},{"hand":"A8o","push":1.0},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"BTN push","push_pct":27.0,"hands":[{"hand":"22","push":0.9998},{"hand":"33","push":0.9995},{"hand":"44","push":0.9999},{"hand":"55","push":1.0},{"hand":"66","push":0.9999},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0},{"hand":"42s","push":0.0001},{"hand":"43s","push":0.0004},{"hand":"52s","push":0.0001},{"hand":"53s","push":0.0001},{"hand":"54s","push":0.0003},{"hand":"62s","push":0.0},{"hand":"63s","push":0.0},{"hand":"64s","push":0.0004},{"hand":"65s","push":0.0001},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0001},{"hand":"74s","push":0.0007},{"hand":"75s","push":0.0003},{"hand":"76s","push":0.0},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0003},{"hand":"86s","push":0.0},{"hand":"87s","push":0.0068},{"hand":"92s","push":0.0004},{"hand":"93s","push":0.0001},{"hand":"94s","push":0.0002},{"hand":"95s","push":0.0001},{"hand":"96s","push":0.0001},{"hand":"97s","push":0.0005},{"hand":"98s","push":0.001},{"hand":"T2s","push":0.0001},{"hand":"T3s","push":0.0006},{"hand":"T4s","push":0.0004},{"hand":"T5s","push":0.0003},{"hand":"T6s","push":0.0001},{"hand":"T7s","push":0.0002},{"hand":"T8s","push":0.0016},{"hand":"T9s","push":0.0183},{"hand":"J2s","push":0.0004},{"hand":"J3s","push":0.0001},{"hand":"J4s","push":0.0001},{"hand":"J5s","push":0.0002},{"hand":"J6s","push":0.0023},{"hand":"J7s","push":0.0019},{"hand":"J8s","push":0.0004},{"hand":"J9s","push":0.0086},{"hand":"JTs","push":0.9922},{"hand":"Q2s","push":0.0007},{"hand":"Q3s","push":0.0014},{"hand":"Q4s","push":0.0018},{"hand":"Q5s","push":0.0035},{"hand":"Q6s","push":0.0003},{"hand":"Q7s","push":0.0012},{"hand":"Q8s","push":0.0004},{"hand":"Q9s","push":0.2423},{"hand":"QTs","push":0.9972},{"hand":"QJs","push":0.9999},{"hand":"K2s","push":0.0001},{"hand":"K3s","push":0.0032},{"hand":"K4s","push":0.0027},{"hand":"K5s","push":0.0001},{"hand":"K6s","push":0.0021},{"hand":"K7s","push":0.6719},{"hand":"K8s","push":0.9995},{"hand":"K9s","push":0.9991},{"hand":"KTs","push":1.0},{"hand":"KJs","push":0.9999},{"hand":"KQs","push":1.0},{"hand":"A2s","push":1.0},{"hand":"A3s","push":0.9999},{"hand":"A4s","push":1.0},{"hand":"A5s","push":0.9999},{"hand":"A6s","push":1.0},{"hand":"A7s","push":1.0},{"hand":"A8s","push":1.0},{"hand":"A9s","push":1.0},{"hand":"ATs","push":1.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":0.9999},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0003},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0001},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0004},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0},{"hand":"92o","push":0.0001},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0001},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0001},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0001},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0001},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0002},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0004},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0001},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0005},{"hand":"J8o","push":0.0003},{"hand":"J9o","push":0.0003},{"hand":"JTo","push":0.0022},{"hand":"Q2o","push":0.0},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0},{"hand":"Q6o","push":0.0002},{"hand":"Q7o","push":0.0001},{"hand":"Q8o","push":0.0004},{"hand":"Q9o","push":0.0014},{"hand":"QTo","push":0.3095},{"hand":"QJo","push":1.0},{"hand":"K2o","push":0.0001},{"hand":"K3o","push":0.0002},{"hand":"K4o","push":0.0005},{"hand":"K5o","push":0.0001},{"hand":"K6o","push":0.0002},{"hand":"K7o","push":0.0014},{"hand":"K8o","push":0.0006},{"hand":"K9o","push":0.0496},{"hand":"KTo","push":1.0},{"hand":"KJo","push":1.0},{"hand":"KQo","push":1.0},{"hand":"A2o","push":0.997},{"hand":"A3o","push":0.9976},{"hand":"A4o","push":0.9999},{"hand":"A5o","push":1.0},{"hand":"A6o","push":0.9998},{"hand":"A7o","push":0.9999},{"hand":"A8o","push":1.0},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"CO+BTN push","push_pct":11.7,"hands":[{"hand":"22","push":0.0},{"hand":"33","push":0.0},{"hand":"44","push":0.539905},{"hand":"55","push":1.0},{"hand":"66","push":1.0},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0},{"hand":"42s","push":0.0},{"hand":"43s","push":0.0},{"hand":"52s","push":0.0},{"hand":"53s","push":0.0},{"hand":"54s","push":0.0},{"hand":"62s","push":0.0},{"hand":"63s","push":0.0},{"hand":"64s","push":0.0},{"hand":"65s","push":0.0},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0},{"hand":"74s","push":0.0},{"hand":"75s","push":0.0},{"hand":"76s","push":0.0},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0},{"hand":"86s","push":0.0},{"hand":"87s","push":0.029905},{"hand":"92s","push":0.0},{"hand":"93s","push":0.0},{"hand":"94s","push":0.0},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0},{"hand":"97s","push":0.0},{"hand":"98s","push":0.249238},{"hand":"T2s","push":0.0},{"hand":"T3s","push":0.0},{"hand":"T4s","push":0.0},{"hand":"T5s","push":0.0},{"hand":"T6s","push":0.0},{"hand":"T7s","push":0.0},{"hand":"T8s","push":0.0},{"hand":"T9s","push":0.773571},{"hand":"J2s","push":0.0},{"hand":"J3s","push":0.0},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0},{"hand":"J6s","push":0.0},{"hand":"J7s","push":0.0},{"hand":"J8s","push":0.0},{"hand":"J9s","push":0.011571},{"hand":"JTs","push":1.0},{"hand":"Q2s","push":0.0},{"hand":"Q3s","push":0.0},{"hand":"Q4s","push":0.0},{"hand":"Q5s","push":0.0},{"hand":"Q6s","push":0.0},{"hand":"Q7s","push":0.0},{"hand":"Q8s","push":0.0},{"hand":"Q9s","push":0.0},{"hand":"QTs","push":1.0},{"hand":"QJs","push":1.0},{"hand":"K2s","push":0.0},{"hand":"K3s","push":0.0},{"hand":"K4s","push":0.0},{"hand":"K5s","push":0.0},{"hand":"K6s","push":0.0},{"hand":"K7s","push":0.0},{"hand":"K8s","push":0.0},{"hand":"K9s","push":0.0},{"hand":"KTs","push":1.0},{"hand":"KJs","push":1.0},{"hand":"KQs","push":1.0},{"hand":"A2s","push":0.0},{"hand":"A3s","push":0.0},{"hand":"A4s","push":0.0},{"hand":"A5s","push":0.0},{"hand":"A6s","push":0.0},{"hand":"A7s","push":0.0},{"hand":"A8s","push":0.0},{"hand":"A9s","push":0.068238},{"hand":"ATs","push":1.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0},{"hand":"J8o","push":0.0},{"hand":"J9o","push":0.0},{"hand":"JTo","push":0.0},{"hand":"Q2o","push":0.0},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0},{"hand":"Q6o","push":0.0},{"hand":"Q7o","push":0.0},{"hand":"Q8o","push":0.0},{"hand":"Q9o","push":0.0},{"hand":"QTo","push":0.0},{"hand":"QJo","push":0.0},{"hand":"K2o","push":0.0},{"hand":"K3o","push":0.0},{"hand":"K4o","push":0.0},{"hand":"K5o","push":0.0},{"hand":"K6o","push":0.0},{"hand":"K7o","push":0.0},{"hand":"K8o","push":0.0},{"hand":"K9o","push":0.0},{"hand":"KTo","push":0.0},{"hand":"KJo","push":0.0},{"hand":"KQo","push":1.0},{"hand":"A2o","push":0.0},{"hand":"A3o","push":0.0},{"hand":"A4o","push":0.0},{"hand":"A5o","push":0.0},{"hand":"A6o","push":0.0},{"hand":"A7o","push":0.0},{"hand":"A8o","push":0.0},{"hand":"A9o","push":0.0},{"hand":"ATo","push":0.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"SB push","push_pct":41.9,"hands":[{"hand":"22","push":0.9998},{"hand":"33","push":1.0},{"hand":"44","push":0.9999},{"hand":"55","push":1.0},{"hand":"66","push":0.9999},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0},{"hand":"42s","push":0.0},{"hand":"43s","push":0.0},{"hand":"52s","push":0.0001},{"hand":"53s","push":0.0},{"hand":"54s","push":0.0019},{"hand":"62s","push":0.0003},{"hand":"63s","push":0.0001},{"hand":"64s","push":0.0},{"hand":"65s","push":0.0001},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0},{"hand":"74s","push":0.0},{"hand":"75s","push":0.0002},{"hand":"76s","push":0.0004},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0002},{"hand":"85s","push":0.0004},{"hand":"86s","push":0.0},{"hand":"87s","push":0.0},{"hand":"92s","push":0.0001},{"hand":"93s","push":0.0},{"hand":"94s","push":0.0},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0015},{"hand":"97s","push":0.0046},{"hand":"98s","push":0.0137},{"hand":"T2s","push":0.0},{"hand":"T3s","push":0.0017},{"hand":"T4s","push":0.0001},{"hand":"T5s","push":0.0004},{"hand":"T6s","push":0.0},{"hand":"T7s","push":0.001},{"hand":"T8s","push":0.9949},{"hand":"T9s","push":1.0},{"hand":"J2s","push":0.0007},{"hand":"J3s","push":0.0003},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0},{"hand":"J6s","push":0.0002},{"hand":"J7s","push":0.3786},{"hand":"J8s","push":0.998},{"hand":"J9s","push":1.0},{"hand":"JTs","push":0.9998},{"hand":"Q2s","push":0.0001},{"hand":"Q3s","push":0.009},{"hand":"Q4s","push":0.0208},{"hand":"Q5s","push":0.9713},{"hand":"Q6s","push":0.9999},{"hand":"Q7s","push":1.0},{"hand":"Q8s","push":1.0},{"hand":"Q9s","push":1.0},{"hand":"QTs","push":0.9999},{"hand":"QJs","push":1.0},{"hand":"K2s","push":0.9993},{"hand":"K3s","push":1.0},{"hand":"K4s","push":1.0},{"hand":"K5s","push":0.9994},{"hand":"K6s","push":0.9991},{"hand":"K7s","push":0.9999},{"hand":"K8s","push":1.0},{"hand":"K9s","push":0.9999},{"hand":"KTs","push":1.0},{"hand":"KJs","push":1.0},{"hand":"KQs","push":1.0},{"hand":"A2s","push":1.0},{"hand":"A3s","push":1.0},{"hand":"A4s","push":1.0},{"hand":"A5s","push":0.9999},{"hand":"A6s","push":0.9999},{"hand":"A7s","push":1.0},{"hand":"A8s","push":1.0},{"hand":"A9s","push":1.0},{"hand":"ATs","push":1.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0001},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0001},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0001},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0003},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0001},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0001},{"hand":"96o","push":0.0002},{"hand":"97o","push":0.0001},{"hand":"98o","push":0.0008},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0001},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0001},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0003},{"hand":"T8o","push":0.0007},{"hand":"T9o","push":0.0061},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0001},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0008},{"hand":"J7o","push":0.0002},{"hand":"J8o","push":0.0006},{"hand":"J9o","push":0.9942},{"hand":"JTo","push":1.0},{"hand":"Q2o","push":0.001},{"hand":"Q3o","push":0.0002},{"hand":"Q4o","push":0.0002},{"hand":"Q5o","push":0.0002},{"hand":"Q6o","push":0.0002},{"hand":"Q7o","push":0.0005},{"hand":"Q8o","push":0.9995},{"hand":"Q9o","push":1.0},{"hand":"QTo","push":1.0},{"hand":"QJo","push":1.0},{"hand":"K2o","push":0.0016},{"hand":"K3o","push":0.9594},{"hand":"K4o","push":0.9988},{"hand":"K5o","push":1.0},{"hand":"K6o","push":1.0},{"hand":"K7o","push":1.0},{"hand":"K8o","push":1.0},{"hand":"K9o","push":1.0},{"hand":"KTo","push":1.0},{"hand":"KJo","push":1.0},{"hand":"KQo","push":1.0},{"hand":"A2o","push":0.9999},{"hand":"A3o","push":1.0},{"hand":"A4o","push":1.0},{"hand":"A5o","push":0.9999},{"hand":"A6o","push":1.0},{"hand":"A7o","push":1.0},{"hand":"A8o","push":1.0},{"hand":"A9o","push":1.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"CO+SB push","push_pct":13.9,"hands":[{"hand":"22","push":0.0},{"hand":"33","push":0.005667},{"hand":"44","push":1.0},{"hand":"55","push":1.0},{"hand":"66","push":1.0},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0},{"hand":"42s","push":0.0},{"hand":"43s","push":0.0},{"hand":"52s","push":0.0},{"hand":"53s","push":0.0},{"hand":"54s","push":0.0},{"hand":"62s","push":0.0},{"hand":"63s","push":0.0},{"hand":"64s","push":0.0},{"hand":"65s","push":0.0},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0},{"hand":"74s","push":0.0},{"hand":"75s","push":0.0},{"hand":"76s","push":0.0},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0},{"hand":"86s","push":0.0},{"hand":"87s","push":0.0},{"hand":"92s","push":0.0},{"hand":"93s","push":0.0},{"hand":"94s","push":0.0},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0},{"hand":"97s","push":0.0},{"hand":"98s","push":0.701667},{"hand":"T2s","push":0.0},{"hand":"T3s","push":0.0},{"hand":"T4s","push":0.0},{"hand":"T5s","push":0.0},{"hand":"T6s","push":0.0},{"hand":"T7s","push":0.0},{"hand":"T8s","push":0.220333},{"hand":"T9s","push":1.0},{"hand":"J2s","push":0.0},{"hand":"J3s","push":0.0},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0},{"hand":"J6s","push":0.0},{"hand":"J7s","push":0.0},{"hand":"J8s","push":0.0},{"hand":"J9s","push":0.884},{"hand":"JTs","push":1.0},{"hand":"Q2s","push":0.0},{"hand":"Q3s","push":0.0},{"hand":"Q4s","push":0.0},{"hand":"Q5s","push":0.0},{"hand":"Q6s","push":0.0},{"hand":"Q7s","push":0.0},{"hand":"Q8s","push":0.0},{"hand":"Q9s","push":0.574667},{"hand":"QTs","push":1.0},{"hand":"QJs","push":1.0},{"hand":"K2s","push":0.0},{"hand":"K3s","push":0.0},{"hand":"K4s","push":0.0},{"hand":"K5s","push":0.0},{"hand":"K6s","push":0.0},{"hand":"K7s","push":0.0},{"hand":"K8s","push":0.0},{"hand":"K9s","push":0.081},{"hand":"KTs","push":1.0},{"hand":"KJs","push":1.0},{"hand":"KQs","push":1.0},{"hand":"A2s","push":0.0},{"hand":"A3s","push":0.0},{"hand":"A4s","push":0.0},{"hand":"A5s","push":0.0},{"hand":"A6s","push":0.0},{"hand":"A7s","push":0.0},{"hand":"A8s","push":0.0},{"hand":"A9s","push":1.0},{"hand":"ATs","push":1.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0},{"hand":"J8o","push":0.0},{"hand":"J9o","push":0.0},{"hand":"JTo","push":0.0},{"hand":"Q2o","push":0.0},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0},{"hand":"Q6o","push":0.0},{"hand":"Q7o","push":0.0},{"hand":"Q8o","push":0.0},{"hand":"Q9o","push":0.0},{"hand":"QTo","push":0.0},{"hand":"QJo","push":0.0},{"hand":"K2o","push":0.0},{"hand":"K3o","push":0.0},{"hand":"K4o","push":0.0},{"hand":"K5o","push":0.0},{"hand":"K6o","push":0.0},{"hand":"K7o","push":0.0},{"hand":"K8o","push":0.0},{"hand":"K9o","push":0.0},{"hand":"KTo","push":0.0},{"hand":"KJo","push":0.0},{"hand":"KQo","push":1.0},{"hand":"A2o","push":0.0},{"hand":"A3o","push":0.0},{"hand":"A4o","push":0.0},{"hand":"A5o","push":0.0},{"hand":"A6o","push":0.0},{"hand":"A7o","push":0.0},{"hand":"A8o","push":0.0},{"hand":"A9o","push":0.0},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"BTN+SB push","push_pct":17.2,"hands":[{"hand":"22","push":0.0},{"hand":"33","push":0.816},{"hand":"44","push":1.0},{"hand":"55","push":1.0},{"hand":"66","push":1.0},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0},{"hand":"42s","push":0.0},{"hand":"43s","push":0.0},{"hand":"52s","push":0.0},{"hand":"53s","push":0.0},{"hand":"54s","push":0.0},{"hand":"62s","push":0.0},{"hand":"63s","push":0.0},{"hand":"64s","push":0.0},{"hand":"65s","push":0.0},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0},{"hand":"74s","push":0.0},{"hand":"75s","push":0.0},{"hand":"76s","push":0.0},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0},{"hand":"86s","push":0.0},{"hand":"87s","push":0.689333},{"hand":"92s","push":0.0},{"hand":"93s","push":0.0},{"hand":"94s","push":0.0},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0},{"hand":"97s","push":0.0},{"hand":"98s","push":0.586},{"hand":"T2s","push":0.0},{"hand":"T3s","push":0.0},{"hand":"T4s","push":0.0},{"hand":"T5s","push":0.0},{"hand":"T6s","push":0.0},{"hand":"T7s","push":0.0},{"hand":"T8s","push":0.323333},{"hand":"T9s","push":1.0},{"hand":"J2s","push":0.0},{"hand":"J3s","push":0.0},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0},{"hand":"J6s","push":0.0},{"hand":"J7s","push":0.0},{"hand":"J8s","push":0.108667},{"hand":"J9s","push":0.978667},{"hand":"JTs","push":1.0},{"hand":"Q2s","push":0.0},{"hand":"Q3s","push":0.0},{"hand":"Q4s","push":0.0},{"hand":"Q5s","push":0.0},{"hand":"Q6s","push":0.0},{"hand":"Q7s","push":0.0},{"hand":"Q8s","push":0.0},{"hand":"Q9s","push":1.0},{"hand":"QTs","push":1.0},{"hand":"QJs","push":1.0},{"hand":"K2s","push":0.0},{"hand":"K3s","push":0.0},{"hand":"K4s","push":0.0},{"hand":"K5s","push":0.0},{"hand":"K6s","push":0.0},{"hand":"K7s","push":0.0},{"hand":"K8s","push":0.0},{"hand":"K9s","push":0.783333},{"hand":"KTs","push":1.0},{"hand":"KJs","push":1.0},{"hand":"KQs","push":1.0},{"hand":"A2s","push":0.0},{"hand":"A3s","push":0.0},{"hand":"A4s","push":0.0},{"hand":"A5s","push":0.0},{"hand":"A6s","push":0.0},{"hand":"A7s","push":0.322},{"hand":"A8s","push":1.0},{"hand":"A9s","push":1.0},{"hand":"ATs","push":1.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0},{"hand":"J8o","push":0.0},{"hand":"J9o","push":0.0},{"hand":"JTo","push":0.0},{"hand":"Q2o","push":0.0},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0},{"hand":"Q6o","push":0.0},{"hand":"Q7o","push":0.0},{"hand":"Q8o","push":0.0},{"hand":"Q9o","push":0.0},{"hand":"QTo","push":0.0},{"hand":"QJo","push":0.675667},{"hand":"K2o","push":0.0},{"hand":"K3o","push":0.0},{"hand":"K4o","push":0.0},{"hand":"K5o","push":0.0},{"hand":"K6o","push":0.0},{"hand":"K7o","push":0.0},{"hand":"K8o","push":0.0},{"hand":"K9o","push":0.0},{"hand":"KTo","push":0.0},{"hand":"KJo","push":1.0},{"hand":"KQo","push":1.0},{"hand":"A2o","push":0.0},{"hand":"A3o","push":0.0},{"hand":"A4o","push":0.0},{"hand":"A5o","push":0.0},{"hand":"A6o","push":0.0},{"hand":"A7o","push":0.0},{"hand":"A8o","push":0.0},{"hand":"A9o","push":0.442667},{"hand":"ATo","push":1.0},{"hand":"AJo","push":1.0},{"hand":"AQo","push":1.0},{"hand":"AKo","push":1.0}]},{"facing":"CO+BTN+SB push","push_pct":9.7,"hands":[{"hand":"22","push":0.0},{"hand":"33","push":0.0},{"hand":"44","push":0.0},{"hand":"55","push":0.083},{"hand":"66","push":1.0},{"hand":"77","push":1.0},{"hand":"88","push":1.0},{"hand":"99","push":1.0},{"hand":"TT","push":1.0},{"hand":"JJ","push":1.0},{"hand":"QQ","push":1.0},{"hand":"KK","push":1.0},{"hand":"AA","push":1.0},{"hand":"32s","push":0.0},{"hand":"42s","push":0.0},{"hand":"43s","push":0.0},{"hand":"52s","push":0.0},{"hand":"53s","push":0.0},{"hand":"54s","push":0.322},{"hand":"62s","push":0.0},{"hand":"63s","push":0.0},{"hand":"64s","push":0.0},{"hand":"65s","push":0.897667},{"hand":"72s","push":0.0},{"hand":"73s","push":0.0},{"hand":"74s","push":0.0},{"hand":"75s","push":0.0},{"hand":"76s","push":0.53},{"hand":"82s","push":0.0},{"hand":"83s","push":0.0},{"hand":"84s","push":0.0},{"hand":"85s","push":0.0},{"hand":"86s","push":0.0},{"hand":"87s","push":0.525333},{"hand":"92s","push":0.0},{"hand":"93s","push":0.0},{"hand":"94s","push":0.0},{"hand":"95s","push":0.0},{"hand":"96s","push":0.0},{"hand":"97s","push":0.0},{"hand":"98s","push":0.474833},{"hand":"T2s","push":0.0},{"hand":"T3s","push":0.0},{"hand":"T4s","push":0.0},{"hand":"T5s","push":0.0},{"hand":"T6s","push":0.0},{"hand":"T7s","push":0.0},{"hand":"T8s","push":0.0},{"hand":"T9s","push":0.724833},{"hand":"J2s","push":0.0},{"hand":"J3s","push":0.0},{"hand":"J4s","push":0.0},{"hand":"J5s","push":0.0},{"hand":"J6s","push":0.0},{"hand":"J7s","push":0.0},{"hand":"J8s","push":0.0},{"hand":"J9s","push":0.0},{"hand":"JTs","push":1.0},{"hand":"Q2s","push":0.0},{"hand":"Q3s","push":0.0},{"hand":"Q4s","push":0.0},{"hand":"Q5s","push":0.0},{"hand":"Q6s","push":0.0},{"hand":"Q7s","push":0.0},{"hand":"Q8s","push":0.0},{"hand":"Q9s","push":0.0},{"hand":"QTs","push":1.0},{"hand":"QJs","push":1.0},{"hand":"K2s","push":0.0},{"hand":"K3s","push":0.0},{"hand":"K4s","push":0.0},{"hand":"K5s","push":0.0},{"hand":"K6s","push":0.0},{"hand":"K7s","push":0.0},{"hand":"K8s","push":0.0},{"hand":"K9s","push":0.0},{"hand":"KTs","push":1.0},{"hand":"KJs","push":1.0},{"hand":"KQs","push":1.0},{"hand":"A2s","push":0.0},{"hand":"A3s","push":0.0},{"hand":"A4s","push":0.0},{"hand":"A5s","push":0.0},{"hand":"A6s","push":0.0},{"hand":"A7s","push":0.0},{"hand":"A8s","push":0.0},{"hand":"A9s","push":0.0},{"hand":"ATs","push":0.0},{"hand":"AJs","push":1.0},{"hand":"AQs","push":1.0},{"hand":"AKs","push":1.0},{"hand":"32o","push":0.0},{"hand":"42o","push":0.0},{"hand":"43o","push":0.0},{"hand":"52o","push":0.0},{"hand":"53o","push":0.0},{"hand":"54o","push":0.0},{"hand":"62o","push":0.0},{"hand":"63o","push":0.0},{"hand":"64o","push":0.0},{"hand":"65o","push":0.0},{"hand":"72o","push":0.0},{"hand":"73o","push":0.0},{"hand":"74o","push":0.0},{"hand":"75o","push":0.0},{"hand":"76o","push":0.0},{"hand":"82o","push":0.0},{"hand":"83o","push":0.0},{"hand":"84o","push":0.0},{"hand":"85o","push":0.0},{"hand":"86o","push":0.0},{"hand":"87o","push":0.0},{"hand":"92o","push":0.0},{"hand":"93o","push":0.0},{"hand":"94o","push":0.0},{"hand":"95o","push":0.0},{"hand":"96o","push":0.0},{"hand":"97o","push":0.0},{"hand":"98o","push":0.0},{"hand":"T2o","push":0.0},{"hand":"T3o","push":0.0},{"hand":"T4o","push":0.0},{"hand":"T5o","push":0.0},{"hand":"T6o","push":0.0},{"hand":"T7o","push":0.0},{"hand":"T8o","push":0.0},{"hand":"T9o","push":0.0},{"hand":"J2o","push":0.0},{"hand":"J3o","push":0.0},{"hand":"J4o","push":0.0},{"hand":"J5o","push":0.0},{"hand":"J6o","push":0.0},{"hand":"J7o","push":0.0},{"hand":"J8o","push":0.0},{"hand":"J9o","push":0.0},{"hand":"JTo","push":0.0},{"hand":"Q2o","push":0.0},{"hand":"Q3o","push":0.0},{"hand":"Q4o","push":0.0},{"hand":"Q5o","push":0.0},{"hand":"Q6o","push":0.0},{"hand":"Q7o","push":0.0},{"hand":"Q8o","push":0.0},{"hand":"Q9o","push":0.0},{"hand":"QTo","push":0.0},{"hand":"QJo","push":0.0},{"hand":"K2o","push":0.0},{"hand":"K3o","push":0.0},{"hand":"K4o","push":0.0},{"hand":"K5o","push":0.0},{"hand":"K6o","push":0.0},{"hand":"K7o","push":0.0},{"hand":"K8o","push":0.0},{"hand":"K9o","push":0.0},{"hand":"KTo","push":0.0},{"hand":"KJo","push":0.0},{"hand":"KQo","push":0.063667},{"hand":"A2o","push":0.0},{"hand":"A3o","push":0.0},{"hand":"A4o","push":0.0},{"hand":"A5o","push":0.0},{"hand":"A6o","push":0.0},{"hand":"A7o","push":0.0},{"hand":"A8o","push":0.0},{"hand":"A9o","push":0.0},{"hand":"ATo","push":0.0},{"hand":"AJo","push":0.0},{"hand":"AQo","push":0.935},{"hand":"AKo","push":1.0}]}]}]};
+
+const RANKS = ['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const state = {
+  posIdx: 3,   // default BB
+  sitIdx: 6,   // default CO+BTN+SB push (last situation for BB)
+  sortCol: 'delta',
+  sortAsc: false,
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function getColor(pct) {
+  if (pct >= 0.97) return '#017a5a';
+  if (pct >= 0.90) return '#018F69';
+  if (pct >= 0.70) return '#4ade80';
+  if (pct >= 0.50) return '#2ab88e';
+  if (pct >= 0.30) return '#f0b429';
+  if (pct >= 0.10) return '#e87040';
+  if (pct >= 0.03) return '#d45050';
+  return '#1a2d42';
+}
+
+function canonicalName(row, col) {
+  if (row === col) return RANKS[row] + RANKS[row];
+  if (col > row) return RANKS[row] + RANKS[col] + 's';
+  return RANKS[col] + RANKS[row] + 'o';
+}
+
+function buildHandMap(hands) {
+  const map = {};
+  for (const h of hands) map[h.hand] = h.push;
+  return map;
+}
+
+function fmt(v) { return (v * 100).toFixed(1) + '%'; }
+function fmt2(v) { return (v * 100).toFixed(2) + '%'; }
+
+function currentOrigSit() {
+  return ORIGINAL.positions[state.posIdx].situations[state.sitIdx];
+}
+function currentFixedSit() {
+  return FIXED.positions[state.posIdx].situations[state.sitIdx];
+}
+
+// ── Controls ──────────────────────────────────────────────────────────────────
+function renderPositionButtons() {
+  const grp = document.getElementById('position-group');
+  grp.innerHTML = '';
+  ORIGINAL.positions.forEach((pos, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn' + (i === state.posIdx ? ' active' : '');
+    btn.textContent = pos.name;
+    btn.addEventListener('click', () => {
+      state.posIdx = i;
+      state.sitIdx = 0;
+      renderPositionButtons();
+      renderSituationButtons();
+      renderAll();
+    });
+    grp.appendChild(btn);
+  });
+}
+
+function renderSituationButtons() {
+  const pos = ORIGINAL.positions[state.posIdx];
+  const grp = document.getElementById('situation-group');
+  grp.innerHTML = '';
+  pos.situations.forEach((sit, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn' + (i === state.sitIdx ? ' active' : '');
+    btn.textContent = sit.facing === 'no action' ? 'No action' : 'vs ' + sit.facing.replace(' push','');
+    btn.addEventListener('click', () => {
+      state.sitIdx = i;
+      renderSituationButtons();
+      renderAll();
+    });
+    grp.appendChild(btn);
+  });
+}
+
+// ── Stats bar ─────────────────────────────────────────────────────────────────
+function renderStats() {
+  const origSit  = currentOrigSit();
+  const fixedSit = currentFixedSit();
+  const delta = fixedSit.push_pct - origSit.push_pct;
+  const deltaStr = (delta >= 0 ? '+' : '') + delta.toFixed(1) + ' pp';
+  const deltaClass = delta > 0.05 ? 'delta-pos' : delta < -0.05 ? 'delta-neg' : 'delta-zero';
+
+  // Hand-level counts
+  const origMap  = buildHandMap(origSit.hands);
+  const fixedMap = buildHandMap(fixedSit.hands);
+  let promoted = 0, demoted = 0, smallChange = 0, unchanged = 0;
+  for (const name of Object.keys(origMap)) {
+    const d = ((fixedMap[name] ?? 0) - origMap[name]) * 100;
+    const ad = Math.abs(d);
+    if (ad > 5) { d > 0 ? promoted++ : demoted++; }
+    else if (ad >= 1) smallChange++;
+    else unchanged++;
+  }
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stats-item">
+      <div class="stats-item-label">Overall push %</div>
+      <div class="stats-item-value">
+        <span class="orig">${origSit.push_pct.toFixed(1)}%</span>
+        <span class="arrow">→</span>
+        <span class="fixed">${fixedSit.push_pct.toFixed(1)}%</span>
+        <span class="${deltaClass}">${deltaStr}</span>
+      </div>
+    </div>
+    <div class="stats-sep"></div>
+    <div class="stats-item">
+      <div class="stats-item-label">Promoted (&gt;5pp)</div>
+      <div class="stats-item-value" style="color:var(--diff-promote)">${promoted} hands</div>
+    </div>
+    <div class="stats-item">
+      <div class="stats-item-label">Demoted (&gt;5pp)</div>
+      <div class="stats-item-value" style="color:var(--diff-demote)">${demoted} hands</div>
+    </div>
+    <div class="stats-item">
+      <div class="stats-item-label">Small change (1–5pp)</div>
+      <div class="stats-item-value" style="color:var(--diff-small)">${smallChange} hands</div>
+    </div>
+    <div class="stats-item">
+      <div class="stats-item-label">Unchanged</div>
+      <div class="stats-item-value" style="color:var(--text-muted)">${unchanged} hands</div>
+    </div>
+  `;
+}
+
+// ── Grid rendering ────────────────────────────────────────────────────────────
+function buildGrid(gridId, handMap, handMapOther, isFixed) {
+  const grid = document.getElementById(gridId);
+  grid.innerHTML = '';
+
+  // Corner spacer
+  grid.appendChild(document.createElement('div'));
+
+  // Col labels
+  RANKS.forEach(r => {
+    const lbl = document.createElement('div');
+    lbl.className = 'grid-label';
+    lbl.textContent = r;
+    grid.appendChild(lbl);
+  });
+
+  RANKS.forEach((_, ri) => {
+    // Row label
+    const rowLbl = document.createElement('div');
+    rowLbl.className = 'grid-label';
+    rowLbl.textContent = RANKS[ri];
+    grid.appendChild(rowLbl);
+
+    RANKS.forEach((_, ci) => {
+      const handName = canonicalName(ri, ci);
+      const push = handMap[handName] ?? 0;
+      const pushOther = (handMapOther[handName] ?? 0);
+
+      const cell = document.createElement('div');
+      cell.className = 'hand-cell';
+      cell.style.background = getColor(push);
+
+      // Diff border on fixed grid
+      if (isFixed) {
+        const deltaAbs = Math.abs((push - pushOther) * 100);
+        const deltaSign = (push - pushOther) * 100;
+        if (deltaAbs > 5) {
+          cell.classList.add(deltaSign > 0 ? 'diff-promote' : 'diff-demote');
+        } else if (deltaAbs >= 1) {
+          cell.classList.add('diff-small');
+        }
+      }
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'cell-name';
+      nameEl.textContent = handName;
+
+      const pctEl = document.createElement('div');
+      pctEl.className = 'cell-pct';
+      pctEl.textContent = push >= 0.005 ? (push * 100).toFixed(0) + '%' : '';
+
+      cell.appendChild(nameEl);
+      cell.appendChild(pctEl);
+
+      const origPush = isFixed ? pushOther : push;
+      const fixedPush = isFixed ? push : pushOther;
+
+      cell.addEventListener('mouseenter', (e) => showTooltip(e, handName, origPush, fixedPush));
+      cell.addEventListener('mousemove', moveTooltip);
+      cell.addEventListener('mouseleave', hideTooltip);
+
+      grid.appendChild(cell);
+    });
+  });
+}
+
+function renderGrids() {
+  const origSit  = currentOrigSit();
+  const fixedSit = currentFixedSit();
+  const origMap  = buildHandMap(origSit.hands);
+  const fixedMap = buildHandMap(fixedSit.hands);
+
+  document.getElementById('orig-push-pct').textContent = origSit.push_pct.toFixed(1);
+  document.getElementById('fixed-push-pct').textContent = fixedSit.push_pct.toFixed(1);
+
+  buildGrid('grid-orig',  origMap,  fixedMap, false);
+  buildGrid('grid-fixed', fixedMap, origMap,  true);
+}
+
+// ── Diff table ────────────────────────────────────────────────────────────────
+function renderDiffTable() {
+  const origSit  = currentOrigSit();
+  const fixedSit = currentFixedSit();
+  const origMap  = buildHandMap(origSit.hands);
+  const fixedMap = buildHandMap(fixedSit.hands);
+
+  const rows = [];
+  for (const name of Object.keys(origMap)) {
+    const o = origMap[name] ?? 0;
+    const f = fixedMap[name] ?? 0;
+    const delta = (f - o) * 100;
+    if (Math.abs(delta) < 1) continue;
+    rows.push({ hand: name, orig: o, fixed: f, delta });
+  }
+
+  // Sort
+  rows.sort((a, b) => {
+    let av = a[state.sortCol], bv = b[state.sortCol];
+    if (state.sortCol === 'hand') { av = av; bv = bv; }
+    if (state.sortCol === 'delta') { av = Math.abs(av); bv = Math.abs(bv); }
+    if (state.sortCol === 'dir') {
+      av = a.delta > 5 ? 2 : a.delta < -5 ? 0 : 1;
+      bv = b.delta > 5 ? 2 : b.delta < -5 ? 0 : 1;
+    }
+    if (av < bv) return state.sortAsc ? -1 : 1;
+    if (av > bv) return state.sortAsc ? 1 : -1;
+    return 0;
+  });
+
+  document.getElementById('diff-count').textContent = rows.length + ' hands changed ≥1pp';
+
+  const tbody = document.getElementById('diff-tbody');
+  tbody.innerHTML = '';
+
+  const maxDelta = Math.max(...rows.map(r => Math.abs(r.delta)), 1);
+
+  for (const row of rows) {
+    const tr = document.createElement('tr');
+    const adelta = Math.abs(row.delta);
+    const isPromote = row.delta > 5;
+    const isDemote  = row.delta < -5;
+    const dirClass = isPromote ? 'dir-promote' : isDemote ? 'dir-demote' : 'dir-small';
+    const dirLabel  = isPromote ? 'Promoted' : isDemote ? 'Demoted' : 'Small';
+    const deltaClass = row.delta > 0 ? 'dt-delta-pos' : 'dt-delta-neg';
+    const barColor = isPromote ? 'var(--diff-promote)' : isDemote ? 'var(--diff-demote)' : 'var(--diff-small)';
+    const barWidth = (adelta / maxDelta * 80).toFixed(1);
+    const sign = row.delta > 0 ? '+' : '';
+
+    tr.innerHTML = `
+      <td class="dt-hand">${row.hand}</td>
+      <td class="dt-orig">${(row.orig*100).toFixed(1)}%</td>
+      <td class="dt-fixed">${(row.fixed*100).toFixed(1)}%</td>
+      <td class="${deltaClass}">
+        ${sign}${row.delta.toFixed(1)} pp
+        <span class="dt-delta-bar-wrap"><span class="dt-delta-bar" style="width:${barWidth}px;background:${barColor}"></span></span>
+      </td>
+      <td><span class="dir-badge ${dirClass}">${dirLabel}</span></td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  // Update sort icons
+  document.querySelectorAll('.diff-table th').forEach(th => {
+    const col = th.dataset.col;
+    const icon = th.querySelector('.sort-icon');
+    if (col === state.sortCol) {
+      th.classList.add('sorted');
+      icon.textContent = state.sortAsc ? '↑' : '↓';
+    } else {
+      th.classList.remove('sorted');
+      icon.textContent = '↕';
+    }
+  });
+}
+
+// ── Table sort ────────────────────────────────────────────────────────────────
+document.querySelectorAll('.diff-table th').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (state.sortCol === col) {
+      state.sortAsc = !state.sortAsc;
+    } else {
+      state.sortCol = col;
+      state.sortAsc = col === 'hand';
+    }
+    renderDiffTable();
+  });
+});
+
+// ── Tooltip ───────────────────────────────────────────────────────────────────
+const tooltip = document.getElementById('tooltip');
+
+function showTooltip(e, hand, orig, fixed) {
+  document.getElementById('tt-hand').textContent = hand;
+  document.getElementById('tt-orig').textContent  = fmt2(orig);
+  document.getElementById('tt-fixed').textContent = fmt2(fixed);
+  const d = (fixed - orig) * 100;
+  const sign = d >= 0 ? '+' : '';
+  const el = document.getElementById('tt-delta');
+  el.textContent = sign + d.toFixed(2) + ' pp';
+  el.className = d > 0.5 ? 'tt-val-delta-pos' : d < -0.5 ? 'tt-val-delta-neg' : 'tt-val-delta-neu';
+  tooltip.classList.add('visible');
+  moveTooltip(e);
+}
+function moveTooltip(e) {
+  const x = e.clientX + 16, y = e.clientY - 10;
+  const tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+  tooltip.style.left = (x + tw > window.innerWidth  ? e.clientX - tw - 8 : x) + 'px';
+  tooltip.style.top  = (y + th > window.innerHeight ? e.clientY - th - 8 : y) + 'px';
+}
+function hideTooltip() { tooltip.classList.remove('visible'); }
+
+// ── Render all ────────────────────────────────────────────────────────────────
+function renderAll() {
+  renderStats();
+  renderGrids();
+  renderDiffTable();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+// Default: BB facing CO+BTN+SB push (most interesting changed situation)
+// BB is index 3, CO+BTN+SB push is last situation (index 6)
+state.posIdx = 3;
+state.sitIdx = ORIGINAL.positions[3].situations.length - 1;
+
+renderPositionButtons();
+renderSituationButtons();
+renderAll();
+</script>
+</body>
+</html>

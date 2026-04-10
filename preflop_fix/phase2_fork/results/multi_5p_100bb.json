@@ -1,0 +1,9491 @@
+[
+  {
+    "spot_name": "UTG RFI",
+    "hands": [
+      {
+        "hand": "22",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9420825
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.05791749
+          }
+        ]
+      },
+      {
+        "hand": "33",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6632551
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.33674487
+          }
+        ]
+      },
+      {
+        "hand": "44",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.760398
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.23960201
+          }
+        ]
+      },
+      {
+        "hand": "55",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.51626855
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.48373148
+          }
+        ]
+      },
+      {
+        "hand": "66",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.07528518
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9247148
+          }
+        ]
+      },
+      {
+        "hand": "77",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.12956828
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8704317
+          }
+        ]
+      },
+      {
+        "hand": "88",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.09168829
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9083117
+          }
+        ]
+      },
+      {
+        "hand": "99",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.0533538
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9466462
+          }
+        ]
+      },
+      {
+        "hand": "TT",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.026121046
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.973879
+          }
+        ]
+      },
+      {
+        "hand": "JJ",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.018606907
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.98139304
+          }
+        ]
+      },
+      {
+        "hand": "QQ",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.011024823
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.98897517
+          }
+        ]
+      },
+      {
+        "hand": "KK",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.009654505
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9903455
+          }
+        ]
+      },
+      {
+        "hand": "AA",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.0002087565
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9997912
+          }
+        ]
+      },
+      {
+        "hand": "32s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9739259
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.026074117
+          }
+        ]
+      },
+      {
+        "hand": "42s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96121037
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.038789634
+          }
+        ]
+      },
+      {
+        "hand": "43s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96240306
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.037596915
+          }
+        ]
+      },
+      {
+        "hand": "52s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.94273067
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.0572694
+          }
+        ]
+      },
+      {
+        "hand": "53s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9849722
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.015027819
+          }
+        ]
+      },
+      {
+        "hand": "54s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9675635
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.032436486
+          }
+        ]
+      },
+      {
+        "hand": "62s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9735635
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.026436483
+          }
+        ]
+      },
+      {
+        "hand": "63s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96466315
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.035336796
+          }
+        ]
+      },
+      {
+        "hand": "64s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96965915
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.03034091
+          }
+        ]
+      },
+      {
+        "hand": "65s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9412538
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.05874622
+          }
+        ]
+      },
+      {
+        "hand": "72s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.97528887
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.02471112
+          }
+        ]
+      },
+      {
+        "hand": "73s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9761315
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.023868516
+          }
+        ]
+      },
+      {
+        "hand": "74s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98215544
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.01784456
+          }
+        ]
+      },
+      {
+        "hand": "75s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9630547
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.036945347
+          }
+        ]
+      },
+      {
+        "hand": "76s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96367
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.036330003
+          }
+        ]
+      },
+      {
+        "hand": "82s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9855302
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.014469813
+          }
+        ]
+      },
+      {
+        "hand": "83s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96457154
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.03542847
+          }
+        ]
+      },
+      {
+        "hand": "84s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.95679575
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.043204192
+          }
+        ]
+      },
+      {
+        "hand": "85s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.968085
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.031915072
+          }
+        ]
+      },
+      {
+        "hand": "86s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9582291
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.04177088
+          }
+        ]
+      },
+      {
+        "hand": "87s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9459919
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.054008156
+          }
+        ]
+      },
+      {
+        "hand": "92s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.955941
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.044058986
+          }
+        ]
+      },
+      {
+        "hand": "93s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9704109
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.029589133
+          }
+        ]
+      },
+      {
+        "hand": "94s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9794337
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.020566255
+          }
+        ]
+      },
+      {
+        "hand": "95s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9337847
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.066215344
+          }
+        ]
+      },
+      {
+        "hand": "96s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9233251
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.07667485
+          }
+        ]
+      },
+      {
+        "hand": "97s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.92970896
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.07029099
+          }
+        ]
+      },
+      {
+        "hand": "98s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9247447
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.07525522
+          }
+        ]
+      },
+      {
+        "hand": "T2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9709521
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.029047938
+          }
+        ]
+      },
+      {
+        "hand": "T3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96732527
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.032674678
+          }
+        ]
+      },
+      {
+        "hand": "T4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.93506634
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.06493371
+          }
+        ]
+      },
+      {
+        "hand": "T5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9605248
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.039475266
+          }
+        ]
+      },
+      {
+        "hand": "T6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.89550555
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.10449442
+          }
+        ]
+      },
+      {
+        "hand": "T7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9204831
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.07951693
+          }
+        ]
+      },
+      {
+        "hand": "T8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.83125407
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.16874596
+          }
+        ]
+      },
+      {
+        "hand": "T9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8293055
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.17069452
+          }
+        ]
+      },
+      {
+        "hand": "J2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96653104
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.03346892
+          }
+        ]
+      },
+      {
+        "hand": "J3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9486798
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.05132019
+          }
+        ]
+      },
+      {
+        "hand": "J4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96995115
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.030048838
+          }
+        ]
+      },
+      {
+        "hand": "J5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.95987535
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.040124673
+          }
+        ]
+      },
+      {
+        "hand": "J6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.95045215
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.04954781
+          }
+        ]
+      },
+      {
+        "hand": "J7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9360916
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.06390836
+          }
+        ]
+      },
+      {
+        "hand": "J8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9044317
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.095568314
+          }
+        ]
+      },
+      {
+        "hand": "J9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5355885
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.46441144
+          }
+        ]
+      },
+      {
+        "hand": "JTs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5189811
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.4810189
+          }
+        ]
+      },
+      {
+        "hand": "Q2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96502286
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.03497711
+          }
+        ]
+      },
+      {
+        "hand": "Q3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9657552
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.034244716
+          }
+        ]
+      },
+      {
+        "hand": "Q4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9424013
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.057598766
+          }
+        ]
+      },
+      {
+        "hand": "Q5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.93407404
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.065925926
+          }
+        ]
+      },
+      {
+        "hand": "Q6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9488788
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.051121183
+          }
+        ]
+      },
+      {
+        "hand": "Q7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9000951
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.0999049
+          }
+        ]
+      },
+      {
+        "hand": "Q8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6745706
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3254293
+          }
+        ]
+      },
+      {
+        "hand": "Q9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.75577086
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.24422917
+          }
+        ]
+      },
+      {
+        "hand": "QTs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.44057512
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.5594248
+          }
+        ]
+      },
+      {
+        "hand": "QJs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.41780815
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.5821919
+          }
+        ]
+      },
+      {
+        "hand": "K2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.93320185
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.06679812
+          }
+        ]
+      },
+      {
+        "hand": "K3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9167137
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.083286285
+          }
+        ]
+      },
+      {
+        "hand": "K4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.86689204
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.13310799
+          }
+        ]
+      },
+      {
+        "hand": "K5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.85238737
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.14761268
+          }
+        ]
+      },
+      {
+        "hand": "K6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8726829
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.12731715
+          }
+        ]
+      },
+      {
+        "hand": "K7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8610199
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.13898002
+          }
+        ]
+      },
+      {
+        "hand": "K8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7078284
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.29217154
+          }
+        ]
+      },
+      {
+        "hand": "K9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.4036799
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.59632015
+          }
+        ]
+      },
+      {
+        "hand": "KTs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.25550038
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.7444996
+          }
+        ]
+      },
+      {
+        "hand": "KJs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.19661929
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8033807
+          }
+        ]
+      },
+      {
+        "hand": "KQs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.086945176
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.91305476
+          }
+        ]
+      },
+      {
+        "hand": "A2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.85243994
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.14756006
+          }
+        ]
+      },
+      {
+        "hand": "A3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.52897
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.47102994
+          }
+        ]
+      },
+      {
+        "hand": "A4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.61442584
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.38557416
+          }
+        ]
+      },
+      {
+        "hand": "A5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7805312
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.21946873
+          }
+        ]
+      },
+      {
+        "hand": "A6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6842313
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.31576866
+          }
+        ]
+      },
+      {
+        "hand": "A7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.39896476
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.60103524
+          }
+        ]
+      },
+      {
+        "hand": "A8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.12930447
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.87069553
+          }
+        ]
+      },
+      {
+        "hand": "A9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.06512202
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.93487793
+          }
+        ]
+      },
+      {
+        "hand": "ATs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.108274765
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8917252
+          }
+        ]
+      },
+      {
+        "hand": "AJs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.04740268
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9525973
+          }
+        ]
+      },
+      {
+        "hand": "AQs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.034373946
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.965626
+          }
+        ]
+      },
+      {
+        "hand": "AKs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.019396093
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9806039
+          }
+        ]
+      },
+      {
+        "hand": "32o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9910869
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.008913055
+          }
+        ]
+      },
+      {
+        "hand": "42o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.993457
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.0065430324
+          }
+        ]
+      },
+      {
+        "hand": "43o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98878217
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.01121783
+          }
+        ]
+      },
+      {
+        "hand": "52o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9903663
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.0096337395
+          }
+        ]
+      },
+      {
+        "hand": "53o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9919432
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.008056835
+          }
+        ]
+      },
+      {
+        "hand": "54o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9911836
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.00881642
+          }
+        ]
+      },
+      {
+        "hand": "62o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.99368507
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.0063149687
+          }
+        ]
+      },
+      {
+        "hand": "63o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.99350244
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.0064975466
+          }
+        ]
+      },
+      {
+        "hand": "64o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9924603
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.0075397138
+          }
+        ]
+      },
+      {
+        "hand": "65o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98039937
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.019600628
+          }
+        ]
+      },
+      {
+        "hand": "72o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.99206454
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.007935439
+          }
+        ]
+      },
+      {
+        "hand": "73o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9858682
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.014131781
+          }
+        ]
+      },
+      {
+        "hand": "74o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98210084
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.017899143
+          }
+        ]
+      },
+      {
+        "hand": "75o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9879619
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.01203812
+          }
+        ]
+      },
+      {
+        "hand": "76o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9831309
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.016869105
+          }
+        ]
+      },
+      {
+        "hand": "82o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.99326366
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.0067363363
+          }
+        ]
+      },
+      {
+        "hand": "83o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9883958
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.011604195
+          }
+        ]
+      },
+      {
+        "hand": "84o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9855599
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.014440144
+          }
+        ]
+      },
+      {
+        "hand": "85o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9859614
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.014038612
+          }
+        ]
+      },
+      {
+        "hand": "86o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98043704
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.01956295
+          }
+        ]
+      },
+      {
+        "hand": "87o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9762338
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.02376622
+          }
+        ]
+      },
+      {
+        "hand": "92o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.99254596
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.0074540125
+          }
+        ]
+      },
+      {
+        "hand": "93o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.99128044
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.008719558
+          }
+        ]
+      },
+      {
+        "hand": "94o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9914973
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.008502733
+          }
+        ]
+      },
+      {
+        "hand": "95o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9896184
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.01038154
+          }
+        ]
+      },
+      {
+        "hand": "96o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9837603
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.016239693
+          }
+        ]
+      },
+      {
+        "hand": "97o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9791446
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.020855397
+          }
+        ]
+      },
+      {
+        "hand": "98o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9748465
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.025153508
+          }
+        ]
+      },
+      {
+        "hand": "T2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9920325
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.00796753
+          }
+        ]
+      },
+      {
+        "hand": "T3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98714995
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.01285002
+          }
+        ]
+      },
+      {
+        "hand": "T4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9892703
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.01072969
+          }
+        ]
+      },
+      {
+        "hand": "T5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9866443
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.013355642
+          }
+        ]
+      },
+      {
+        "hand": "T6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98476666
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.015233317
+          }
+        ]
+      },
+      {
+        "hand": "T7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9791169
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.020883132
+          }
+        ]
+      },
+      {
+        "hand": "T8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96599716
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.034002844
+          }
+        ]
+      },
+      {
+        "hand": "T9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9307495
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.06925056
+          }
+        ]
+      },
+      {
+        "hand": "J2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98660356
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.01339638
+          }
+        ]
+      },
+      {
+        "hand": "J3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9900869
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.009913103
+          }
+        ]
+      },
+      {
+        "hand": "J4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9890762
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.0109238345
+          }
+        ]
+      },
+      {
+        "hand": "J5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98983175
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.010168247
+          }
+        ]
+      },
+      {
+        "hand": "J6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9855358
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.014464239
+          }
+        ]
+      },
+      {
+        "hand": "J7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.980574
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.019425979
+          }
+        ]
+      },
+      {
+        "hand": "J8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.969168
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.030832002
+          }
+        ]
+      },
+      {
+        "hand": "J9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.94694024
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.053059716
+          }
+        ]
+      },
+      {
+        "hand": "JTo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.87867063
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.12132934
+          }
+        ]
+      },
+      {
+        "hand": "Q2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9896464
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.01035363
+          }
+        ]
+      },
+      {
+        "hand": "Q3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98807937
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.011920682
+          }
+        ]
+      },
+      {
+        "hand": "Q4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98847896
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.01152102
+          }
+        ]
+      },
+      {
+        "hand": "Q5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9838668
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.016133169
+          }
+        ]
+      },
+      {
+        "hand": "Q6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98236805
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.017631933
+          }
+        ]
+      },
+      {
+        "hand": "Q7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9657866
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.034213435
+          }
+        ]
+      },
+      {
+        "hand": "Q8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9639975
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.03600254
+          }
+        ]
+      },
+      {
+        "hand": "Q9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9505085
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.049491562
+          }
+        ]
+      },
+      {
+        "hand": "QTo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8583867
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.14161335
+          }
+        ]
+      },
+      {
+        "hand": "QJo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7810771
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.21892291
+          }
+        ]
+      },
+      {
+        "hand": "K2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.97988385
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.020116158
+          }
+        ]
+      },
+      {
+        "hand": "K3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9769245
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.023075506
+          }
+        ]
+      },
+      {
+        "hand": "K4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.97601134
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.023988644
+          }
+        ]
+      },
+      {
+        "hand": "K5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9701138
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.02988617
+          }
+        ]
+      },
+      {
+        "hand": "K6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96805304
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.03194692
+          }
+        ]
+      },
+      {
+        "hand": "K7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.97185373
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.028146205
+          }
+        ]
+      },
+      {
+        "hand": "K8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9316629
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.06833708
+          }
+        ]
+      },
+      {
+        "hand": "K9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7716459
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.22835413
+          }
+        ]
+      },
+      {
+        "hand": "KTo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5369023
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.46309772
+          }
+        ]
+      },
+      {
+        "hand": "KJo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.2397785
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.76022154
+          }
+        ]
+      },
+      {
+        "hand": "KQo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.18436183
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8156381
+          }
+        ]
+      },
+      {
+        "hand": "A2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.95372355
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.04627641
+          }
+        ]
+      },
+      {
+        "hand": "A3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9595141
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.040485892
+          }
+        ]
+      },
+      {
+        "hand": "A4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9245022
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.07549776
+          }
+        ]
+      },
+      {
+        "hand": "A5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8866099
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.11339012
+          }
+        ]
+      },
+      {
+        "hand": "A6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.90324044
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.09675957
+          }
+        ]
+      },
+      {
+        "hand": "A7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.84047365
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.1595264
+          }
+        ]
+      },
+      {
+        "hand": "A8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.43690145
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.5630985
+          }
+        ]
+      },
+      {
+        "hand": "A9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.1607593
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.83924073
+          }
+        ]
+      },
+      {
+        "hand": "ATo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.12752824
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8724718
+          }
+        ]
+      },
+      {
+        "hand": "AJo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.046842933
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.95315707
+          }
+        ]
+      },
+      {
+        "hand": "AQo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.032009635
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.96799034
+          }
+        ]
+      },
+      {
+        "hand": "AKo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.021268835
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.97873116
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "spot_name": "HJ RFI",
+    "hands": [
+      {
+        "hand": "22",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7066474
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.29335254
+          }
+        ]
+      },
+      {
+        "hand": "33",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.55225843
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.44774154
+          }
+        ]
+      },
+      {
+        "hand": "44",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.36628428
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.63371575
+          }
+        ]
+      },
+      {
+        "hand": "55",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.41712818
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.58287185
+          }
+        ]
+      },
+      {
+        "hand": "66",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.20400424
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.7959957
+          }
+        ]
+      },
+      {
+        "hand": "77",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.114147745
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8858523
+          }
+        ]
+      },
+      {
+        "hand": "88",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.072740644
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9272593
+          }
+        ]
+      },
+      {
+        "hand": "99",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.09814809
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.90185195
+          }
+        ]
+      },
+      {
+        "hand": "TT",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.032314748
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9676853
+          }
+        ]
+      },
+      {
+        "hand": "JJ",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.03153615
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.96846384
+          }
+        ]
+      },
+      {
+        "hand": "QQ",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.030377885
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9696221
+          }
+        ]
+      },
+      {
+        "hand": "KK",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.009385906
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9906141
+          }
+        ]
+      },
+      {
+        "hand": "AA",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.00030990184
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9996901
+          }
+        ]
+      },
+      {
+        "hand": "32s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.97645795
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.023542086
+          }
+        ]
+      },
+      {
+        "hand": "42s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.97145927
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.028540779
+          }
+        ]
+      },
+      {
+        "hand": "43s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9407225
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.05927752
+          }
+        ]
+      },
+      {
+        "hand": "52s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9447999
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.055200115
+          }
+        ]
+      },
+      {
+        "hand": "53s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.94887894
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.05112101
+          }
+        ]
+      },
+      {
+        "hand": "54s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7876669
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.21233308
+          }
+        ]
+      },
+      {
+        "hand": "62s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9733946
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.026605384
+          }
+        ]
+      },
+      {
+        "hand": "63s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96708494
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.032915067
+          }
+        ]
+      },
+      {
+        "hand": "64s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8748685
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.12513144
+          }
+        ]
+      },
+      {
+        "hand": "65s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9106527
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.089347266
+          }
+        ]
+      },
+      {
+        "hand": "72s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98132867
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.018671298
+          }
+        ]
+      },
+      {
+        "hand": "73s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9739097
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.026090272
+          }
+        ]
+      },
+      {
+        "hand": "74s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.95431787
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.045682162
+          }
+        ]
+      },
+      {
+        "hand": "75s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9492924
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.050707567
+          }
+        ]
+      },
+      {
+        "hand": "76s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.86980736
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.13019264
+          }
+        ]
+      },
+      {
+        "hand": "82s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96346045
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.036539555
+          }
+        ]
+      },
+      {
+        "hand": "83s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96626335
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.033736657
+          }
+        ]
+      },
+      {
+        "hand": "84s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.78896666
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.21103334
+          }
+        ]
+      },
+      {
+        "hand": "85s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8967592
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.103240766
+          }
+        ]
+      },
+      {
+        "hand": "86s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9351612
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.064838804
+          }
+        ]
+      },
+      {
+        "hand": "87s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8512918
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.14870818
+          }
+        ]
+      },
+      {
+        "hand": "92s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.92046595
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.07953403
+          }
+        ]
+      },
+      {
+        "hand": "93s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9459203
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.054079663
+          }
+        ]
+      },
+      {
+        "hand": "94s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.967197
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.03280301
+          }
+        ]
+      },
+      {
+        "hand": "95s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9136318
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.08636821
+          }
+        ]
+      },
+      {
+        "hand": "96s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9172429
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.08275713
+          }
+        ]
+      },
+      {
+        "hand": "97s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8114035
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.18859652
+          }
+        ]
+      },
+      {
+        "hand": "98s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.60277206
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.39722797
+          }
+        ]
+      },
+      {
+        "hand": "T2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9678809
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.03211906
+          }
+        ]
+      },
+      {
+        "hand": "T3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.946395
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.053605016
+          }
+        ]
+      },
+      {
+        "hand": "T4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9462653
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.05373471
+          }
+        ]
+      },
+      {
+        "hand": "T5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9474932
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.052506834
+          }
+        ]
+      },
+      {
+        "hand": "T6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9152394
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.0847606
+          }
+        ]
+      },
+      {
+        "hand": "T7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9091451
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.09085489
+          }
+        ]
+      },
+      {
+        "hand": "T8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.854673
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.14532694
+          }
+        ]
+      },
+      {
+        "hand": "T9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.86569154
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.13430849
+          }
+        ]
+      },
+      {
+        "hand": "J2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9541109
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.04588909
+          }
+        ]
+      },
+      {
+        "hand": "J3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.93149596
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.068504035
+          }
+        ]
+      },
+      {
+        "hand": "J4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.93129367
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.0687063
+          }
+        ]
+      },
+      {
+        "hand": "J5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9306074
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.069392644
+          }
+        ]
+      },
+      {
+        "hand": "J6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.84244794
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.15755205
+          }
+        ]
+      },
+      {
+        "hand": "J7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8870505
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.11294946
+          }
+        ]
+      },
+      {
+        "hand": "J8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8059712
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.19402884
+          }
+        ]
+      },
+      {
+        "hand": "J9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.26814723
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.73185277
+          }
+        ]
+      },
+      {
+        "hand": "JTs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.36226487
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.6377351
+          }
+        ]
+      },
+      {
+        "hand": "Q2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9460716
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.05392843
+          }
+        ]
+      },
+      {
+        "hand": "Q3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.94712824
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.052871723
+          }
+        ]
+      },
+      {
+        "hand": "Q4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.83872026
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.16127971
+          }
+        ]
+      },
+      {
+        "hand": "Q5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9007245
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.09927554
+          }
+        ]
+      },
+      {
+        "hand": "Q6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8465799
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.1534201
+          }
+        ]
+      },
+      {
+        "hand": "Q7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.81646186
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.18353814
+          }
+        ]
+      },
+      {
+        "hand": "Q8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7815992
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.21840079
+          }
+        ]
+      },
+      {
+        "hand": "Q9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.80516213
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.19483788
+          }
+        ]
+      },
+      {
+        "hand": "QTs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.24796419
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.75203586
+          }
+        ]
+      },
+      {
+        "hand": "QJs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.35545415
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.64454585
+          }
+        ]
+      },
+      {
+        "hand": "K2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9296078
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.070392184
+          }
+        ]
+      },
+      {
+        "hand": "K3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.89279765
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.10720236
+          }
+        ]
+      },
+      {
+        "hand": "K4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7233744
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.27662554
+          }
+        ]
+      },
+      {
+        "hand": "K5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7843635
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.21563652
+          }
+        ]
+      },
+      {
+        "hand": "K6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.83323616
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.16676383
+          }
+        ]
+      },
+      {
+        "hand": "K7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.829472
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.170528
+          }
+        ]
+      },
+      {
+        "hand": "K8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6481521
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3518479
+          }
+        ]
+      },
+      {
+        "hand": "K9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.13182585
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.86817414
+          }
+        ]
+      },
+      {
+        "hand": "KTs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.1431645
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.85683554
+          }
+        ]
+      },
+      {
+        "hand": "KJs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.28285715
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.7171428
+          }
+        ]
+      },
+      {
+        "hand": "KQs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.16424933
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8357507
+          }
+        ]
+      },
+      {
+        "hand": "A2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7241085
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.2758915
+          }
+        ]
+      },
+      {
+        "hand": "A3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.25552922
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.7444708
+          }
+        ]
+      },
+      {
+        "hand": "A4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.20913345
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.79086655
+          }
+        ]
+      },
+      {
+        "hand": "A5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.2919301
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.70806986
+          }
+        ]
+      },
+      {
+        "hand": "A6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.26674744
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.7332526
+          }
+        ]
+      },
+      {
+        "hand": "A7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.2507827
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.7492173
+          }
+        ]
+      },
+      {
+        "hand": "A8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.13608868
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8639113
+          }
+        ]
+      },
+      {
+        "hand": "A9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.23794334
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.76205665
+          }
+        ]
+      },
+      {
+        "hand": "ATs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.10650623
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8934938
+          }
+        ]
+      },
+      {
+        "hand": "AJs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.079588115
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.92041194
+          }
+        ]
+      },
+      {
+        "hand": "AQs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.039024204
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9609758
+          }
+        ]
+      },
+      {
+        "hand": "AKs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.02416507
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9758349
+          }
+        ]
+      },
+      {
+        "hand": "32o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98906523
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.010934769
+          }
+        ]
+      },
+      {
+        "hand": "42o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9878692
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.0121308025
+          }
+        ]
+      },
+      {
+        "hand": "43o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9789612
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.021038814
+          }
+        ]
+      },
+      {
+        "hand": "52o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9770782
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.022921802
+          }
+        ]
+      },
+      {
+        "hand": "53o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9790652
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.020934816
+          }
+        ]
+      },
+      {
+        "hand": "54o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9652306
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.034769412
+          }
+        ]
+      },
+      {
+        "hand": "62o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98659676
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.013403262
+          }
+        ]
+      },
+      {
+        "hand": "63o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98911196
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.010888009
+          }
+        ]
+      },
+      {
+        "hand": "64o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.984377
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.015622925
+          }
+        ]
+      },
+      {
+        "hand": "65o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96469474
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.03530522
+          }
+        ]
+      },
+      {
+        "hand": "72o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.99037826
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.009621699
+          }
+        ]
+      },
+      {
+        "hand": "73o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9881483
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.011851755
+          }
+        ]
+      },
+      {
+        "hand": "74o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98026246
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.01973761
+          }
+        ]
+      },
+      {
+        "hand": "75o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.97775215
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.02224784
+          }
+        ]
+      },
+      {
+        "hand": "76o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9509976
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.04900246
+          }
+        ]
+      },
+      {
+        "hand": "82o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98587567
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.01412438
+          }
+        ]
+      },
+      {
+        "hand": "83o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9751763
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.024823772
+          }
+        ]
+      },
+      {
+        "hand": "84o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9821018
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.017898139
+          }
+        ]
+      },
+      {
+        "hand": "85o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9790266
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.020973425
+          }
+        ]
+      },
+      {
+        "hand": "86o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.961037
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.03896306
+          }
+        ]
+      },
+      {
+        "hand": "87o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9550751
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.044924952
+          }
+        ]
+      },
+      {
+        "hand": "92o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9801565
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.019843545
+          }
+        ]
+      },
+      {
+        "hand": "93o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9878347
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.012165252
+          }
+        ]
+      },
+      {
+        "hand": "94o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.981373
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.018626994
+          }
+        ]
+      },
+      {
+        "hand": "95o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9814243
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.018575732
+          }
+        ]
+      },
+      {
+        "hand": "96o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9754731
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.02452688
+          }
+        ]
+      },
+      {
+        "hand": "97o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9663136
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.033686437
+          }
+        ]
+      },
+      {
+        "hand": "98o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.92616475
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.07383525
+          }
+        ]
+      },
+      {
+        "hand": "T2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98140633
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.018593675
+          }
+        ]
+      },
+      {
+        "hand": "T3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98060507
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.019394979
+          }
+        ]
+      },
+      {
+        "hand": "T4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.97208095
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.027919084
+          }
+        ]
+      },
+      {
+        "hand": "T5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.97027194
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.029728066
+          }
+        ]
+      },
+      {
+        "hand": "T6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96611094
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.033889033
+          }
+        ]
+      },
+      {
+        "hand": "T7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96829754
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.031702455
+          }
+        ]
+      },
+      {
+        "hand": "T8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.95230985
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.04769016
+          }
+        ]
+      },
+      {
+        "hand": "T9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.92679024
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.0732097
+          }
+        ]
+      },
+      {
+        "hand": "J2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.97820586
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.021794133
+          }
+        ]
+      },
+      {
+        "hand": "J3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9773512
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.022648776
+          }
+        ]
+      },
+      {
+        "hand": "J4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96889555
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.031104494
+          }
+        ]
+      },
+      {
+        "hand": "J5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9751741
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.024825929
+          }
+        ]
+      },
+      {
+        "hand": "J6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9775397
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.022460323
+          }
+        ]
+      },
+      {
+        "hand": "J7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.95601463
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.043985374
+          }
+        ]
+      },
+      {
+        "hand": "J8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.89166564
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.1083344
+          }
+        ]
+      },
+      {
+        "hand": "J9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8605796
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.13942042
+          }
+        ]
+      },
+      {
+        "hand": "JTo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7917439
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.20825614
+          }
+        ]
+      },
+      {
+        "hand": "Q2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.98446256
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.015537479
+          }
+        ]
+      },
+      {
+        "hand": "Q3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.97084004
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.029159969
+          }
+        ]
+      },
+      {
+        "hand": "Q4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9810237
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.018976305
+          }
+        ]
+      },
+      {
+        "hand": "Q5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9564592
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.043540783
+          }
+        ]
+      },
+      {
+        "hand": "Q6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.89688194
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.10311808
+          }
+        ]
+      },
+      {
+        "hand": "Q7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.96567154
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.034328498
+          }
+        ]
+      },
+      {
+        "hand": "Q8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.95352376
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.046476267
+          }
+        ]
+      },
+      {
+        "hand": "Q9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.92307895
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.07692103
+          }
+        ]
+      },
+      {
+        "hand": "QTo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.57953274
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.4204673
+          }
+        ]
+      },
+      {
+        "hand": "QJo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8058601
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.19413991
+          }
+        ]
+      },
+      {
+        "hand": "K2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.95899624
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.041003793
+          }
+        ]
+      },
+      {
+        "hand": "K3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9453327
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.054667283
+          }
+        ]
+      },
+      {
+        "hand": "K4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9540608
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.045939248
+          }
+        ]
+      },
+      {
+        "hand": "K5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.94237196
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.057628017
+          }
+        ]
+      },
+      {
+        "hand": "K6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9267128
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.07328723
+          }
+        ]
+      },
+      {
+        "hand": "K7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.92440754
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.075592466
+          }
+        ]
+      },
+      {
+        "hand": "K8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.89033514
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.10966489
+          }
+        ]
+      },
+      {
+        "hand": "K9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6250537
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3749463
+          }
+        ]
+      },
+      {
+        "hand": "KTo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.19931917
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.80068076
+          }
+        ]
+      },
+      {
+        "hand": "KJo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.33735034
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.6626497
+          }
+        ]
+      },
+      {
+        "hand": "KQo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.109958395
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8900416
+          }
+        ]
+      },
+      {
+        "hand": "A2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.82401544
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.17598455
+          }
+        ]
+      },
+      {
+        "hand": "A3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7864898
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.2135102
+          }
+        ]
+      },
+      {
+        "hand": "A4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.87989396
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.12010607
+          }
+        ]
+      },
+      {
+        "hand": "A5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.32412937
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.6758706
+          }
+        ]
+      },
+      {
+        "hand": "A6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.80737823
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.19262174
+          }
+        ]
+      },
+      {
+        "hand": "A7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.80758685
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.19241314
+          }
+        ]
+      },
+      {
+        "hand": "A8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.22860356
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.77139646
+          }
+        ]
+      },
+      {
+        "hand": "A9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.23025513
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.7697449
+          }
+        ]
+      },
+      {
+        "hand": "ATo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.14252451
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8574755
+          }
+        ]
+      },
+      {
+        "hand": "AJo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.0830267
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9169733
+          }
+        ]
+      },
+      {
+        "hand": "AQo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.03229253
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9677075
+          }
+        ]
+      },
+      {
+        "hand": "AKo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.021807348
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9781927
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "spot_name": "CO RFI",
+    "hands": [
+      {
+        "hand": "22",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.13148642
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8685136
+          }
+        ]
+      },
+      {
+        "hand": "33",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.14702168
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8529783
+          }
+        ]
+      },
+      {
+        "hand": "44",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.2607916
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.73920846
+          }
+        ]
+      },
+      {
+        "hand": "55",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.10931474
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.89068526
+          }
+        ]
+      },
+      {
+        "hand": "66",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.12038039
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.87961966
+          }
+        ]
+      },
+      {
+        "hand": "77",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.07291746
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.92708254
+          }
+        ]
+      },
+      {
+        "hand": "88",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.10790374
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8920962
+          }
+        ]
+      },
+      {
+        "hand": "99",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.0425703
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9574297
+          }
+        ]
+      },
+      {
+        "hand": "TT",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.047956172
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9520439
+          }
+        ]
+      },
+      {
+        "hand": "JJ",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.027924718
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9720753
+          }
+        ]
+      },
+      {
+        "hand": "QQ",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.02390238
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.97609764
+          }
+        ]
+      },
+      {
+        "hand": "KK",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.010844262
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9891557
+          }
+        ]
+      },
+      {
+        "hand": "AA",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.0000017441719
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9999983
+          }
+        ]
+      },
+      {
+        "hand": "32s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9121856
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.08781436
+          }
+        ]
+      },
+      {
+        "hand": "42s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8725643
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.12743568
+          }
+        ]
+      },
+      {
+        "hand": "43s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.80006534
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.19993465
+          }
+        ]
+      },
+      {
+        "hand": "52s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.78671867
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.21328132
+          }
+        ]
+      },
+      {
+        "hand": "53s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.68873656
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.31126347
+          }
+        ]
+      },
+      {
+        "hand": "54s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.3056104
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.69438964
+          }
+        ]
+      },
+      {
+        "hand": "62s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8102743
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.18972567
+          }
+        ]
+      },
+      {
+        "hand": "63s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7284837
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.27151632
+          }
+        ]
+      },
+      {
+        "hand": "64s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.2873408
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.7126592
+          }
+        ]
+      },
+      {
+        "hand": "65s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6559553
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3440447
+          }
+        ]
+      },
+      {
+        "hand": "72s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.57478356
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.42521638
+          }
+        ]
+      },
+      {
+        "hand": "73s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7805564
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.21944356
+          }
+        ]
+      },
+      {
+        "hand": "74s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.88712347
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.112876534
+          }
+        ]
+      },
+      {
+        "hand": "75s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8653315
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.13466847
+          }
+        ]
+      },
+      {
+        "hand": "76s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6927408
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.30725917
+          }
+        ]
+      },
+      {
+        "hand": "82s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.788657
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.21134293
+          }
+        ]
+      },
+      {
+        "hand": "83s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.83044773
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.1695523
+          }
+        ]
+      },
+      {
+        "hand": "84s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.68606
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.31393996
+          }
+        ]
+      },
+      {
+        "hand": "85s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8657604
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.13423963
+          }
+        ]
+      },
+      {
+        "hand": "86s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.47818378
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.52181625
+          }
+        ]
+      },
+      {
+        "hand": "87s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.18854219
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8114578
+          }
+        ]
+      },
+      {
+        "hand": "92s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8658275
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.1341725
+          }
+        ]
+      },
+      {
+        "hand": "93s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.80138445
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.19861555
+          }
+        ]
+      },
+      {
+        "hand": "94s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.88341606
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.116583966
+          }
+        ]
+      },
+      {
+        "hand": "95s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6588549
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3411451
+          }
+        ]
+      },
+      {
+        "hand": "96s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6937831
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3062169
+          }
+        ]
+      },
+      {
+        "hand": "97s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.14185223
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8581478
+          }
+        ]
+      },
+      {
+        "hand": "98s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.17020494
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.82979506
+          }
+        ]
+      },
+      {
+        "hand": "T2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9105953
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.08940475
+          }
+        ]
+      },
+      {
+        "hand": "T3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8404846
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.15951541
+          }
+        ]
+      },
+      {
+        "hand": "T4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.62053996
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.37945998
+          }
+        ]
+      },
+      {
+        "hand": "T5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.60372823
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.39627182
+          }
+        ]
+      },
+      {
+        "hand": "T6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.66658056
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3334194
+          }
+        ]
+      },
+      {
+        "hand": "T7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6199853
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.38001475
+          }
+        ]
+      },
+      {
+        "hand": "T8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.30433893
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.69566107
+          }
+        ]
+      },
+      {
+        "hand": "T9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.30605772
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.6939423
+          }
+        ]
+      },
+      {
+        "hand": "J2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8009207
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.19907928
+          }
+        ]
+      },
+      {
+        "hand": "J3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6028254
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3971746
+          }
+        ]
+      },
+      {
+        "hand": "J4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.82148254
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.17851745
+          }
+        ]
+      },
+      {
+        "hand": "J5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.21083722
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.78916276
+          }
+        ]
+      },
+      {
+        "hand": "J6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7123437
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.28765634
+          }
+        ]
+      },
+      {
+        "hand": "J7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.19070011
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8092999
+          }
+        ]
+      },
+      {
+        "hand": "J8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.1638591
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.83614093
+          }
+        ]
+      },
+      {
+        "hand": "J9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.12507528
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8749247
+          }
+        ]
+      },
+      {
+        "hand": "JTs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.3104001
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.6895999
+          }
+        ]
+      },
+      {
+        "hand": "Q2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5011029
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.49889708
+          }
+        ]
+      },
+      {
+        "hand": "Q3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5654009
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.4345991
+          }
+        ]
+      },
+      {
+        "hand": "Q4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5528109
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.44718903
+          }
+        ]
+      },
+      {
+        "hand": "Q5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.24707423
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.75292575
+          }
+        ]
+      },
+      {
+        "hand": "Q6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.18068159
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8193184
+          }
+        ]
+      },
+      {
+        "hand": "Q7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.49228513
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.5077148
+          }
+        ]
+      },
+      {
+        "hand": "Q8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.11550019
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8844998
+          }
+        ]
+      },
+      {
+        "hand": "Q9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.33269408
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.66730595
+          }
+        ]
+      },
+      {
+        "hand": "QTs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.17707674
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.82292324
+          }
+        ]
+      },
+      {
+        "hand": "QJs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.07687969
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9231203
+          }
+        ]
+      },
+      {
+        "hand": "K2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.43344736
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.56655264
+          }
+        ]
+      },
+      {
+        "hand": "K3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.15801845
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.84198153
+          }
+        ]
+      },
+      {
+        "hand": "K4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.43120694
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.56879306
+          }
+        ]
+      },
+      {
+        "hand": "K5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.29115608
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.70884395
+          }
+        ]
+      },
+      {
+        "hand": "K6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.19330405
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.80669594
+          }
+        ]
+      },
+      {
+        "hand": "K7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.11966693
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.88033307
+          }
+        ]
+      },
+      {
+        "hand": "K8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.15100983
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8489902
+          }
+        ]
+      },
+      {
+        "hand": "K9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.15150526
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.84849477
+          }
+        ]
+      },
+      {
+        "hand": "KTs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.09743983
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9025602
+          }
+        ]
+      },
+      {
+        "hand": "KJs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.11674602
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.883254
+          }
+        ]
+      },
+      {
+        "hand": "KQs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.08820402
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.911796
+          }
+        ]
+      },
+      {
+        "hand": "A2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.47150674
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.5284932
+          }
+        ]
+      },
+      {
+        "hand": "A3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.05910926
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9408907
+          }
+        ]
+      },
+      {
+        "hand": "A4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.101269014
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.898731
+          }
+        ]
+      },
+      {
+        "hand": "A5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.10587235
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8941276
+          }
+        ]
+      },
+      {
+        "hand": "A6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.13097732
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8690227
+          }
+        ]
+      },
+      {
+        "hand": "A7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.18468344
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8153165
+          }
+        ]
+      },
+      {
+        "hand": "A8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.14127746
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.85872257
+          }
+        ]
+      },
+      {
+        "hand": "A9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.20038727
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.7996127
+          }
+        ]
+      },
+      {
+        "hand": "ATs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.058987394
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9410126
+          }
+        ]
+      },
+      {
+        "hand": "AJs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.06855094
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9314491
+          }
+        ]
+      },
+      {
+        "hand": "AQs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.052765273
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.94723475
+          }
+        ]
+      },
+      {
+        "hand": "AKs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.043266445
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9567336
+          }
+        ]
+      },
+      {
+        "hand": "32o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9320563
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.06794374
+          }
+        ]
+      },
+      {
+        "hand": "42o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9030334
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.09696664
+          }
+        ]
+      },
+      {
+        "hand": "43o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8787233
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.12127668
+          }
+        ]
+      },
+      {
+        "hand": "52o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9241543
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.07584572
+          }
+        ]
+      },
+      {
+        "hand": "53o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9343907
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.06560933
+          }
+        ]
+      },
+      {
+        "hand": "54o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8511495
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.14885049
+          }
+        ]
+      },
+      {
+        "hand": "62o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9534937
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.046506245
+          }
+        ]
+      },
+      {
+        "hand": "63o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9506132
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.04938685
+          }
+        ]
+      },
+      {
+        "hand": "64o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.89086384
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.109136134
+          }
+        ]
+      },
+      {
+        "hand": "65o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.85489935
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.14510068
+          }
+        ]
+      },
+      {
+        "hand": "72o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9406828
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.0593172
+          }
+        ]
+      },
+      {
+        "hand": "73o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.88239014
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.11760988
+          }
+        ]
+      },
+      {
+        "hand": "74o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7828168
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.21718319
+          }
+        ]
+      },
+      {
+        "hand": "75o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9046062
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.095393784
+          }
+        ]
+      },
+      {
+        "hand": "76o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.666291
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.333709
+          }
+        ]
+      },
+      {
+        "hand": "82o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.88145167
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.11854837
+          }
+        ]
+      },
+      {
+        "hand": "83o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.93285054
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.067149416
+          }
+        ]
+      },
+      {
+        "hand": "84o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8544965
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.14550348
+          }
+        ]
+      },
+      {
+        "hand": "85o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.90088993
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.09911009
+          }
+        ]
+      },
+      {
+        "hand": "86o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6901676
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.30983242
+          }
+        ]
+      },
+      {
+        "hand": "87o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5981306
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.4018694
+          }
+        ]
+      },
+      {
+        "hand": "92o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9376832
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.06231682
+          }
+        ]
+      },
+      {
+        "hand": "93o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.88002396
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.11997604
+          }
+        ]
+      },
+      {
+        "hand": "94o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.88710403
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.11289592
+          }
+        ]
+      },
+      {
+        "hand": "95o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9022662
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.09773375
+          }
+        ]
+      },
+      {
+        "hand": "96o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6802806
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3197194
+          }
+        ]
+      },
+      {
+        "hand": "97o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.50280195
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.49719802
+          }
+        ]
+      },
+      {
+        "hand": "98o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8774971
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.12250286
+          }
+        ]
+      },
+      {
+        "hand": "T2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.82355654
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.17644346
+          }
+        ]
+      },
+      {
+        "hand": "T3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9127461
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.08725396
+          }
+        ]
+      },
+      {
+        "hand": "T4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9008623
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.099137776
+          }
+        ]
+      },
+      {
+        "hand": "T5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.837424
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.16257605
+          }
+        ]
+      },
+      {
+        "hand": "T6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8652948
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.13470519
+          }
+        ]
+      },
+      {
+        "hand": "T7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.62644523
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.37355474
+          }
+        ]
+      },
+      {
+        "hand": "T8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.380751
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.619249
+          }
+        ]
+      },
+      {
+        "hand": "T9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.14242339
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8575766
+          }
+        ]
+      },
+      {
+        "hand": "J2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.89436567
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.105634354
+          }
+        ]
+      },
+      {
+        "hand": "J3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.88413256
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.115867436
+          }
+        ]
+      },
+      {
+        "hand": "J4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8262182
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.17378183
+          }
+        ]
+      },
+      {
+        "hand": "J5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6573206
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3426794
+          }
+        ]
+      },
+      {
+        "hand": "J6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7460878
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.25391218
+          }
+        ]
+      },
+      {
+        "hand": "J7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5352435
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.46475646
+          }
+        ]
+      },
+      {
+        "hand": "J8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.4078107
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.5921894
+          }
+        ]
+      },
+      {
+        "hand": "J9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.2137661
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.7862339
+          }
+        ]
+      },
+      {
+        "hand": "JTo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.14166863
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8583313
+          }
+        ]
+      },
+      {
+        "hand": "Q2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.732336
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.26766402
+          }
+        ]
+      },
+      {
+        "hand": "Q3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.84097326
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.15902674
+          }
+        ]
+      },
+      {
+        "hand": "Q4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6681354
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3318646
+          }
+        ]
+      },
+      {
+        "hand": "Q5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.67308396
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.32691604
+          }
+        ]
+      },
+      {
+        "hand": "Q6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.69137806
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3086219
+          }
+        ]
+      },
+      {
+        "hand": "Q7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.42805925
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.5719407
+          }
+        ]
+      },
+      {
+        "hand": "Q8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.30440968
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.6955903
+          }
+        ]
+      },
+      {
+        "hand": "Q9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.23513806
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.764862
+          }
+        ]
+      },
+      {
+        "hand": "QTo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.13632655
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.86367345
+          }
+        ]
+      },
+      {
+        "hand": "QJo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.1189014
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8810986
+          }
+        ]
+      },
+      {
+        "hand": "K2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6793584
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.32064164
+          }
+        ]
+      },
+      {
+        "hand": "K3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5052133
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.49478665
+          }
+        ]
+      },
+      {
+        "hand": "K4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.43140447
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.5685955
+          }
+        ]
+      },
+      {
+        "hand": "K5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.47357258
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.5264274
+          }
+        ]
+      },
+      {
+        "hand": "K6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.35434696
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.645653
+          }
+        ]
+      },
+      {
+        "hand": "K7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.13239653
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8676034
+          }
+        ]
+      },
+      {
+        "hand": "K8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.21425323
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.78574675
+          }
+        ]
+      },
+      {
+        "hand": "K9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.14091788
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.85908216
+          }
+        ]
+      },
+      {
+        "hand": "KTo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.15134425
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8486558
+          }
+        ]
+      },
+      {
+        "hand": "KJo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.038272418
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.96172756
+          }
+        ]
+      },
+      {
+        "hand": "KQo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.07731453
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.92268544
+          }
+        ]
+      },
+      {
+        "hand": "A2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.12026073
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8797393
+          }
+        ]
+      },
+      {
+        "hand": "A3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.07986743
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9201325
+          }
+        ]
+      },
+      {
+        "hand": "A4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.20190673
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.79809326
+          }
+        ]
+      },
+      {
+        "hand": "A5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.109597795
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.8904022
+          }
+        ]
+      },
+      {
+        "hand": "A6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.12992778
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.87007225
+          }
+        ]
+      },
+      {
+        "hand": "A7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.078915015
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.921085
+          }
+        ]
+      },
+      {
+        "hand": "A8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.06923726
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9307627
+          }
+        ]
+      },
+      {
+        "hand": "A9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.06931281
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.9306872
+          }
+        ]
+      },
+      {
+        "hand": "ATo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.050266907
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.94973314
+          }
+        ]
+      },
+      {
+        "hand": "AJo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.04132226
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.95867777
+          }
+        ]
+      },
+      {
+        "hand": "AQo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.027464326
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.97253567
+          }
+        ]
+      },
+      {
+        "hand": "AKo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.01540139
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.98459864
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "spot_name": "BTN RFI",
+    "hands": [
+      {
+        "hand": "22",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.4352201
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.4668035
+          }
+        ]
+      },
+      {
+        "hand": "33",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.271234
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.27958813
+          }
+        ]
+      },
+      {
+        "hand": "44",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.235819
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.39299375
+          }
+        ]
+      },
+      {
+        "hand": "55",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.16091608
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.4276527
+          }
+        ]
+      },
+      {
+        "hand": "66",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.15105255
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.40947825
+          }
+        ]
+      },
+      {
+        "hand": "77",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.106688425
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.2628746
+          }
+        ]
+      },
+      {
+        "hand": "88",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.110692464
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.10819646
+          }
+        ]
+      },
+      {
+        "hand": "99",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.08900728
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.19149344
+          }
+        ]
+      },
+      {
+        "hand": "TT",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.01871368
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.17569794
+          }
+        ]
+      },
+      {
+        "hand": "JJ",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.03614802
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.24408448
+          }
+        ]
+      },
+      {
+        "hand": "QQ",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.017119166
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.17526793
+          }
+        ]
+      },
+      {
+        "hand": "KK",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.0059287166
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.25535083
+          }
+        ]
+      },
+      {
+        "hand": "AA",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 6.576319e-7
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.17207316
+          }
+        ]
+      },
+      {
+        "hand": "32s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.88619626
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.07257637
+          }
+        ]
+      },
+      {
+        "hand": "42s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.806275
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.11816766
+          }
+        ]
+      },
+      {
+        "hand": "43s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.69501525
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.22013672
+          }
+        ]
+      },
+      {
+        "hand": "52s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.58577925
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3555316
+          }
+        ]
+      },
+      {
+        "hand": "53s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6856418
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.085822396
+          }
+        ]
+      },
+      {
+        "hand": "54s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.4538233
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.4572629
+          }
+        ]
+      },
+      {
+        "hand": "62s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8016292
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.13857631
+          }
+        ]
+      },
+      {
+        "hand": "63s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7750216
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.16054127
+          }
+        ]
+      },
+      {
+        "hand": "64s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5531329
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.2866928
+          }
+        ]
+      },
+      {
+        "hand": "65s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6949225
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.23383448
+          }
+        ]
+      },
+      {
+        "hand": "72s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8908707
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.05914322
+          }
+        ]
+      },
+      {
+        "hand": "73s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.75591224
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.10179629
+          }
+        ]
+      },
+      {
+        "hand": "74s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.56569463
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3840142
+          }
+        ]
+      },
+      {
+        "hand": "75s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5513577
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3164354
+          }
+        ]
+      },
+      {
+        "hand": "76s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.44163996
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.27821413
+          }
+        ]
+      },
+      {
+        "hand": "82s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6529917
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.2694301
+          }
+        ]
+      },
+      {
+        "hand": "83s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5475787
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.349306
+          }
+        ]
+      },
+      {
+        "hand": "84s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.668195
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.2327444
+          }
+        ]
+      },
+      {
+        "hand": "85s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6717183
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.25342754
+          }
+        ]
+      },
+      {
+        "hand": "86s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6622241
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.26446286
+          }
+        ]
+      },
+      {
+        "hand": "87s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6197436
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.30096346
+          }
+        ]
+      },
+      {
+        "hand": "92s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5318667
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.39040416
+          }
+        ]
+      },
+      {
+        "hand": "93s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.55218995
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.38451564
+          }
+        ]
+      },
+      {
+        "hand": "94s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.57943195
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.2356101
+          }
+        ]
+      },
+      {
+        "hand": "95s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.51460266
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3625546
+          }
+        ]
+      },
+      {
+        "hand": "96s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.617545
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.29764727
+          }
+        ]
+      },
+      {
+        "hand": "97s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.36674806
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.4422785
+          }
+        ]
+      },
+      {
+        "hand": "98s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.4348081
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.46053484
+          }
+        ]
+      },
+      {
+        "hand": "T2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6239831
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.23932154
+          }
+        ]
+      },
+      {
+        "hand": "T3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.40858757
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.42133358
+          }
+        ]
+      },
+      {
+        "hand": "T4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.53782254
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.27108246
+          }
+        ]
+      },
+      {
+        "hand": "T5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.617064
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.32487202
+          }
+        ]
+      },
+      {
+        "hand": "T6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.49993458
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.381739
+          }
+        ]
+      },
+      {
+        "hand": "T7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.43103054
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.37113512
+          }
+        ]
+      },
+      {
+        "hand": "T8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.22574504
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.24413487
+          }
+        ]
+      },
+      {
+        "hand": "T9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.43605828
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.44828606
+          }
+        ]
+      },
+      {
+        "hand": "J2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.57587415
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.30415612
+          }
+        ]
+      },
+      {
+        "hand": "J3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.59767324
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.29045478
+          }
+        ]
+      },
+      {
+        "hand": "J4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5676101
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.2772232
+          }
+        ]
+      },
+      {
+        "hand": "J5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.53297794
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.25642705
+          }
+        ]
+      },
+      {
+        "hand": "J6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.23357393
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.35051444
+          }
+        ]
+      },
+      {
+        "hand": "J7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.2798439
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.4325968
+          }
+        ]
+      },
+      {
+        "hand": "J8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.2916448
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.39788404
+          }
+        ]
+      },
+      {
+        "hand": "J9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.4432302
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.38573468
+          }
+        ]
+      },
+      {
+        "hand": "JTs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.38652572
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.32609284
+          }
+        ]
+      },
+      {
+        "hand": "Q2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.61851853
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.30499238
+          }
+        ]
+      },
+      {
+        "hand": "Q3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.37501106
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.35277998
+          }
+        ]
+      },
+      {
+        "hand": "Q4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.39138302
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.5424462
+          }
+        ]
+      },
+      {
+        "hand": "Q5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.44115508
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.36731637
+          }
+        ]
+      },
+      {
+        "hand": "Q6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.4559519
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.4075133
+          }
+        ]
+      },
+      {
+        "hand": "Q7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.3474241
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.48338607
+          }
+        ]
+      },
+      {
+        "hand": "Q8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.41435847
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3214933
+          }
+        ]
+      },
+      {
+        "hand": "Q9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.17904975
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.28886896
+          }
+        ]
+      },
+      {
+        "hand": "QTs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.1108154
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.30419004
+          }
+        ]
+      },
+      {
+        "hand": "QJs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.46395984
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3639662
+          }
+        ]
+      },
+      {
+        "hand": "K2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.4893992
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.4016104
+          }
+        ]
+      },
+      {
+        "hand": "K3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.1359621
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.26264152
+          }
+        ]
+      },
+      {
+        "hand": "K4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.37774706
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.38872045
+          }
+        ]
+      },
+      {
+        "hand": "K5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.30223292
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.51792014
+          }
+        ]
+      },
+      {
+        "hand": "K6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.37884173
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.34071094
+          }
+        ]
+      },
+      {
+        "hand": "K7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.3555836
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.36403877
+          }
+        ]
+      },
+      {
+        "hand": "K8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.21473002
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.2185048
+          }
+        ]
+      },
+      {
+        "hand": "K9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.29677546
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.33011562
+          }
+        ]
+      },
+      {
+        "hand": "KTs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.12529445
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.22538574
+          }
+        ]
+      },
+      {
+        "hand": "KJs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.16836157
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.41165197
+          }
+        ]
+      },
+      {
+        "hand": "KQs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.11705477
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.23864101
+          }
+        ]
+      },
+      {
+        "hand": "A2s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5271802
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.37270406
+          }
+        ]
+      },
+      {
+        "hand": "A3s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.17723432
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.19938415
+          }
+        ]
+      },
+      {
+        "hand": "A4s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.15848617
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.4195303
+          }
+        ]
+      },
+      {
+        "hand": "A5s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.09160954
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.10852755
+          }
+        ]
+      },
+      {
+        "hand": "A6s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.3334581
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.39602274
+          }
+        ]
+      },
+      {
+        "hand": "A7s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.1626897
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.2923774
+          }
+        ]
+      },
+      {
+        "hand": "A8s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.20694917
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.21452972
+          }
+        ]
+      },
+      {
+        "hand": "A9s",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.27229437
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.26548132
+          }
+        ]
+      },
+      {
+        "hand": "ATs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.0861028
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.12690139
+          }
+        ]
+      },
+      {
+        "hand": "AJs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.054777455
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.10761464
+          }
+        ]
+      },
+      {
+        "hand": "AQs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.051121965
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.45662844
+          }
+        ]
+      },
+      {
+        "hand": "AKs",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.01544864
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.2455629
+          }
+        ]
+      },
+      {
+        "hand": "32o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.89084774
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.03810022
+          }
+        ]
+      },
+      {
+        "hand": "42o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9334384
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.023271898
+          }
+        ]
+      },
+      {
+        "hand": "43o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8808161
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.03343895
+          }
+        ]
+      },
+      {
+        "hand": "52o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.90122026
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.040281866
+          }
+        ]
+      },
+      {
+        "hand": "53o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9131765
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.04510717
+          }
+        ]
+      },
+      {
+        "hand": "54o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.89341265
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.051467195
+          }
+        ]
+      },
+      {
+        "hand": "62o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.924906
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.030472733
+          }
+        ]
+      },
+      {
+        "hand": "63o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.8374974
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.1259881
+          }
+        ]
+      },
+      {
+        "hand": "64o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.71906704
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.22524749
+          }
+        ]
+      },
+      {
+        "hand": "65o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.77818394
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.14565225
+          }
+        ]
+      },
+      {
+        "hand": "72o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.92984873
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.028048435
+          }
+        ]
+      },
+      {
+        "hand": "73o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.87252367
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.061481055
+          }
+        ]
+      },
+      {
+        "hand": "74o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.76409745
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.1679698
+          }
+        ]
+      },
+      {
+        "hand": "75o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.52275294
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3403773
+          }
+        ]
+      },
+      {
+        "hand": "76o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.6248071
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.32094446
+          }
+        ]
+      },
+      {
+        "hand": "82o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.9130241
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.045109864
+          }
+        ]
+      },
+      {
+        "hand": "83o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.7637607
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.17683086
+          }
+        ]
+      },
+      {
+        "hand": "84o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.81021863
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.10815815
+          }
+        ]
+      },
+      {
+        "hand": "85o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.68370163
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.27409697
+          }
+        ]
+      },
+      {
+        "hand": "86o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.3862442
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.529754
+          }
+        ]
+      },
+      {
+        "hand": "87o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.43358752
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.42228338
+          }
+        ]
+      },
+      {
+        "hand": "92o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.64311683
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.2554417
+          }
+        ]
+      },
+      {
+        "hand": "93o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.56377524
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.38732043
+          }
+        ]
+      },
+      {
+        "hand": "94o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.43944594
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.46555796
+          }
+        ]
+      },
+      {
+        "hand": "95o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.49187332
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.42992467
+          }
+        ]
+      },
+      {
+        "hand": "96o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.2958537
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.63215244
+          }
+        ]
+      },
+      {
+        "hand": "97o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.3970429
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.51883316
+          }
+        ]
+      },
+      {
+        "hand": "98o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.3682093
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.59832674
+          }
+        ]
+      },
+      {
+        "hand": "T2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.69673306
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.25562185
+          }
+        ]
+      },
+      {
+        "hand": "T3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5637072
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3655049
+          }
+        ]
+      },
+      {
+        "hand": "T4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5003995
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.41416648
+          }
+        ]
+      },
+      {
+        "hand": "T5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.4595799
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.4960009
+          }
+        ]
+      },
+      {
+        "hand": "T6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.45169175
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.4857535
+          }
+        ]
+      },
+      {
+        "hand": "T7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.26110944
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.6218533
+          }
+        ]
+      },
+      {
+        "hand": "T8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.1772824
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.7469596
+          }
+        ]
+      },
+      {
+        "hand": "T9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.21705985
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.7266953
+          }
+        ]
+      },
+      {
+        "hand": "J2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.394482
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.43325344
+          }
+        ]
+      },
+      {
+        "hand": "J3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.4564375
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.45388037
+          }
+        ]
+      },
+      {
+        "hand": "J4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.5508608
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.38209718
+          }
+        ]
+      },
+      {
+        "hand": "J5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.39929542
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.39399633
+          }
+        ]
+      },
+      {
+        "hand": "J6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.29034263
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.5925326
+          }
+        ]
+      },
+      {
+        "hand": "J7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.110618025
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.6553253
+          }
+        ]
+      },
+      {
+        "hand": "J8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.262417
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.44538632
+          }
+        ]
+      },
+      {
+        "hand": "J9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.18949212
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.46190688
+          }
+        ]
+      },
+      {
+        "hand": "JTo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.11340036
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.5745333
+          }
+        ]
+      },
+      {
+        "hand": "Q2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.41306806
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.499616
+          }
+        ]
+      },
+      {
+        "hand": "Q3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.42536336
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.49093172
+          }
+        ]
+      },
+      {
+        "hand": "Q4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.3620621
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.52333146
+          }
+        ]
+      },
+      {
+        "hand": "Q5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.36241412
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.5016613
+          }
+        ]
+      },
+      {
+        "hand": "Q6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.3243787
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.49354184
+          }
+        ]
+      },
+      {
+        "hand": "Q7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.3010291
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.5038372
+          }
+        ]
+      },
+      {
+        "hand": "Q8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.21773638
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.7043842
+          }
+        ]
+      },
+      {
+        "hand": "Q9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.19554977
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.55019176
+          }
+        ]
+      },
+      {
+        "hand": "QTo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.19066793
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.488961
+          }
+        ]
+      },
+      {
+        "hand": "QJo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.09633112
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.41930515
+          }
+        ]
+      },
+      {
+        "hand": "K2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.18345433
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.6852679
+          }
+        ]
+      },
+      {
+        "hand": "K3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.15226647
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.6932845
+          }
+        ]
+      },
+      {
+        "hand": "K4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.19094376
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.7195825
+          }
+        ]
+      },
+      {
+        "hand": "K5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.25649792
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.4242377
+          }
+        ]
+      },
+      {
+        "hand": "K6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.30825904
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.5024962
+          }
+        ]
+      },
+      {
+        "hand": "K7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.26001757
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.597664
+          }
+        ]
+      },
+      {
+        "hand": "K8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.252147
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.529437
+          }
+        ]
+      },
+      {
+        "hand": "K9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.05270173
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.36730438
+          }
+        ]
+      },
+      {
+        "hand": "KTo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.09486401
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.513796
+          }
+        ]
+      },
+      {
+        "hand": "KJo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.0754192
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.5510335
+          }
+        ]
+      },
+      {
+        "hand": "KQo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.047828905
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.46450844
+          }
+        ]
+      },
+      {
+        "hand": "A2o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.22258586
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.55794084
+          }
+        ]
+      },
+      {
+        "hand": "A3o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.0983642
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.3780607
+          }
+        ]
+      },
+      {
+        "hand": "A4o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.100699425
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.70239246
+          }
+        ]
+      },
+      {
+        "hand": "A5o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.069624886
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.35535032
+          }
+        ]
+      },
+      {
+        "hand": "A6o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.15377028
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.6659696
+          }
+        ]
+      },
+      {
+        "hand": "A7o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.17152616
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.28774008
+          }
+        ]
+      },
+      {
+        "hand": "A8o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.11989523
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.52928716
+          }
+        ]
+      },
+      {
+        "hand": "A9o",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.1459036
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.29978493
+          }
+        ]
+      },
+      {
+        "hand": "ATo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.09895572
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.23948799
+          }
+        ]
+      },
+      {
+        "hand": "AJo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.047948007
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.13845238
+          }
+        ]
+      },
+      {
+        "hand": "AQo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.034478176
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.24914972
+          }
+        ]
+      },
+      {
+        "hand": "AKo",
+        "actions": [
+          {
+            "action": "fold",
+            "prob": 0.018475913
+          },
+          {
+            "action": "raise 5",
+            "prob": 0.10284634
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "spot_name": "SB RFI",
+    "hands": [
+      {
+        "hand": "22",
+        "actions": []
+      },
+      {
+        "hand": "33",
+        "actions": []
+      },
+      {
+        "hand": "44",
+        "actions": []
+      },
+      {
+        "hand": "55",
+        "actions": []
+      },
+      {
+        "hand": "66",
+        "actions": []
+      },
+      {
+        "hand": "77",
+        "actions": []
+      },
+      {
+        "hand": "88",
+        "actions": []
+      },
+      {
+        "hand": "99",
+        "actions": []
+      },
+      {
+        "hand": "TT",
+        "actions": []
+      },
+      {
+        "hand": "JJ",
+        "actions": []
+      },
+      {
+        "hand": "QQ",
+        "actions": []
+      },
+      {
+        "hand": "KK",
+        "actions": []
+      },
+      {
+        "hand": "AA",
+        "actions": []
+      },
+      {
+        "hand": "32s",
+        "actions": []
+      },
+      {
+        "hand": "42s",
+        "actions": []
+      },
+      {
+        "hand": "43s",
+        "actions": []
+      },
+      {
+        "hand": "52s",
+        "actions": []
+      },
+      {
+        "hand": "53s",
+        "actions": []
+      },
+      {
+        "hand": "54s",
+        "actions": []
+      },
+      {
+        "hand": "62s",
+        "actions": []
+      },
+      {
+        "hand": "63s",
+        "actions": []
+      },
+      {
+        "hand": "64s",
+        "actions": []
+      },
+      {
+        "hand": "65s",
+        "actions": []
+      },
+      {
+        "hand": "72s",
+        "actions": []
+      },
+      {
+        "hand": "73s",
+        "actions": []
+      },
+      {
+        "hand": "74s",
+        "actions": []
+      },
+      {
+        "hand": "75s",
+        "actions": []
+      },
+      {
+        "hand": "76s",
+        "actions": []
+      },
+      {
+        "hand": "82s",
+        "actions": []
+      },
+      {
+        "hand": "83s",
+        "actions": []
+      },
+      {
+        "hand": "84s",
+        "actions": []
+      },
+      {
+        "hand": "85s",
+        "actions": []
+      },
+      {
+        "hand": "86s",
+        "actions": []
+      },
+      {
+        "hand": "87s",
+        "actions": []
+      },
+      {
+        "hand": "92s",
+        "actions": []
+      },
+      {
+        "hand": "93s",
+        "actions": []
+      },
+      {
+        "hand": "94s",
+        "actions": []
+      },
+      {
+        "hand": "95s",
+        "actions": []
+      },
+      {
+        "hand": "96s",
+        "actions": []
+      },
+      {
+        "hand": "97s",
+        "actions": []
+      },
+      {
+        "hand": "98s",
+        "actions": []
+      },
+      {
+        "hand": "T2s",
+        "actions": []
+      },
+      {
+        "hand": "T3s",
+        "actions": []
+      },
+      {
+        "hand": "T4s",
+        "actions": []
+      },
+      {
+        "hand": "T5s",
+        "actions": []
+      },
+      {
+        "hand": "T6s",
+        "actions": []
+      },
+      {
+        "hand": "T7s",
+        "actions": []
+      },
+      {
+        "hand": "T8s",
+        "actions": []
+      },
+      {
+        "hand": "T9s",
+        "actions": []
+      },
+      {
+        "hand": "J2s",
+        "actions": []
+      },
+      {
+        "hand": "J3s",
+        "actions": []
+      },
+      {
+        "hand": "J4s",
+        "actions": []
+      },
+      {
+        "hand": "J5s",
+        "actions": []
+      },
+      {
+        "hand": "J6s",
+        "actions": []
+      },
+      {
+        "hand": "J7s",
+        "actions": []
+      },
+      {
+        "hand": "J8s",
+        "actions": []
+      },
+      {
+        "hand": "J9s",
+        "actions": []
+      },
+      {
+        "hand": "JTs",
+        "actions": []
+      },
+      {
+        "hand": "Q2s",
+        "actions": []
+      },
+      {
+        "hand": "Q3s",
+        "actions": []
+      },
+      {
+        "hand": "Q4s",
+        "actions": []
+      },
+      {
+        "hand": "Q5s",
+        "actions": []
+      },
+      {
+        "hand": "Q6s",
+        "actions": []
+      },
+      {
+        "hand": "Q7s",
+        "actions": []
+      },
+      {
+        "hand": "Q8s",
+        "actions": []
+      },
+      {
+        "hand": "Q9s",
+        "actions": []
+      },
+      {
+        "hand": "QTs",
+        "actions": []
+      },
+      {
+        "hand": "QJs",
+        "actions": []
+      },
+      {
+        "hand": "K2s",
+        "actions": []
+      },
+      {
+        "hand": "K3s",
+        "actions": []
+      },
+      {
+        "hand": "K4s",
+        "actions": []
+      },
+      {
+        "hand": "K5s",
+        "actions": []
+      },
+      {
+        "hand": "K6s",
+        "actions": []
+      },
+      {
+        "hand": "K7s",
+        "actions": []
+      },
+      {
+        "hand": "K8s",
+        "actions": []
+      },
+      {
+        "hand": "K9s",
+        "actions": []
+      },
+      {
+        "hand": "KTs",
+        "actions": []
+      },
+      {
+        "hand": "KJs",
+        "actions": []
+      },
+      {
+        "hand": "KQs",
+        "actions": []
+      },
+      {
+        "hand": "A2s",
+        "actions": []
+      },
+      {
+        "hand": "A3s",
+        "actions": []
+      },
+      {
+        "hand": "A4s",
+        "actions": []
+      },
+      {
+        "hand": "A5s",
+        "actions": []
+      },
+      {
+        "hand": "A6s",
+        "actions": []
+      },
+      {
+        "hand": "A7s",
+        "actions": []
+      },
+      {
+        "hand": "A8s",
+        "actions": []
+      },
+      {
+        "hand": "A9s",
+        "actions": []
+      },
+      {
+        "hand": "ATs",
+        "actions": []
+      },
+      {
+        "hand": "AJs",
+        "actions": []
+      },
+      {
+        "hand": "AQs",
+        "actions": []
+      },
+      {
+        "hand": "AKs",
+        "actions": []
+      },
+      {
+        "hand": "32o",
+        "actions": []
+      },
+      {
+        "hand": "42o",
+        "actions": []
+      },
+      {
+        "hand": "43o",
+        "actions": []
+      },
+      {
+        "hand": "52o",
+        "actions": []
+      },
+      {
+        "hand": "53o",
+        "actions": []
+      },
+      {
+        "hand": "54o",
+        "actions": []
+      },
+      {
+        "hand": "62o",
+        "actions": []
+      },
+      {
+        "hand": "63o",
+        "actions": []
+      },
+      {
+        "hand": "64o",
+        "actions": []
+      },
+      {
+        "hand": "65o",
+        "actions": []
+      },
+      {
+        "hand": "72o",
+        "actions": []
+      },
+      {
+        "hand": "73o",
+        "actions": []
+      },
+      {
+        "hand": "74o",
+        "actions": []
+      },
+      {
+        "hand": "75o",
+        "actions": []
+      },
+      {
+        "hand": "76o",
+        "actions": []
+      },
+      {
+        "hand": "82o",
+        "actions": []
+      },
+      {
+        "hand": "83o",
+        "actions": []
+      },
+      {
+        "hand": "84o",
+        "actions": []
+      },
+      {
+        "hand": "85o",
+        "actions": []
+      },
+      {
+        "hand": "86o",
+        "actions": []
+      },
+      {
+        "hand": "87o",
+        "actions": []
+      },
+      {
+        "hand": "92o",
+        "actions": []
+      },
+      {
+        "hand": "93o",
+        "actions": []
+      },
+      {
+        "hand": "94o",
+        "actions": []
+      },
+      {
+        "hand": "95o",
+        "actions": []
+      },
+      {
+        "hand": "96o",
+        "actions": []
+      },
+      {
+        "hand": "97o",
+        "actions": []
+      },
+      {
+        "hand": "98o",
+        "actions": []
+      },
+      {
+        "hand": "T2o",
+        "actions": []
+      },
+      {
+        "hand": "T3o",
+        "actions": []
+      },
+      {
+        "hand": "T4o",
+        "actions": []
+      },
+      {
+        "hand": "T5o",
+        "actions": []
+      },
+      {
+        "hand": "T6o",
+        "actions": []
+      },
+      {
+        "hand": "T7o",
+        "actions": []
+      },
+      {
+        "hand": "T8o",
+        "actions": []
+      },
+      {
+        "hand": "T9o",
+        "actions": []
+      },
+      {
+        "hand": "J2o",
+        "actions": []
+      },
+      {
+        "hand": "J3o",
+        "actions": []
+      },
+      {
+        "hand": "J4o",
+        "actions": []
+      },
+      {
+        "hand": "J5o",
+        "actions": []
+      },
+      {
+        "hand": "J6o",
+        "actions": []
+      },
+      {
+        "hand": "J7o",
+        "actions": []
+      },
+      {
+        "hand": "J8o",
+        "actions": []
+      },
+      {
+        "hand": "J9o",
+        "actions": []
+      },
+      {
+        "hand": "JTo",
+        "actions": []
+      },
+      {
+        "hand": "Q2o",
+        "actions": []
+      },
+      {
+        "hand": "Q3o",
+        "actions": []
+      },
+      {
+        "hand": "Q4o",
+        "actions": []
+      },
+      {
+        "hand": "Q5o",
+        "actions": []
+      },
+      {
+        "hand": "Q6o",
+        "actions": []
+      },
+      {
+        "hand": "Q7o",
+        "actions": []
+      },
+      {
+        "hand": "Q8o",
+        "actions": []
+      },
+      {
+        "hand": "Q9o",
+        "actions": []
+      },
+      {
+        "hand": "QTo",
+        "actions": []
+      },
+      {
+        "hand": "QJo",
+        "actions": []
+      },
+      {
+        "hand": "K2o",
+        "actions": []
+      },
+      {
+        "hand": "K3o",
+        "actions": []
+      },
+      {
+        "hand": "K4o",
+        "actions": []
+      },
+      {
+        "hand": "K5o",
+        "actions": []
+      },
+      {
+        "hand": "K6o",
+        "actions": []
+      },
+      {
+        "hand": "K7o",
+        "actions": []
+      },
+      {
+        "hand": "K8o",
+        "actions": []
+      },
+      {
+        "hand": "K9o",
+        "actions": []
+      },
+      {
+        "hand": "KTo",
+        "actions": []
+      },
+      {
+        "hand": "KJo",
+        "actions": []
+      },
+      {
+        "hand": "KQo",
+        "actions": []
+      },
+      {
+        "hand": "A2o",
+        "actions": []
+      },
+      {
+        "hand": "A3o",
+        "actions": []
+      },
+      {
+        "hand": "A4o",
+        "actions": []
+      },
+      {
+        "hand": "A5o",
+        "actions": []
+      },
+      {
+        "hand": "A6o",
+        "actions": []
+      },
+      {
+        "hand": "A7o",
+        "actions": []
+      },
+      {
+        "hand": "A8o",
+        "actions": []
+      },
+      {
+        "hand": "A9o",
+        "actions": []
+      },
+      {
+        "hand": "ATo",
+        "actions": []
+      },
+      {
+        "hand": "AJo",
+        "actions": []
+      },
+      {
+        "hand": "AQo",
+        "actions": []
+      },
+      {
+        "hand": "AKo",
+        "actions": []
+      }
+    ]
+  }
+]
