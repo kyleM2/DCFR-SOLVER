@@ -20,5 +20,7 @@ training_data/
 
 # Claude/OMC state
 .omc/
+.claude/
+.playwright-mcp/
 
 /output
